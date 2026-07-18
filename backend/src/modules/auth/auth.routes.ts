@@ -10,7 +10,7 @@ import {
 
 const authRouter = Router();
 
-authRouter.post('/admin-login', adminLoginController);
+authRouter.post('/adminLogin', adminLoginController);
 authRouter.post('/login', loginController);
 authRouter.post('/register', registerController);
 authRouter.get('/current', authMiddleware, currentUserController);
