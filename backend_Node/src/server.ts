@@ -1,6 +1,16 @@
-import express from 'express'
+import { app } from './app';
+import { connectDatabase } from './config/database';
+import { env } from './config/env';
 
-const app = express()
+const startServer = async () => {
+  await connectDatabase();
 
-app.get('/', (req, res)=> {res.send("Hello world!")})
-app.listen(4000, ()=>console.log("Express running on port 4000!"))
+  app.listen(env.PORT, () => {
+    console.log(`Server is running on port ${env.PORT}`);
+  });
+};
+
+startServer().catch((error: unknown) => {
+  console.error('Failed to start server', error);
+  process.exit(1);
+});
