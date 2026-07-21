@@ -1,3 +1,43 @@
 import { Routes } from '@angular/router';
 
-export const routes: Routes = [];
+import { authGuard } from './core/guards/auth.guard';
+import { AdminComponent } from './components/admin/admin.component';
+import { AthleteComponent } from './components/athlete/athlete.component';
+import { EmployeeComponent } from './components/employee/employee.component';
+import { LoginComponent } from './components/auth/login/login.component';
+import { AdminLoginComponent } from './components/auth/admin-login/admin-login.component';
+
+export const routes: Routes = [
+  {
+    path: '',
+    component: LoginComponent
+  },
+  {
+    path: 'admin-login',
+    component: AdminLoginComponent
+  },
+  {
+  path: 'athlete',
+  component: AthleteComponent,
+  canActivate: [authGuard],
+  data: {
+    roles: ['athlete']
+  }
+},
+{
+  path: 'employee',
+  component: EmployeeComponent,
+  canActivate: [authGuard],
+  data: {
+    roles: ['employee']
+  }
+},
+{
+  path: 'admin',
+  component: AdminComponent,
+  canActivate: [authGuard],
+  data: {
+    roles: ['admin']
+  }
+},
+];
