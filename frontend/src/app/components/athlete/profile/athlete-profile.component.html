@@ -1,0 +1,167 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>Athlete Profile</h1>
+      <p>Manage your personal information and review your reservations.</p>
+    </div>
+    <a routerLink="/athlete">Back to dashboard</a>
+  </header>
+
+  @if (isLoading) {
+    <p class="state-message">Loading athlete profile...</p>
+  } @else if (errorMessage && !profile) {
+    <p class="state-message error">{{ errorMessage }}</p>
+  } @else {
+    <section class="panel">
+      <h2>Personal Data</h2>
+
+      @if (successMessage) {
+        <p class="message success">{{ successMessage }}</p>
+      }
+
+      @if (errorMessage) {
+        <p class="message error">{{ errorMessage }}</p>
+      }
+
+      <form [formGroup]="profileForm" (ngSubmit)="saveProfile()">
+        <div class="form-grid">
+          <div class="field">
+            <label for="username">Username</label>
+            <input id="username" type="text" formControlName="username" readonly />
+          </div>
+
+          <div class="field">
+            <label for="email">Email</label>
+            <input id="email" type="email" formControlName="email" />
+            @if (email.touched && email.hasError('required')) {
+              <small class="field-error">Email is required.</small>
+            }
+            @if (email.touched && email.hasError('email')) {
+              <small class="field-error">Enter a valid email address.</small>
+            }
+          </div>
+
+          <div class="field">
+            <label for="firstName">First Name</label>
+            <input id="firstName" type="text" formControlName="firstName" />
+            @if (firstName.touched && firstName.hasError('required')) {
+              <small class="field-error">First name is required.</small>
+            }
+          </div>
+
+          <div class="field">
+            <label for="lastName">Last Name</label>
+            <input id="lastName" type="text" formControlName="lastName" />
+            @if (lastName.touched && lastName.hasError('required')) {
+              <small class="field-error">Last name is required.</small>
+            }
+          </div>
+
+          <div class="field">
+            <label for="phone">Phone</label>
+            <input id="phone" type="text" formControlName="phone" />
+            @if (phone.touched && phone.hasError('required')) {
+              <small class="field-error">Phone is required.</small>
+            }
+          </div>
+
+          <div class="field static-field">
+            <label>Created At</label>
+            <p>{{ profile?.createdAt | date: 'medium' }}</p>
+          </div>
+
+          <div class="field static-field">
+            <label>Role</label>
+            <p>{{ profile?.role }}</p>
+          </div>
+
+          <div class="field static-field">
+            <label>Status</label>
+            <p>{{ profile?.status }}</p>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Favorite Sports</label>
+          <div class="sports-grid">
+            @for (sport of sports; track sport.id) {
+              <label class="sport-option">
+                <input
+                  type="checkbox"
+                  [checked]="isSportSelected(sport.id)"
+                  [disabled]="!canSelectMoreSports(sport.id)"
+                  (change)="onSportChange(sport.id, $any($event.target).checked)"
+                />
+                <span>{{ sport.name }}</span>
+              </label>
+            }
+          </div>
+          <small class="helper-text">Choose up to 5 sports.</small>
+          @if (favoriteSports.touched && favoriteSports.hasError('maxSelectedSports')) {
+            <small class="field-error">You can select at most 5 sports.</small>
+          }
+        </div>
+
+        <button type="submit" [disabled]="profileForm.invalid || isSaving">
+          {{ isSaving ? 'Saving...' : 'Save Changes' }}
+        </button>
+      </form>
+    </section>
+
+    <section class="panel">
+      <h2>Reservations</h2>
+
+      @if (reservationsErrorMessage) {
+        <p class="message error">{{ reservationsErrorMessage }}</p>
+      }
+
+      @if (reservations.length === 0) {
+        <p class="state-message">No reservations found.</p>
+      } @else {
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Facility</th>
+                <th>City</th>
+                <th>Resource</th>
+                <th>Sport</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (reservation of reservations; track reservation.id) {
+                <tr>
+                  <td>{{ reservation.facilityName }}</td>
+                  <td>{{ reservation.city }}</td>
+                  <td>{{ reservation.resourceName }}</td>
+                  <td>{{ reservation.sportName }}</td>
+                  <td>{{ reservation.startTime | date: 'medium' }}</td>
+                  <td>{{ reservation.endTime | date: 'medium' }}</td>
+                  <td>{{ reservation.status }}</td>
+                  <td>
+                    @if (reservation.canCancel) {
+                      <button
+                        type="button"
+                        class="secondary-button"
+                        [disabled]="isCancelling(reservation.id)"
+                        (click)="cancelReservation(reservation)"
+                      >
+                        {{ isCancelling(reservation.id) ? 'Cancelling...' : 'Cancel' }}
+                      </button>
+                    } @else {
+                      <span>-</span>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+  }
+</section>

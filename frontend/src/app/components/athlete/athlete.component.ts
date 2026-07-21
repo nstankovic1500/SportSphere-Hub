@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 import type { User } from '../../core/models/user.model';
 import { AuthService } from '../../core/services/auth.service';
@@ -7,7 +8,7 @@ import { AuthService } from '../../core/services/auth.service';
 @Component({
   selector: 'app-athlete',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './athlete.component.html',
   styleUrl: './athlete.component.css',
 })
