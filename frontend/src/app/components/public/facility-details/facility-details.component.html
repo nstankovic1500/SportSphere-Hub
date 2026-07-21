@@ -1,0 +1,112 @@
+<section class="public-page">
+  <a class="back-link" routerLink="/facilities">Back to facilities</a>
+
+  @if (isLoading) {
+    <p class="state-message">Loading facility details...</p>
+  } @else if (errorMessage) {
+    <p class="state-message error">{{ errorMessage }}</p>
+  } @else if (facility) {
+    <header class="hero-card">
+      <div>
+        <h1>{{ facility.name }}</h1>
+        <p>{{ facility.city }}, {{ facility.country }}</p>
+        <p>{{ facility.address }}</p>
+        <p>{{ facility.hourlyPrice }} per hour</p>
+        <p>{{ facility.likesCount }} likes · {{ facility.dislikesCount }} dislikes</p>
+      </div>
+      <div class="sports-tags">
+        @for (sport of facility.sports; track sport.id) {
+          <span>{{ sport.name }}</span>
+        }
+      </div>
+    </header>
+
+    <section class="panel">
+      <h2>Description</h2>
+      <p>{{ facility.description }}</p>
+    </section>
+
+    <section class="panel">
+      <h2>Gallery</h2>
+      @if (facility.images.length === 0) {
+        <p class="state-message">No images available.</p>
+      } @else {
+        <div class="gallery">
+          @for (image of facility.images; track image) {
+            <img [src]="image" [alt]="facility.name" />
+          }
+        </div>
+      }
+    </section>
+
+    <section class="panel">
+      <h2>Opening Hours</h2>
+      @if (facility.openingHours.length === 0) {
+        <p class="state-message">No opening hours available.</p>
+      } @else {
+        <div class="hours-list">
+          @for (openingHour of facility.openingHours; track openingHour.day) {
+            <div class="hour-row">
+              <span>{{ getDayName(openingHour.day) }}</span>
+              <span>{{ openingHour.open }} - {{ openingHour.close }}</span>
+            </div>
+          }
+        </div>
+      }
+    </section>
+
+    <section class="panel">
+      <h2>Location</h2>
+      <p>Longitude: {{ facility.location.coordinates[0] }}</p>
+      <p>Latitude: {{ facility.location.coordinates[1] }}</p>
+    </section>
+
+    <section class="panel">
+      <h2>Resources</h2>
+      @if (facility.resources.length === 0) {
+        <p class="state-message">No active resources available.</p>
+      } @else {
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Capacity</th>
+                <th>Equipment</th>
+                <th>Sport</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (resource of facility.resources; track resource.id) {
+                <tr>
+                  <td>{{ resource.name }}</td>
+                  <td>{{ resource.type }}</td>
+                  <td>{{ resource.capacity }}</td>
+                  <td>{{ resource.equipmentDescription }}</td>
+                  <td>{{ resource.sport?.name ?? '-' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+
+    <section class="panel">
+      <h2>Latest Comments</h2>
+      @if (facility.comments.length === 0) {
+        <p class="state-message">No comments available.</p>
+      } @else {
+        <div class="comment-list">
+          @for (comment of facility.comments; track comment.id) {
+            <article class="comment-card">
+              <p>{{ comment.comment }}</p>
+              <small>{{ comment.createdAt | date: 'medium' }}</small>
+            </article>
+          }
+        </div>
+      }
+    </section>
+  }
+</section>

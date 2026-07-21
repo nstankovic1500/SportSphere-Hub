@@ -6,14 +6,24 @@ import { LoginComponent } from './components/auth/login/login.component';
 import { RegisterComponent } from './components/auth/register/register.component';
 import { AdminComponent } from './components/admin/admin.component';
 import { RegistrationRequestsComponent } from './components/admin/registration-requests/registration-requests.component';
+import { FacilityDetailsComponent } from './components/public/facility-details/facility-details.component';
+import { FacilitiesComponent } from './components/public/facilities/facilities.component';
+import { HomeComponent } from './components/public/home/home.component';
 import { AthleteComponent } from './components/athlete/athlete.component';
 import { EmployeeComponent } from './components/employee/employee.component';
 
 export const routes: Routes = [
   {
     path: '',
-    pathMatch: 'full',
-    redirectTo: 'login',
+    component: HomeComponent,
+  },
+  {
+    path: 'facilities',
+    component: FacilitiesComponent,
+  },
+  {
+    path: 'facilities/:id',
+    component: FacilityDetailsComponent,
   },
   {
     path: 'login',
@@ -61,6 +71,6 @@ export const routes: Routes = [
   },
   {
     path: '**',
-    redirectTo: 'login',
+    redirectTo: '',
   },
 ];

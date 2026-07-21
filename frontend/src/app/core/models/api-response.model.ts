@@ -4,6 +4,12 @@ import type {
   RegistrationRequestsResponseData,
   ResolvedRegistrationResponseData,
 } from './admin.model';
+import type {
+  CitiesResponseData,
+  FacilitiesResponseData,
+  FacilityDetailsResponseData,
+  HomeResponseData,
+} from './public.model';
 
 export interface ApiResponse<T> {
   success: boolean;
@@ -29,3 +35,8 @@ export type AdminRegistrationRequestsResponse =
 
 export type AdminResolvedRegistrationResponse =
   ApiResponse<ResolvedRegistrationResponseData>;
+
+export type PublicHomeApiResponse = ApiResponse<HomeResponseData>;
+export type PublicCitiesApiResponse = ApiResponse<CitiesResponseData>;
+export type PublicFacilitiesApiResponse = ApiResponse<FacilitiesResponseData>;
+export type PublicFacilityDetailsApiResponse = ApiResponse<FacilityDetailsResponseData>;

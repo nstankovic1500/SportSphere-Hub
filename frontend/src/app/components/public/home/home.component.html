@@ -1,0 +1,84 @@
+<section class="public-page">
+  <header class="hero">
+    <div>
+      <p class="eyebrow">SportSphere Hub</p>
+      <h1>Discover approved sports facilities in one place.</h1>
+      <p class="hero-copy">
+        Browse venues, explore current promotions, and inspect facility details before signing in.
+      </p>
+    </div>
+
+    <nav class="hero-actions">
+      <a routerLink="/facilities">Browse facilities</a>
+      <a routerLink="/login">Login</a>
+      <a routerLink="/register">Register</a>
+    </nav>
+  </header>
+
+  @if (isLoading) {
+    <p class="state-message">Loading home page...</p>
+  } @else if (errorMessage) {
+    <p class="state-message error">{{ errorMessage }}</p>
+  } @else {
+    <section class="stats-card">
+      <h2>Active Facilities</h2>
+      <p class="stats-value">{{ activeFacilitiesCount }}</p>
+    </section>
+
+    <section class="content-section">
+      <div class="section-heading">
+        <h2>Top Facilities</h2>
+        <a routerLink="/facilities">View all</a>
+      </div>
+
+      @if (topFacilities.length === 0) {
+        <p class="state-message">No featured facilities available.</p>
+      } @else {
+        <div class="card-grid">
+          @for (facility of topFacilities; track facility.id) {
+            <article class="facility-card">
+              @if (facility.image) {
+                <img [src]="facility.image" [alt]="facility.name" />
+              } @else {
+                <div class="image-placeholder">No image</div>
+              }
+
+              <div class="card-body">
+                <h3>{{ facility.name }}</h3>
+                <p>{{ facility.city }}, {{ facility.country }}</p>
+                <p>{{ facility.likesCount }} likes</p>
+                <a [routerLink]="['/facilities', facility.id]">Details</a>
+              </div>
+            </article>
+          }
+        </div>
+      }
+    </section>
+
+    <section class="content-section">
+      <div class="section-heading">
+        <h2>Active Promotions</h2>
+      </div>
+
+      @if (promotions.length === 0) {
+        <p class="state-message">No active promotions right now.</p>
+      } @else {
+        <div class="promotion-list">
+          @for (promotion of promotions; track promotion.id) {
+            <article class="promotion-card">
+              <h3>{{ promotion.name }}</h3>
+              <p>{{ promotion.facilityName }}</p>
+              <p>
+                {{ promotion.discountType === 'percentage' ? promotion.discountValue + '% off' : promotion.discountValue + ' off' }}
+              </p>
+              <p>
+                {{ promotion.startDate | date: 'mediumDate' }} -
+                {{ promotion.endDate | date: 'mediumDate' }}
+              </p>
+            </article>
+          }
+        </div>
+      }
+    </section>
+  }
+</section>

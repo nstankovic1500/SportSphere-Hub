@@ -1,0 +1,130 @@
+<section class="public-page">
+  <header class="page-header">
+    <div>
+      <h1>Facilities</h1>
+      <p>Search approved sports facilities by city, sport, and resource type.</p>
+    </div>
+    <a routerLink="/">Back home</a>
+  </header>
+
+  <form class="filters" [formGroup]="filterForm" (ngSubmit)="applyFilters()">
+    <div class="filter-grid">
+      <div class="field">
+        <label for="name">Facility Name</label>
+        <input id="name" type="text" formControlName="name" />
+      </div>
+
+      <div class="field">
+        <label for="sportId">Sport</label>
+        <select id="sportId" formControlName="sportId">
+          <option value="">All sports</option>
+          @for (sport of sports; track sport.id) {
+            <option [value]="sport.id">{{ sport.name }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="resourceType">Resource Type</label>
+        <select id="resourceType" formControlName="resourceType">
+          <option value="">All types</option>
+          <option value="outdoor">Outdoor</option>
+          <option value="indoor">Indoor</option>
+          <option value="team_hall">Team hall</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="sortBy">Sort By</label>
+        <select id="sortBy" formControlName="sortBy">
+          <option value="name">Name</option>
+          <option value="city">City</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="sortOrder">Sort Order</label>
+        <select id="sortOrder" formControlName="sortOrder">
+          <option value="asc">Ascending</option>
+          <option value="desc">Descending</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="city-section">
+      <label>Cities</label>
+      <div class="city-options">
+        @for (city of cities; track city) {
+          <label class="city-option">
+            <input
+              type="checkbox"
+              [checked]="isCitySelected(city)"
+              (change)="onCityChange(city, $any($event.target).checked)"
+            />
+            <span>{{ city }}</span>
+          </label>
+        }
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" [disabled]="isSearching">
+        {{ isSearching ? 'Searching...' : 'Apply Filters' }}
+      </button>
+      <button type="button" class="secondary-button" (click)="resetFilters()" [disabled]="isSearching">
+        Reset
+      </button>
+    </div>
+  </form>
+
+  @if (isLoading) {
+    <p class="state-message">Loading facilities...</p>
+  } @else if (errorMessage) {
+    <p class="state-message error">{{ errorMessage }}</p>
+  } @else if (facilities.length === 0) {
+    <p class="state-message">No facilities match the selected filters.</p>
+  } @else {
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>City</th>
+            <th>Country</th>
+            <th>Address</th>
+            <th>Sports</th>
+            <th>Price</th>
+            <th>Image</th>
+            <th>Likes</th>
+            <th>Dislikes</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (facility of facilities; track facility.id) {
+            <tr>
+              <td>{{ facility.name }}</td>
+              <td>{{ facility.city }}</td>
+              <td>{{ facility.country }}</td>
+              <td>{{ facility.address }}</td>
+              <td>{{ getSportsLabel(facility) }}</td>
+              <td>{{ facility.hourlyPrice }}</td>
+              <td>
+                @if (facility.image) {
+                  <img class="table-image" [src]="facility.image" [alt]="facility.name" />
+                } @else {
+                  <span>-</span>
+                }
+              </td>
+              <td>{{ facility.likesCount }}</td>
+              <td>{{ facility.dislikesCount }}</td>
+              <td>
+                <a class="details-link" [routerLink]="['/facilities', facility.id]">Details</a>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>
