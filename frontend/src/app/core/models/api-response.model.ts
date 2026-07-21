@@ -1,4 +1,9 @@
 import type { User } from './user.model';
+import type { Sport } from './sport.model';
+import type {
+  RegistrationRequestsResponseData,
+  ResolvedRegistrationResponseData,
+} from './admin.model';
 
 export interface ApiResponse<T> {
   success: boolean;
@@ -14,3 +19,13 @@ export interface LoginResponseData {
 export interface CurrentUserResponseData {
   user: User;
 }
+
+export interface SportsResponseData {
+  sports: Sport[];
+}
+
+export type AdminRegistrationRequestsResponse =
+  ApiResponse<RegistrationRequestsResponseData>;
+
+export type AdminResolvedRegistrationResponse =
+  ApiResponse<ResolvedRegistrationResponseData>;

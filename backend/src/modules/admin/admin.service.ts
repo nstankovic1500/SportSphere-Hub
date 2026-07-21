@@ -3,13 +3,17 @@ import { Types } from 'mongoose';
 import { User, UserRole, UserStatus, type IUser } from '../../models/User';
 import { AppError } from '../../utils/AppError';
 import type {
-  PendingRegistrationUser,
+  RegistratingUser,
   ResolvedRegistrationResponse,
   PendingRegistrationsResponse,
 } from './admin.types';
 
-const createSafeUser = (user: IUser & { _id?: { toString(): string } }): PendingRegistrationUser => {
+const createSafeUser = (
+  user: IUser & { _id: { toString(): string } },
+): RegistratingUser => {
   return {
+    id: user._id.toString(),
+    _id: user._id.toString(),
     username: user.username,
     firstName: user.firstName,
     lastName: user.lastName,
@@ -24,7 +28,7 @@ const createSafeUser = (user: IUser & { _id?: { toString(): string } }): Pending
   };
 };
 
-const findPendingRegistrationUser = async (id: string) => {
+const findRegistratingUser = async (id: string) => {
   if (!Types.ObjectId.isValid(id)) {
     throw new AppError('Invalid registration request id', 400);
   }
@@ -58,7 +62,7 @@ const getRegistrationRequests = async () => {
 };
 
 const approveRegistrationRequest = async (id: string) => {
-  const user = await findPendingRegistrationUser(id);
+  const user = await findRegistratingUser(id);
 
   user.status = UserStatus.Approved;
   await user.save();
@@ -69,7 +73,7 @@ const approveRegistrationRequest = async (id: string) => {
 };
 
 const rejectRegistrationRequest = async (id: string) => {
-  const user = await findPendingRegistrationUser(id);
+  const user = await findRegistratingUser(id);
 
   user.status = UserStatus.Rejected;
   await user.save();

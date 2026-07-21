@@ -1,0 +1,78 @@
+<section class="page">
+  <div class="page-header">
+    <div>
+      <h1>Registration Requests</h1>
+      <p>Review pending athlete and employee registrations.</p>
+    </div>
+  </div>
+
+  @if (successMessage) {
+    <p class="success-message">{{ successMessage }}</p>
+  }
+
+  @if (errorMessage) {
+    <p class="error-message">{{ errorMessage }}</p>
+  }
+
+  @if (isLoading) {
+    <p class="state-message">Loading registration requests...</p>
+  } @else if (requests.length === 0) {
+    <p class="state-message">No pending registration requests.</p>
+  } @else {
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Username</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Role</th>
+            <th>Favorite Sports</th>
+            <th>Company Name</th>
+            <th>Registration Number</th>
+            <th>PIB</th>
+            <th>Created At</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (request of requests; track getTrackKey(request)) {
+            <tr>
+              <td>{{ request.username }}</td>
+              <td>{{ request.firstName }}</td>
+              <td>{{ request.lastName }}</td>
+              <td>{{ request.email }}</td>
+              <td>{{ request.phone }}</td>
+              <td>{{ request.role }}</td>
+              <td>{{ request.favoriteSports.length ? request.favoriteSports.join(', ') : '-' }}</td>
+              <td>{{ request.employeeData?.companyName ?? '-' }}</td>
+              <td>{{ request.employeeData?.registrationNumber ?? '-' }}</td>
+              <td>{{ request.employeeData?.pib ?? '-' }}</td>
+              <td>{{ request.createdAt | date: 'medium' }}</td>
+              <td class="actions">
+                <button
+                  type="button"
+                  class="approve-button"
+                  [disabled]="isProcessing(request)"
+                  (click)="approve(request)"
+                >
+                  {{ isProcessing(request) ? 'Working...' : 'Approve' }}
+                </button>
+                <button
+                  type="button"
+                  class="reject-button"
+                  [disabled]="isProcessing(request)"
+                  (click)="reject(request)"
+                >
+                  {{ isProcessing(request) ? 'Working...' : 'Reject' }}
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

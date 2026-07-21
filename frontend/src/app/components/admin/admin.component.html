@@ -2,5 +2,8 @@
   <h1>Admin Dashboard</h1>
   <p>Welcome, {{ user?.firstName }}</p>
   <p>Role: {{ user?.role }}</p>
+  <a class="dashboard-link" routerLink="/admin/registration-requests">
+    View registration requests
+  </a>
   <button type="button" (click)="logout()">Logout</button>
 </section>

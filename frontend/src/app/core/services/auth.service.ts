@@ -9,6 +9,7 @@ import type {
   CurrentUserResponseData,
   LoginResponseData,
 } from '../models/api-response.model';
+import type { RegisterRequest, RegisterResponseData } from '../models/register.model';
 import type { User } from '../models/user.model';
 
 @Injectable({
@@ -68,6 +69,13 @@ export class AuthService {
           return of(null);
         }),
       );
+  }
+
+  register(payload: RegisterRequest) {
+    return this.http.post<ApiResponse<RegisterResponseData>>(
+      `${environment.apiUrl}/auth/register`,
+      payload,
+    );
   }
 
   logout(): void {

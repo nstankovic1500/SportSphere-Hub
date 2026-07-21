@@ -1,6 +1,8 @@
 import type { IEmployeeData, UserRole, UserStatus } from '../../models/User';
 
-interface PendingRegistrationUser {
+interface RegistratingUser {
+  id: string;
+  _id: string;
   username: string;
   firstName: string;
   lastName: string;
@@ -15,15 +17,15 @@ interface PendingRegistrationUser {
 }
 
 interface PendingRegistrationsResponse {
-  requests: PendingRegistrationUser[];
+  requests: RegistratingUser[];
 }
 
 interface ResolvedRegistrationResponse {
-  user: PendingRegistrationUser;
+  user: RegistratingUser;
 }
 
 export type {
-  PendingRegistrationUser,
+  RegistratingUser,
   ResolvedRegistrationResponse,
   PendingRegistrationsResponse,
 };

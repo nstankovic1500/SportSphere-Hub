@@ -1,0 +1,173 @@
+<section class="register-page">
+  <div class="register-card">
+    <h1>Create Account</h1>
+    <p>Submit your registration request to join SportSphere Hub.</p>
+
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+      <div class="form-grid">
+        <div class="field">
+          <label for="username">Username</label>
+          <input id="username" type="text" formControlName="username" />
+          @if (username.touched && username.hasError('required')) {
+            <small class="field-error">Username is required.</small>
+          }
+        </div>
+
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" type="email" formControlName="email" />
+          @if (email.touched && email.hasError('required')) {
+            <small class="field-error">Email is required.</small>
+          }
+          @if (email.touched && email.hasError('email')) {
+            <small class="field-error">Enter a valid email address.</small>
+          }
+        </div>
+
+        <div class="field">
+          <label for="password">Password</label>
+          <input id="password" type="password" formControlName="password" />
+          @if (password.touched && password.hasError('required')) {
+            <small class="field-error">Password is required.</small>
+          }
+          @if (password.touched && password.hasError('invalidPassword')) {
+            <small class="field-error">
+              Password must start with a letter, be 8-12 characters, and include an uppercase letter, a number, and a special character.
+            </small>
+          }
+        </div>
+
+        <div class="field">
+          <label for="confirmPassword">Confirm Password</label>
+          <input id="confirmPassword" type="password" formControlName="confirmPassword" />
+          @if (confirmPassword.touched && confirmPassword.hasError('required')) {
+            <small class="field-error">Confirm password is required.</small>
+          }
+          @if (registerForm.touched && registerForm.hasError('passwordMismatch')) {
+            <small class="field-error">Passwords must match.</small>
+          }
+        </div>
+
+        <div class="field">
+          <label for="firstName">First Name</label>
+          <input id="firstName" type="text" formControlName="firstName" />
+          @if (firstName.touched && firstName.hasError('required')) {
+            <small class="field-error">First name is required.</small>
+          }
+        </div>
+
+        <div class="field">
+          <label for="lastName">Last Name</label>
+          <input id="lastName" type="text" formControlName="lastName" />
+          @if (lastName.touched && lastName.hasError('required')) {
+            <small class="field-error">Last name is required.</small>
+          }
+        </div>
+
+        <div class="field">
+          <label for="phone">Phone</label>
+          <input id="phone" type="text" formControlName="phone" />
+          @if (phone.touched && phone.hasError('required')) {
+            <small class="field-error">Phone is required.</small>
+          }
+        </div>
+
+        <div class="field">
+          <label for="role">Role</label>
+          <select id="role" formControlName="role">
+            <option value="athlete">Athlete</option>
+            <option value="employee">Employee</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Favorite Sports</label>
+        @if (isLoadingSports) {
+          <p class="helper-text">Loading sports...</p>
+        } @else {
+          <div class="sports-grid">
+            @for (sport of sports; track sport.id) {
+              <label class="sport-option">
+                <input
+                  type="checkbox"
+                  [checked]="isSportSelected(sport.id)"
+                  [disabled]="!canSelectMoreSports(sport.id)"
+                  (change)="onSportChange(sport.id, $any($event.target).checked)"
+                />
+                <span>{{ sport.name }}</span>
+              </label>
+            }
+          </div>
+        }
+        <small class="helper-text">Choose up to 5 sports.</small>
+        @if (favoriteSports.touched && favoriteSports.hasError('maxSelectedSports')) {
+          <small class="field-error">You can select at most 5 sports.</small>
+        }
+      </div>
+
+      @if (isEmployee) {
+        <section class="employee-section" formGroupName="employeeData">
+          <h2>Employee Details</h2>
+
+          <div class="form-grid">
+            <div class="field">
+              <label for="companyName">Company Name</label>
+              <input id="companyName" type="text" formControlName="companyName" />
+              @if (employeeDataGroup.controls.companyName.touched && employeeDataGroup.controls.companyName.hasError('required')) {
+                <small class="field-error">Company name is required.</small>
+              }
+            </div>
+
+            <div class="field">
+              <label for="headOfficeAddress">Head Office Address</label>
+              <input id="headOfficeAddress" type="text" formControlName="headOfficeAddress" />
+              @if (employeeDataGroup.controls.headOfficeAddress.touched && employeeDataGroup.controls.headOfficeAddress.hasError('required')) {
+                <small class="field-error">Head office address is required.</small>
+              }
+            </div>
+
+            <div class="field">
+              <label for="registrationNumber">Registration Number</label>
+              <input id="registrationNumber" type="text" formControlName="registrationNumber" />
+              @if (employeeDataGroup.controls.registrationNumber.touched && employeeDataGroup.controls.registrationNumber.hasError('required')) {
+                <small class="field-error">Registration number is required.</small>
+              }
+              @if (employeeDataGroup.controls.registrationNumber.touched && employeeDataGroup.controls.registrationNumber.hasError('pattern')) {
+                <small class="field-error">Registration number must contain exactly 8 digits.</small>
+              }
+            </div>
+
+            <div class="field">
+              <label for="pib">PIB</label>
+              <input id="pib" type="text" formControlName="pib" />
+              @if (employeeDataGroup.controls.pib.touched && employeeDataGroup.controls.pib.hasError('required')) {
+                <small class="field-error">PIB is required.</small>
+              }
+              @if (employeeDataGroup.controls.pib.touched && employeeDataGroup.controls.pib.hasError('pattern')) {
+                <small class="field-error">PIB must contain exactly 9 digits and cannot start with 0.</small>
+              }
+            </div>
+          </div>
+        </section>
+      }
+
+      @if (errorMessage) {
+        <p class="error-message">{{ errorMessage }}</p>
+      }
+
+      @if (successMessage) {
+        <p class="success-message">{{ successMessage }}</p>
+      }
+
+      <button type="submit" [disabled]="registerForm.invalid || isSubmitting || isLoadingSports">
+        {{ isSubmitting ? 'Submitting...' : 'Register' }}
+      </button>
+    </form>
+
+    <p class="login-link">
+      Already have an account?
+      <a routerLink="/login">Back to login</a>
+    </p>
+  </div>
+</section>
