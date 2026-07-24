@@ -51,8 +51,16 @@ export interface FacilitiesResponseData {
 
 export interface FacilityComment {
   id: string;
+  athleteName: string;
+  reaction: 'like' | 'dislike';
   comment: string;
   createdAt: string;
+}
+
+export interface FacilityReviews {
+  likesCount: number;
+  dislikesCount: number;
+  comments: FacilityComment[];
 }
 
 export interface FacilityResource {
@@ -95,6 +103,12 @@ export interface FacilityDetails {
 
 export interface FacilityDetailsResponseData {
   facility: FacilityDetails;
+}
+
+export interface FacilityReviewsResponseData {
+  likesCount: number;
+  dislikesCount: number;
+  comments: FacilityComment[];
 }
 
 export interface FacilitiesQueryParams {

@@ -7,9 +7,11 @@ import type {
   AthleteReservationRequest,
   AthleteProfile,
   AthleteReservation,
+  CreateFacilityReviewRequest,
   ResourceAvailability,
   UpdateAthleteProfileRequest,
 } from '../models/athlete.model';
+import type { FacilityComment } from '../models/public.model';
 
 @Injectable({
   providedIn: 'root',
@@ -57,6 +59,13 @@ export class AthleteService {
   createReservation(payload: AthleteReservationRequest) {
     return this.http.post<ApiResponse<{ reservation: AthleteReservation }>>(
       `${environment.apiUrl}/athletes/reservations`,
+      payload,
+    );
+  }
+
+  createFacilityReview(facilityId: string, payload: CreateFacilityReviewRequest) {
+    return this.http.post<ApiResponse<{ review: FacilityComment }>>(
+      `${environment.apiUrl}/facilities/${facilityId}/reviews`,
       payload,
     );
   }

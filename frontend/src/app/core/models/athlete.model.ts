@@ -67,3 +67,8 @@ export interface AthleteReservationRequest {
   startTime: string;
   endTime: string;
 }
+
+export interface CreateFacilityReviewRequest {
+  reaction: 'like' | 'dislike';
+  comment: string;
+}

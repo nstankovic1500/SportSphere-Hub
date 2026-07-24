@@ -128,6 +128,14 @@ th {
   background: #f8fbff;
 }
 
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
 .comment-card p,
 .comment-card small {
   margin: 0;
@@ -137,6 +145,104 @@ th {
   display: block;
   margin-top: 8px;
   color: #5d6f83;
+}
+
+.reaction-badge {
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #e9f8ee;
+  color: #1f7a38;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.reaction-badge.dislike {
+  background: #fdecec;
+  color: #c62828;
+}
+
+form {
+  display: grid;
+  gap: 18px;
+  margin-top: 14px;
+}
+
+.field {
+  display: grid;
+  gap: 8px;
+}
+
+label {
+  font-weight: 600;
+}
+
+textarea,
+button,
+input {
+  font: inherit;
+}
+
+textarea {
+  padding: 12px 14px;
+  border: 1px solid #cad6e4;
+  border-radius: 12px;
+  resize: vertical;
+}
+
+.radio-group {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.radio-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid #dde7f2;
+  border-radius: 12px;
+  background: #f8fbff;
+}
+
+.helper-text {
+  color: #607086;
+}
+
+.field-error {
+  color: #c62828;
+}
+
+.message {
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  border-radius: 12px;
+}
+
+.message.success {
+  background: #e9f8ee;
+  color: #1f7a38;
+}
+
+.message.error {
+  background: #fdecec;
+  color: #c62828;
+}
+
+button {
+  width: fit-content;
+  padding: 12px 16px;
+  border: 0;
+  border-radius: 12px;
+  background: #0f6bff;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
 }
 
 .state-message {
@@ -161,7 +267,9 @@ th {
     flex-direction: column;
   }
 
-  .hour-row {
+  .hour-row,
+  .comment-header {
     flex-direction: column;
+    align-items: flex-start;
   }
 }

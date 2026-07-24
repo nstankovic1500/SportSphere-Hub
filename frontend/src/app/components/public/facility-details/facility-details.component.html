@@ -12,7 +12,7 @@
         <p>{{ facility.city }}, {{ facility.country }}</p>
         <p>{{ facility.address }}</p>
         <p>{{ facility.hourlyPrice }} per hour</p>
-        <p>{{ facility.likesCount }} likes · {{ facility.dislikesCount }} dislikes</p>
+        <p>{{ likesCount }} likes · {{ dislikesCount }} dislikes</p>
         @if (canReserve) {
           <a class="reserve-link" [routerLink]="['/athlete/facilities', facility.id, 'reserve']">
             Reserve
@@ -100,18 +100,74 @@
 
     <section class="panel">
       <h2>Latest Comments</h2>
-      @if (facility.comments.length === 0) {
+      @if (comments.length === 0) {
         <p class="state-message">No comments available.</p>
       } @else {
         <div class="comment-list">
-          @for (comment of facility.comments; track comment.id) {
+          @for (commentItem of comments; track commentItem.id) {
             <article class="comment-card">
-              <p>{{ comment.comment }}</p>
-              <small>{{ comment.createdAt | date: 'medium' }}</small>
+              <div class="comment-header">
+                <strong>{{ commentItem.athleteName }}</strong>
+                <span class="reaction-badge" [class.dislike]="commentItem.reaction === 'dislike'">
+                  {{ commentItem.reaction }}
+                </span>
+              </div>
+              <p>{{ commentItem.comment }}</p>
+              <small>{{ commentItem.createdAt | date: 'medium' }}</small>
             </article>
           }
         </div>
       }
     </section>
+
+    @if (canReview) {
+      <section class="panel">
+        <h2>Leave a Review</h2>
+
+        @if (reviewSuccessMessage) {
+          <p class="message success">{{ reviewSuccessMessage }}</p>
+        }
+
+        @if (reviewErrorMessage) {
+          <p class="message error">{{ reviewErrorMessage }}</p>
+        }
+
+        <form [formGroup]="reviewForm" (ngSubmit)="submitReview()">
+          <div class="field">
+            <label>Reaction</label>
+            <div class="radio-group">
+              <label class="radio-option">
+                <input type="radio" value="like" formControlName="reaction" />
+                <span>Like</span>
+              </label>
+
+              <label class="radio-option">
+                <input type="radio" value="dislike" formControlName="reaction" />
+                <span>Dislike</span>
+              </label>
+            </div>
+            @if (reaction.touched && reaction.hasError('required')) {
+              <small class="field-error">Reaction is required.</small>
+            }
+          </div>
+
+          <div class="field">
+            <label for="comment">Comment</label>
+            <textarea id="comment" rows="5" formControlName="comment" maxlength="500"></textarea>
+            <small class="helper-text">{{ comment.value.length }}/500 characters</small>
+            @if (comment.touched && comment.hasError('required')) {
+              <small class="field-error">Comment is required.</small>
+            }
+            @if (comment.touched && comment.hasError('maxlength')) {
+              <small class="field-error">Comment can contain at most 500 characters.</small>
+            }
+          </div>
+
+          <button type="submit" [disabled]="reviewForm.invalid || isSubmittingReview">
+            {{ isSubmittingReview ? 'Submitting...' : 'Submit Review' }}
+          </button>
+        </form>
+      </section>
+    }
   }
 </section>

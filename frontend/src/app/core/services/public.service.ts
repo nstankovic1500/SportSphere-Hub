@@ -7,6 +7,7 @@ import type {
   PublicCitiesApiResponse,
   PublicFacilitiesApiResponse,
   PublicFacilityDetailsApiResponse,
+  PublicFacilityReviewsApiResponse,
   PublicHomeApiResponse,
   SportsResponseData,
 } from '../models/api-response.model';
@@ -54,6 +55,12 @@ export class PublicService {
   getFacilityDetails(id: string) {
     return this.http.get<PublicFacilityDetailsApiResponse>(
       `${environment.apiUrl}/public/facilities/${id}`,
+    );
+  }
+
+  getFacilityReviews(facilityId: string) {
+    return this.http.get<PublicFacilityReviewsApiResponse>(
+      `${environment.apiUrl}/facilities/${facilityId}/reviews`,
     );
   }
 }

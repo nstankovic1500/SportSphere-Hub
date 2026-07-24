@@ -8,6 +8,7 @@ import type {
   CitiesResponseData,
   FacilitiesResponseData,
   FacilityDetailsResponseData,
+  FacilityReviewsResponseData,
   HomeResponseData,
 } from './public.model';
 
@@ -40,3 +41,4 @@ export type PublicHomeApiResponse = ApiResponse<HomeResponseData>;
 export type PublicCitiesApiResponse = ApiResponse<CitiesResponseData>;
 export type PublicFacilitiesApiResponse = ApiResponse<FacilitiesResponseData>;
 export type PublicFacilityDetailsApiResponse = ApiResponse<FacilityDetailsResponseData>;
+export type PublicFacilityReviewsApiResponse = ApiResponse<FacilityReviewsResponseData>;
