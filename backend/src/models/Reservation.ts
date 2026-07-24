@@ -40,6 +40,9 @@ const reservationSchema = new Schema<IReservation>(
   },
 );
 
+reservationSchema.index({ resourceId: 1, startTime: 1, endTime: 1, status: 1 });
+reservationSchema.index({ athleteId: 1, startTime: -1 });
+
 reservationSchema.path('endTime').validate(function validateEndTime(value: Date): boolean {
   return value.getTime() > this.startTime.getTime();
 }, 'endTime must be after startTime');

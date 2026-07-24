@@ -1,8 +1,19 @@
 import type { Response } from 'express';
 
 import { asyncHandler } from '../../utils/asyncHandler';
-import type { AuthenticatedAthleteRequest, UpdateAthleteProfileBody } from './athlete.types';
-import { cancelReservation, getProfile, getReservations, updateProfile } from './athlete.service';
+import type {
+  AuthenticatedAthleteRequest,
+  CreateReservationBody,
+  UpdateAthleteProfileBody,
+} from './athlete.types';
+import {
+  cancelReservation,
+  createReservation,
+  getProfile,
+  getReservations,
+  getResourceAvailability,
+  updateProfile,
+} from './athlete.service';
 
 const getProfileController = asyncHandler(async (req: AuthenticatedAthleteRequest, res: Response) => {
   const athleteId = String(req.auth?.userId);
@@ -46,9 +57,33 @@ const cancelReservationController = asyncHandler(async (req: AuthenticatedAthlet
   });
 });
 
+const getResourceAvailabilityController = asyncHandler(async (req: AuthenticatedAthleteRequest, res: Response) => {
+  const resourceId = String(req.params.resourceId);
+  const date = String(req.query.date ?? '');
+  const data = await getResourceAvailability(resourceId, date);
+
+  res.status(200).json({
+    success: true,
+    data,
+  });
+});
+
+const createReservationController = asyncHandler(async (req: AuthenticatedAthleteRequest, res: Response) => {
+  const athleteId = String(req.auth?.userId);
+  const body = req.body as CreateReservationBody;
+  const data = await createReservation(athleteId, body);
+
+  res.status(201).json({
+    success: true,
+    data,
+  });
+});
+
 export {
   cancelReservationController,
+  createReservationController,
   getProfileController,
+  getResourceAvailabilityController,
   getReservationsController,
   updateProfileController,
 };

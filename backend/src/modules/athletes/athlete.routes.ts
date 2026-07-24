@@ -5,7 +5,9 @@ import { roleMiddleware } from '../../middleware/role.middleware';
 import { UserRole } from '../../models/User';
 import {
   cancelReservationController,
+  createReservationController,
   getProfileController,
+  getResourceAvailabilityController,
   getReservationsController,
   updateProfileController,
 } from './athlete.controller';
@@ -17,7 +19,9 @@ athleteRouter.use(roleMiddleware(UserRole.Athlete));
 
 athleteRouter.get('/profile', getProfileController);
 athleteRouter.patch('/profile', updateProfileController);
+athleteRouter.get('/resources/:resourceId/availability', getResourceAvailabilityController);
 athleteRouter.get('/reservations', getReservationsController);
+athleteRouter.post('/reservations', createReservationController);
 athleteRouter.patch('/reservations/:id/cancel', cancelReservationController);
 
 export { athleteRouter };

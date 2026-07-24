@@ -1,6 +1,8 @@
 import type { Request } from 'express';
 
 import type { ReservationStatus } from '../../models/Reservation';
+import type { FacilityStatus, IOpeningHour } from '../../models/Facility';
+import type { ResourceType } from '../../models/Resource';
 import type { UserRole, UserStatus } from '../../models/User';
 
 interface AthleteFavoriteSport {
@@ -42,6 +44,30 @@ interface AthleteReservation {
   canCancel: boolean;
 }
 
+interface ResourceAvailability {
+  resource: {
+    id: string;
+    name: string;
+    facilityId: string;
+    facilityName: string;
+    sportId: string;
+    sportName: string;
+  };
+  date: string;
+  openingTime: string;
+  closingTime: string;
+  occupiedIntervals: Array<{
+    startTime: Date;
+    endTime: Date;
+  }>;
+}
+
+interface CreateReservationBody {
+  resourceId?: string;
+  startTime?: string;
+  endTime?: string;
+}
+
 interface AuthenticatedAthleteRequest extends Request {
   auth?: {
     userId: string;
@@ -55,6 +81,8 @@ export type {
   AthleteProfile,
   AthleteReservation,
   AthleteFavoriteSport,
+  CreateReservationBody,
   AuthenticatedAthleteRequest,
+  ResourceAvailability,
   UpdateAthleteProfileBody,
 };
