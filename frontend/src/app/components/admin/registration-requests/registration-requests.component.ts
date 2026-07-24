@@ -88,7 +88,7 @@ export class RegistrationRequestsComponent {
     requestCall.subscribe({
       next: () => {
         this.requests = this.requests.filter(
-          (currentRequest) => currentRequest.id !== request.id,
+          (currentRequest) => !(currentRequest.id === request.id),
         );
         this.processingRequestIds.delete(request.id);
         this.successMessage =

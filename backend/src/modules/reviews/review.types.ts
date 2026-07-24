@@ -1,5 +1,3 @@
-import type { AuthenticatedRequest } from '../auth/auth.types';
-
 interface CreateReviewBody {
   reaction: 'like' | 'dislike';
   comment: string;
@@ -19,12 +17,7 @@ interface FacilityReviewsResponse {
   comments: ReviewComment[];
 }
 
-interface AuthenticatedAthleteReviewRequest extends AuthenticatedRequest {
-  auth: NonNullable<AuthenticatedRequest['auth']>;
-}
-
 export type {
-  AuthenticatedAthleteReviewRequest,
   CreateReviewBody,
   FacilityReviewsResponse,
   ReviewComment,

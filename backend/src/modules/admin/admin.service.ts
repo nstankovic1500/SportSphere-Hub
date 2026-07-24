@@ -39,11 +39,11 @@ const findRegistratingUser = async (id: string) => {
     throw new AppError('Registration request not found', 404);
   }
 
-  if (user.role !== UserRole.Athlete && user.role !== UserRole.Employee) {
+  if (!(user.role === UserRole.Athlete) && !(user.role === UserRole.Employee)) {
     throw new AppError('Only athlete and employee registrations can be processed', 400);
   }
 
-  if (user.status !== UserStatus.Pending) {
+  if (!(user.status === UserStatus.Pending)) {
     throw new AppError('Only pending registration requests can be processed', 400);
   }
 

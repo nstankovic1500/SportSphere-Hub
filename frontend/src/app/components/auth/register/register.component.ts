@@ -232,7 +232,7 @@ export class RegisterComponent {
 
     this.favoriteSports.setValue(
       selectedSports.filter(
-        (selectedId) => selectedId !== sportId,
+        (selectedId) => !(selectedId === sportId),
       ),
     );
     this.favoriteSports.updateValueAndValidity();

@@ -1,5 +1,6 @@
 import { Router } from 'express';
 
+import { adRouter, applyRequestRouter } from '../modules/ads/ad.routes';
 import { adminRouter } from '../modules/admin/admin.routes';
 import { athleteRouter } from '../modules/athletes/athlete.routes';
 import { authRouter } from '../modules/auth/auth.routes';
@@ -21,8 +22,10 @@ router.get('/health', (_req, res) => {
 
 router.use('/auth', authRouter);
 router.use('/admin', adminRouter);
+router.use('/ads', adRouter);
 router.use('/athletes', athleteRouter);
 router.use('/facilities', reviewRouter);
+router.use('/join-requests', applyRequestRouter);
 router.use('/public', publicRouter);
 router.use('/sports', sportRouter);
 

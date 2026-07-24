@@ -133,11 +133,11 @@ const userSchema = new Schema<IUser>(
 userSchema.pre('validate', function ensureEmployeeDataMatchesRole() {
   if (this.role === UserRole.Employee) {
     const hasEmployeeData =
-      this.employeeData !== undefined &&
-      this.employeeData.companyName !== undefined &&
-      this.employeeData.headOfficeAddress !== undefined &&
-      this.employeeData.registrationNumber !== undefined &&
-      this.employeeData.pib !== undefined;
+      !(this.employeeData === undefined) &&
+      !(this.employeeData.companyName === undefined) &&
+      !(this.employeeData.headOfficeAddress === undefined) &&
+      !(this.employeeData.registrationNumber === undefined) &&
+      !(this.employeeData.pib === undefined);
 
     if (!hasEmployeeData) {
       this.invalidate('employeeData', 'employeeData is required when role is employee');
@@ -145,7 +145,7 @@ userSchema.pre('validate', function ensureEmployeeDataMatchesRole() {
     return;
   }
 
-  if (this.employeeData !== undefined) {
+  if (!(this.employeeData === undefined)) {
     this.employeeData = undefined;
   }
 });

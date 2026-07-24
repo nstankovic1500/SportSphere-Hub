@@ -67,7 +67,7 @@ const createRegisteredUser = (user: IUser & { _id: { toString(): string } }): Re
 };
 
 const trimString = (value: unknown) => {
-  if (typeof value !== 'string') {
+  if (!(typeof value === 'string')) {
     return '';
   }
 
@@ -123,7 +123,7 @@ const validateFavoriteSports = async (favoriteSports: unknown) => {
     throw new AppError('favoriteSports must be an array', 400);
   }
 
-  const uniqueIds = [...new Set(favoriteSports.filter((sportId) => sportId !== ''))];
+  const uniqueIds = [...new Set(favoriteSports.filter((sportId) => !(sportId === '')))];
 
   if (uniqueIds.length > 5) {
     throw new AppError('favoriteSports can contain at most 5 items', 400);
@@ -145,7 +145,7 @@ const validateFavoriteSports = async (favoriteSports: unknown) => {
     active: true,
   });
 
-  if (sports.length !== objectIds.length) {
+  if (!(sports.length === objectIds.length)) {
     throw new AppError('All favoriteSports must reference existing sports', 400);
   }
 
@@ -198,7 +198,7 @@ const validateEmployeeData = async (employeeData: RegisterEmployeeData | undefin
 };
 
 function handleDuplicateKeyError(error: any) {
-  if (error.code !== 11000) {
+  if (!(error.code === 11000)) {
     throw error;
   }
 
@@ -217,11 +217,11 @@ const loginWithRole = async (
     throw new AppError(INVALID_CREDENTIALS_MESSAGE, 401);
   }
 
-  if ((role !== undefined && user.role !== role) || (role === undefined && user.role === UserRole.Admin)) {
+  if ((!(role === undefined) && !(user.role === role)) || (role === undefined && user.role === UserRole.Admin)) {
     throw new AppError(INVALID_CREDENTIALS_MESSAGE, 401);
   }
 
-  if (user.status !== UserStatus.Approved) {
+  if (!(user.status === UserStatus.Approved)) {
     throw new AppError('Only approved users may log in', 403);
   }
 
@@ -275,7 +275,7 @@ const register = async (body: RegisterRequestBody) => {
   ensureRequired(data.email, 'email');
   ensureRequired(data.role, 'role');
 
-  if (data.role !== UserRole.Athlete && data.role !== UserRole.Employee) {
+  if (!(data.role === UserRole.Athlete) && !(data.role === UserRole.Employee)) {
     throw new AppError('Only athlete and employee roles are allowed', 400);
   }
 
@@ -287,7 +287,7 @@ const register = async (body: RegisterRequestBody) => {
     await validateEmployeeData(data.employeeData);
   }
 
-  if (data.role === UserRole.Athlete && data.employeeData !== undefined) {
+  if (data.role === UserRole.Athlete && !(data.employeeData === undefined)) {
     throw new AppError('employeeData must be omitted for athlete registration', 400);
   }
 

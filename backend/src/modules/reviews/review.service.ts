@@ -97,7 +97,7 @@ const createReview = async (
     throw new AppError('reaction is required', 400);
   }
 
-  if (reaction !== ReviewReaction.Like && reaction !== ReviewReaction.Dislike) {
+  if (!(reaction === ReviewReaction.Like) && !(reaction === ReviewReaction.Dislike)) {
     throw new AppError('reaction must be like or dislike', 400);
   }
 

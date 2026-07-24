@@ -95,7 +95,7 @@ export class AthleteProfileComponent {
     }
 
     this.favoriteSports.setValue(
-      selectedSports.filter((selectedSportId) => selectedSportId !== sportId),
+      selectedSports.filter((selectedSportId) => !(selectedSportId === sportId)),
     );
     this.favoriteSports.updateValueAndValidity();
   }

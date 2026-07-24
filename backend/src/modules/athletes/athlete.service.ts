@@ -259,7 +259,7 @@ const validateFavoriteSports = async (favoriteSports: unknown) => {
     active: true,
   });
 
-  if (sports.length !== objectIds.length) {
+  if (!(sports.length === objectIds.length)) {
     throw new AppError('All favoriteSports must reference existing active sports', 400);
   }
 
@@ -363,7 +363,7 @@ const cancelReservation = async (
     throw new AppError('Reservation not found', 404);
   }
 
-  if (reservation.athleteId.toString() !== athleteId) {
+  if (!(reservation.athleteId.toString() === athleteId)) {
     throw new AppError('You do not have permission to access this reservation', 403);
   }
 
@@ -473,7 +473,7 @@ const createReservation = async (
     throw new AppError('Minimum reservation duration is 1 hour', 400);
   }
 
-  if (getDateKey(startTime) !== getDateKey(endTime)) {
+  if (!(getDateKey(startTime) === getDateKey(endTime))) {
     throw new AppError('Reservation must start and end on the same date', 400);
   }
 

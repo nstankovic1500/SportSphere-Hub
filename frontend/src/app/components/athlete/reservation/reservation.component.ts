@@ -385,7 +385,7 @@ export class ReservationComponent {
       return this.showSelectionError('Availability is not loaded for the selected day.', silent);
     }
 
-    if (this.formatDate(start) !== this.formatDate(end)) {
+    if (!(this.formatDate(start) === this.formatDate(end))) {
       return this.showSelectionError('Reservation must start and end on the same date.', silent);
     }
 

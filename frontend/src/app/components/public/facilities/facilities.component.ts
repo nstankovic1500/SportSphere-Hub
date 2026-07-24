@@ -45,7 +45,7 @@ export class FacilitiesComponent {
     this.filterForm.controls.cities.setValue(
       checked
         ? [...currentCities, city]
-        : currentCities.filter((currentCity) => currentCity !== city),
+        : currentCities.filter((currentCity) => !(currentCity === city)),
     );
   }
 
