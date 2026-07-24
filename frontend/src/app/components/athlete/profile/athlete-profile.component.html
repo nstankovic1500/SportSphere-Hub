@@ -4,7 +4,10 @@
       <h1>Athlete Profile</h1>
       <p>Manage your personal information and review your reservations.</p>
     </div>
-    <a routerLink="/athlete">Back to dashboard</a>
+    <div class="header-links">
+      <a routerLink="/athlete">Back to dashboard</a>
+      <a routerLink="/facilities">Browse facilities</a>
+    </div>
   </header>
 
   @if (isLoading) {

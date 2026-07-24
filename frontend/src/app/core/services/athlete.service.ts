@@ -4,8 +4,10 @@ import { Injectable, inject } from '@angular/core';
 import { environment } from '../../../environments/environment';
 import type { ApiResponse } from '../models/api-response.model';
 import type {
+  AthleteReservationRequest,
   AthleteProfile,
   AthleteReservation,
+  ResourceAvailability,
   UpdateAthleteProfileRequest,
 } from '../models/athlete.model';
 
@@ -38,6 +40,24 @@ export class AthleteService {
     return this.http.patch<ApiResponse<{ reservation: AthleteReservation }>>(
       `${environment.apiUrl}/athletes/reservations/${id}/cancel`,
       {},
+    );
+  }
+
+  getResourceAvailability(resourceId: string, date: string) {
+    return this.http.get<ApiResponse<{ availability: ResourceAvailability }>>(
+      `${environment.apiUrl}/athletes/resources/${resourceId}/availability`,
+      {
+        params: {
+          date,
+        },
+      },
+    );
+  }
+
+  createReservation(payload: AthleteReservationRequest) {
+    return this.http.post<ApiResponse<{ reservation: AthleteReservation }>>(
+      `${environment.apiUrl}/athletes/reservations`,
+      payload,
     );
   }
 }

@@ -40,4 +40,30 @@ export interface AthleteReservation {
   canCancel: boolean;
 }
 
+export interface ResourceAvailabilityPeriod {
+  startTime: string;
+  endTime: string;
+}
 
+export interface ResourceDetails {
+  id: string;
+  name: string;
+  facilityId: string;
+  facilityName: string;
+  sportId: string;
+  sportName: string;
+}
+
+export interface ResourceAvailability {
+  resource: ResourceDetails;
+  date: string;
+  openingTime: string;
+  closingTime: string;
+  occupiedIntervals: ResourceAvailabilityPeriod[];
+}
+
+export interface AthleteReservationRequest {
+  resourceId: string;
+  startTime: string;
+  endTime: string;
+}

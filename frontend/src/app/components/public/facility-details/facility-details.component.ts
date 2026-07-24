@@ -3,6 +3,7 @@ import { Component, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 
 import type { FacilityDetails } from '../../../core/models/public.model';
+import { AuthService } from '../../../core/services/auth.service';
 import { PublicService } from '../../../core/services/public.service';
 
 const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -17,6 +18,7 @@ const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Frida
 export class FacilityDetailsComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly publicService = inject(PublicService);
+  private readonly authService = inject(AuthService);
 
   isLoading = true;
   errorMessage = '';
@@ -29,6 +31,11 @@ export class FacilityDetailsComponent {
 
   getDayName(day: number) {
     return dayNames[day] ?? `Day ${day}`;
+  }
+
+  get canReserve() {
+    const user = this.authService.getCurrentUser();
+    return user?.role === 'athlete';
   }
 
   private loadFacility(id: string) {

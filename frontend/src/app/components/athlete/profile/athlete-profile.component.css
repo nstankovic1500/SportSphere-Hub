@@ -12,6 +12,12 @@
   margin-bottom: 24px;
 }
 
+.header-links {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
 .page-header h1,
 .page-header p,
 .static-field p {

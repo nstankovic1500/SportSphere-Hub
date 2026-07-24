@@ -13,6 +13,11 @@
         <p>{{ facility.address }}</p>
         <p>{{ facility.hourlyPrice }} per hour</p>
         <p>{{ facility.likesCount }} likes · {{ facility.dislikesCount }} dislikes</p>
+        @if (canReserve) {
+          <a class="reserve-link" [routerLink]="['/athlete/facilities', facility.id, 'reserve']">
+            Reserve
+          </a>
+        }
       </div>
       <div class="sports-tags">
         @for (sport of facility.sports; track sport.id) {

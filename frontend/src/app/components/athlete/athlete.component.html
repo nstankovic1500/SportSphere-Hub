@@ -2,8 +2,13 @@
   <h1>Athlete Dashboard</h1>
   <p>Welcome, {{ user?.firstName }}</p>
   <p>Role: {{ user?.role }}</p>
-  <a class="dashboard-link" routerLink="/athlete/profile">
-    View profile
-  </a>
+  <div class="dashboard-links">
+    <a class="dashboard-link" routerLink="/athlete/profile">
+      View profile
+    </a>
+    <a class="dashboard-link" routerLink="/facilities">
+      Browse facilities
+    </a>
+  </div>
   <button type="button" (click)="logout()">Logout</button>
 </section>

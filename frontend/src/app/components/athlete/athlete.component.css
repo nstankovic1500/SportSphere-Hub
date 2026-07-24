@@ -2,9 +2,15 @@
   padding: 32px;
 }
 
+.dashboard-links {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+
 .dashboard-link {
   display: inline-block;
-  margin-top: 16px;
   color: #0f6bff;
   font-weight: 700;
   text-decoration: none;

@@ -1,0 +1,131 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>Reserve Resource</h1>
+      <p>Select a resource and choose one or more free whole-hour slots on the calendar.</p>
+    </div>
+    <div class="header-links">
+      <a routerLink="/facilities">Browse facilities</a>
+      <a routerLink="/athlete/profile">Back to profile</a>
+    </div>
+  </header>
+
+  @if (isLoadingFacility) {
+    <p class="state-message">Loading facility...</p>
+  } @else if (backendError && !facility) {
+    <p class="state-message error">{{ backendError }}</p>
+  } @else if (facility) {
+    <section class="panel">
+      <h2>{{ facility.name }}</h2>
+      <p>{{ facility.city }}, {{ facility.country }}</p>
+      <p>{{ facility.address }}</p>
+      <p>{{ facility.hourlyPrice }} per hour</p>
+    </section>
+
+    <section class="panel">
+      <h2>Active Resources</h2>
+
+      @if (!hasResources) {
+        <p class="state-message">No active resources available.</p>
+      } @else {
+        <div class="resource-toolbar">
+          <button type="button" class="secondary-button" [disabled]="!hasPreviousResource" (click)="goToPreviousResource()">
+            Previous Resource
+          </button>
+
+          <div class="field resource-field">
+            <label for="resourceId">Resource</label>
+            <select id="resourceId" [formControl]="resourceId">
+              @for (resource of activeResources; track resource.id) {
+                <option [value]="resource.id">
+                  {{ resource.name }} - {{ resource.sport?.name ?? 'No sport' }}
+                </option>
+              }
+            </select>
+          </div>
+
+          <button type="button" class="secondary-button" [disabled]="!hasNextResource" (click)="goToNextResource()">
+            Next Resource
+          </button>
+        </div>
+
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Sport</th>
+                <th>Type</th>
+                <th>Capacity</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (resource of activeResources; track resource.id) {
+                <tr [class.active-row]="currentResource && resource.id === currentResource.id">
+                  <td>{{ resource.name }}</td>
+                  <td>{{ resource.sport?.name ?? '-' }}</td>
+                  <td>{{ getResourceTypeLabel(resource.type) }}</td>
+                  <td>{{ resource.capacity }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+
+    @if (hasResources) {
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <h2>Reservation Calendar</h2>
+            @if (currentResource) {
+              <p>{{ currentResource.name }} - {{ currentResource.sport?.name ?? 'No sport' }}</p>
+            }
+          </div>
+        </div>
+
+        @if (successMessage) {
+          <p class="message success">{{ successMessage }}</p>
+        }
+
+        @if (backendError && facility) {
+          <p class="message error">{{ backendError }}</p>
+        }
+
+        @if (isLoadingAvailability) {
+          <p class="state-message">Loading calendar availability...</p>
+        }
+
+        <div class="calendar-wrapper">
+          <full-calendar #calendar [options]="calendarOptions"></full-calendar>
+        </div>
+      </section>
+
+      @if (selectedSlot) {
+        <section class="panel">
+          <h2>Reservation Summary</h2>
+
+          <div class="summary-card">
+            <p><strong>Facility:</strong> {{ facility.name }}</p>
+            <p><strong>Resource:</strong> {{ currentResource ? currentResource.name : '' }}</p>
+            <p><strong>Sport:</strong> {{ currentResource ? (currentResource.sport?.name ?? '-') : '-' }}</p>
+            <p><strong>Date:</strong> {{ selectedSlot.date }}</p>
+            <p><strong>Start time:</strong> {{ selectedSlot.startTime }}</p>
+            <p><strong>End time:</strong> {{ selectedSlot.endTime }}</p>
+            <p><strong>Duration:</strong> {{ selectedSlot.durationHours }} hour{{ selectedSlot.durationHours > 1 ? 's' : '' }}</p>
+          </div>
+
+          <div class="action-row">
+            <button type="button" [disabled]="!canConfirmReservation" (click)="confirmReservation()">
+              {{ isSubmitting ? 'Submitting...' : 'Confirm Reservation' }}
+            </button>
+            <button type="button" class="secondary-button" [disabled]="isSubmitting" (click)="clearSelection()">
+              Clear Selection
+            </button>
+          </div>
+        </section>
+      }
+    }
+  }
+</section>

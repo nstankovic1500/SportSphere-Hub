@@ -10,6 +10,17 @@
   text-decoration: none;
 }
 
+.reserve-link {
+  display: inline-flex;
+  margin-top: 16px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: #0f6bff;
+  color: #ffffff;
+  font-weight: 700;
+  text-decoration: none;
+}
+
 .hero-card,
 .panel {
   margin-top: 20px;
