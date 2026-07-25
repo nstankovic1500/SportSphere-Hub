@@ -1,0 +1,80 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>{{ isEditMode ? 'Edit Promotion' : 'Create Promotion' }}</h1>
+      <p>{{ isEditMode ? 'Update the selected promotion.' : 'Add a new promotion for this facility.' }}</p>
+    </div>
+    <div class="header-links">
+      <a [routerLink]="['/employee/facilities', facilityId, 'promotions']">Back to promotions</a>
+      <a [routerLink]="['/employee/facilities', facilityId]">Facility details</a>
+    </div>
+  </header>
+
+  @if (isLoading) {
+    <p class="state-message">Loading promotion form...</p>
+  } @else {
+    <section class="panel">
+      @if (successMessage) { <p class="message success">{{ successMessage }}</p> }
+      @if (errorMessage) { <p class="message error">{{ errorMessage }}</p> }
+
+      <form [formGroup]="promotionForm" (ngSubmit)="submit()">
+        <div class="form-grid">
+          <div class="field">
+            <label for="name">Name</label>
+            <input id="name" type="text" formControlName="name" />
+          </div>
+
+          <div class="field">
+            <label for="sportId">Sport</label>
+            <select id="sportId" formControlName="sportId">
+              <option value="">Select sport</option>
+              @for (sport of supportedSports; track sport.id) {
+                <option [value]="sport.id">{{ sport.name }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="startDate">Start Date</label>
+            <input id="startDate" type="date" formControlName="startDate" />
+          </div>
+
+          <div class="field">
+            <label for="endDate">End Date</label>
+            <input id="endDate" type="date" formControlName="endDate" />
+          </div>
+
+          <div class="field">
+            <label for="discountType">Discount Type</label>
+            <select id="discountType" formControlName="discountType">
+              <option value="percentage">Percentage</option>
+              <option value="fixed">Fixed</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="discountValue">Discount Value</label>
+            <input
+              id="discountValue"
+              type="number"
+              [min]="promotionForm.controls.discountType.value === 'percentage' ? 1 : 0.000001"
+              [max]="promotionForm.controls.discountType.value === 'percentage' ? 100 : null"
+              step="0.01"
+              formControlName="discountValue" />
+          </div>
+
+          @if (isEditMode) {
+            <label class="checkbox-field">
+              <input type="checkbox" formControlName="active" />
+              <span>Active</span>
+            </label>
+          }
+        </div>
+
+        <button type="submit" [disabled]="promotionForm.invalid || isSubmitting">
+          {{ isSubmitting ? 'Saving...' : (isEditMode ? 'Save Changes' : 'Create Promotion') }}
+        </button>
+      </form>
+    </section>
+  }
+</section>

@@ -6,6 +6,8 @@ import { environment } from '../../../environments/environment';
 import type {
   ApiResponse,
   EmployeeCreatedFacilityApiResponse,
+  EmployeePromotionApiResponse,
+  EmployeePromotionsApiResponse,
   EmployeeCreatedResourceApiResponse,
   EmployeeCreatedTrainerApiResponse,
   EmployeeAttendanceApiResponse,
@@ -18,9 +20,11 @@ import type {
 } from '../models/api-response.model';
 import type {
   CreateEmployeeFacilityRequest,
+  CreateEmployeePromotionRequest,
   CreateEmployeeResourceRequest,
   CreateEmployeeTrainerRequest,
   EmployeeAttendanceType,
+  UpdateEmployeePromotionRequest,
   UpdateEmployeeFacilityRequest,
   UpdateEmployeeProfileRequest,
   UpdateEmployeeResourceRequest,
@@ -78,10 +82,36 @@ export class EmployeeService {
     );
   }
 
+  getPromotions(facilityId: string) {
+    return this.http.get<EmployeePromotionsApiResponse>(
+      `${environment.apiUrl}/employees/facilities/${facilityId}/promotions`,
+    );
+  }
+
   updateFacility(facilityId: string, payload: UpdateEmployeeFacilityRequest) {
     return this.http.patch<EmployeeFacilityApiResponse>(
       `${environment.apiUrl}/employees/facilities/${facilityId}`,
       payload,
+    );
+  }
+
+  createPromotion(facilityId: string, payload: CreateEmployeePromotionRequest) {
+    return this.http.post<EmployeePromotionApiResponse>(
+      `${environment.apiUrl}/employees/facilities/${facilityId}/promotions`,
+      payload,
+    );
+  }
+
+  updatePromotion(promotionId: string, payload: UpdateEmployeePromotionRequest) {
+    return this.http.patch<EmployeePromotionApiResponse>(
+      `${environment.apiUrl}/employees/promotions/${promotionId}`,
+      payload,
+    );
+  }
+
+  deletePromotion(promotionId: string) {
+    return this.http.delete<ApiResponse<Record<string, never>>>(
+      `${environment.apiUrl}/employees/promotions/${promotionId}`,
     );
   }
 

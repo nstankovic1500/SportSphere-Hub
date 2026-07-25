@@ -164,3 +164,28 @@ export interface EmployeeAttendanceUpdateResponse {
   allowedNoShows?: number;
   athleteBlockedInFacility?: boolean;
 }
+
+export interface EmployeePromotion {
+  id: string;
+  name: string;
+  sport: EmployeeFavoriteSport;
+  startDate: string;
+  endDate: string;
+  discountType: 'percentage' | 'fixed';
+  discountValue: number;
+  active: boolean;
+  state: 'upcoming' | 'active' | 'expired' | 'inactive';
+}
+
+export interface CreateEmployeePromotionRequest {
+  name: string;
+  sportId: string;
+  startDate: string;
+  endDate: string;
+  discountType: 'percentage' | 'fixed';
+  discountValue: number;
+}
+
+export interface UpdateEmployeePromotionRequest extends CreateEmployeePromotionRequest {
+  active: boolean;
+}
