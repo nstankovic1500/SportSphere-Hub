@@ -1,4 +1,4 @@
-import type { FacilityStatus } from '../../models/Facility';
+import type { FacilityStatus, IOpeningHour } from '../../models/Facility';
 import type { UserRole, UserStatus } from '../../models/User';
 
 interface EmployeeFavoriteSport {
@@ -44,6 +44,7 @@ interface EmployeeFacility {
   city: string;
   country: string;
   address: string;
+  description?: string;
   status: FacilityStatus;
   active: boolean;
   hourlyPrice: number;
@@ -52,7 +53,23 @@ interface EmployeeFacility {
   createdAt: Date;
 }
 
+interface CreateEmployeeFacilityBody {
+  name?: string;
+  city?: string;
+  country?: string;
+  address?: string;
+  description?: string;
+  longitude?: number;
+  latitude?: number;
+  sports?: string[];
+  openingHours?: IOpeningHour[];
+  hourlyPrice?: number;
+  allowedNoShows?: number;
+  images?: string[];
+}
+
 export type {
+  CreateEmployeeFacilityBody,
   EmployeeFacility,
   EmployeeFavoriteSport,
   EmployeeProfile,

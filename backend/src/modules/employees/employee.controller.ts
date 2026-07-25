@@ -3,9 +3,11 @@ import type { Response } from 'express';
 import type { AuthenticatedRequest } from '../auth/auth.types';
 import { asyncHandler } from '../../utils/asyncHandler';
 import type {
+  CreateEmployeeFacilityBody,
   UpdateEmployeeProfileBody,
 } from './employee.types';
 import {
+  createFacility as createFacilityService,
   getFacilities as getFacilitiesService,
   getProfile as getProfileService,
   updateProfile as updateProfileService,
@@ -42,7 +44,19 @@ const getFacilities = asyncHandler(async (req: AuthenticatedRequest, res: Respon
   });
 });
 
+const createFacility = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const employeeId = String(req.auth?.userId);
+  const body = req.body as CreateEmployeeFacilityBody;
+  const data = await createFacilityService(employeeId, body);
+
+  res.status(201).json({
+    success: true,
+    data,
+  });
+});
+
 export {
+  createFacility,
   getFacilities,
   getProfile,
   updateProfile,

@@ -1,4 +1,5 @@
 import type { IEmployeeData, UserRole, UserStatus } from '../../models/User';
+import type { FacilityStatus } from '../../models/Facility';
 
 interface RegistratingUser {
   id: string;
@@ -24,8 +25,45 @@ interface ResolvedRegistrationResponse {
   user: RegistratingUser;
 }
 
+interface PendingFacilityRequest {
+  id: string;
+  name: string;
+  city: string;
+  country: string;
+  address: string;
+  description: string;
+  status: FacilityStatus;
+  active: boolean;
+  hourlyPrice: number;
+  images: string[];
+  sports: Array<{
+    id: string;
+    name: string;
+  }>;
+  employees: Array<{
+    id: string;
+    firstName: string;
+    lastName: string;
+    username: string;
+    email: string;
+    companyName: string;
+  }>;
+  createdAt: Date;
+}
+
+interface PendingFacilityRequestsResponse {
+  requests: PendingFacilityRequest[];
+}
+
+interface ResolvedFacilityRequestResponse {
+  facility: PendingFacilityRequest;
+}
+
 export type {
+  PendingFacilityRequest,
+  PendingFacilityRequestsResponse,
   RegistratingUser,
+  ResolvedFacilityRequestResponse,
   ResolvedRegistrationResponse,
   PendingRegistrationsResponse,
 };

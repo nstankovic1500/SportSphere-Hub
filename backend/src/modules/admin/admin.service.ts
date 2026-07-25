@@ -1,12 +1,38 @@
 import { Types } from 'mongoose';
 
+import { Facility, FacilityStatus, type IFacility } from '../../models/Facility';
 import { User, UserRole, UserStatus, type IUser } from '../../models/User';
 import { AppError } from '../../utils/AppError';
 import type {
+  PendingFacilityRequest,
+  PendingFacilityRequestsResponse,
   RegistratingUser,
+  ResolvedFacilityRequestResponse,
   ResolvedRegistrationResponse,
   PendingRegistrationsResponse,
 } from './admin.types';
+
+type FacilityRequestSport = {
+  _id: Types.ObjectId;
+  name: string;
+};
+
+type FacilityRequestEmployee = {
+  _id: Types.ObjectId;
+  firstName: string;
+  lastName: string;
+  username: string;
+  email: string;
+  employeeData?: {
+    companyName?: string;
+  };
+};
+
+type FacilityRequestWithRefs = IFacility & {
+  _id: Types.ObjectId;
+  sports: FacilityRequestSport[];
+  employeeIds: FacilityRequestEmployee[];
+};
 
 const createSafeUser = (
   user: IUser & { _id: { toString(): string } },
@@ -50,6 +76,74 @@ const findRegistratingUser = async (id: string) => {
   return user;
 };
 
+const toFacilityRequest = (facility: FacilityRequestWithRefs): PendingFacilityRequest => {
+  const sports = (facility.sports ?? []) as FacilityRequestSport[];
+  const employees = (facility.employeeIds ?? []) as FacilityRequestEmployee[];
+
+  return {
+    id: facility._id.toString(),
+    name: facility.name,
+    city: facility.city,
+    country: facility.country,
+    address: facility.address,
+    description: facility.description,
+    status: facility.status,
+    active: facility.active,
+    hourlyPrice: facility.hourlyPrice,
+    images: facility.images ?? [],
+    sports: sports.map((sport) => ({
+      id: sport._id.toString(),
+      name: sport.name,
+    })),
+    employees: employees.map((employee) => ({
+      id: employee._id.toString(),
+      firstName: employee.firstName,
+      lastName: employee.lastName,
+      username: employee.username,
+      email: employee.email,
+      companyName: employee.employeeData?.companyName ?? '',
+    })),
+    createdAt: facility.createdAt ?? new Date(),
+  };
+};
+
+const getFacilityWithRefs = async (id: string) => {
+  const facility = (await Facility.findById(id)
+    .populate({
+      path: 'sports',
+      select: 'name',
+    })
+    .populate({
+      path: 'employeeIds',
+      select: 'firstName lastName username email employeeData.companyName',
+    })
+    .lean()) as unknown as FacilityRequestWithRefs | null;
+
+  if (!facility) {
+    throw new AppError('Facility request not found', 404);
+  }
+
+  return facility;
+};
+
+const findPendingFacility = async (id: string) => {
+  if (!Types.ObjectId.isValid(id)) {
+    throw new AppError('Invalid facility request id', 400);
+  }
+
+  const facility = await Facility.findById(id);
+
+  if (!facility) {
+    throw new AppError('Facility request not found', 404);
+  }
+
+  if (!(facility.status === FacilityStatus.Pending)) {
+    throw new AppError('Only pending facility requests can be processed', 400);
+  }
+
+  return facility;
+};
+
 const getRegistrationRequests = async () => {
   const users = await User.find({
     status: UserStatus.Pending,
@@ -83,8 +177,59 @@ const rejectRegistrationRequest = async (id: string) => {
   } as ResolvedRegistrationResponse;
 };
 
+const getFacilityRequests = async () => {
+  const facilities = (await Facility.find({
+    status: FacilityStatus.Pending,
+  })
+    .populate({
+      path: 'sports',
+      select: 'name',
+    })
+    .populate({
+      path: 'employeeIds',
+      select: 'firstName lastName username email employeeData.companyName',
+    })
+    .sort({ createdAt: 1 })
+    .lean()) as unknown as FacilityRequestWithRefs[];
+
+  return {
+    requests: facilities.map((facility) => toFacilityRequest(facility)),
+  } as PendingFacilityRequestsResponse;
+};
+
+const approveFacilityRequest = async (id: string) => {
+  const facility = await findPendingFacility(id);
+
+  facility.status = FacilityStatus.Approved;
+  facility.active = true;
+  await facility.save();
+
+  const updatedFacility = await getFacilityWithRefs(id);
+
+  return {
+    facility: toFacilityRequest(updatedFacility),
+  } as ResolvedFacilityRequestResponse;
+};
+
+const rejectFacilityRequest = async (id: string) => {
+  const facility = await findPendingFacility(id);
+
+  facility.status = FacilityStatus.Rejected;
+  facility.active = false;
+  await facility.save();
+
+  const updatedFacility = await getFacilityWithRefs(id);
+
+  return {
+    facility: toFacilityRequest(updatedFacility),
+  } as ResolvedFacilityRequestResponse;
+};
+
 export {
+  approveFacilityRequest,
   approveRegistrationRequest,
+  getFacilityRequests,
   getRegistrationRequests,
+  rejectFacilityRequest,
   rejectRegistrationRequest,
 };
