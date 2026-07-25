@@ -1,7 +1,7 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 
 import type {
@@ -24,6 +24,7 @@ const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Frida
 })
 export class FacilityDetailsComponent {
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly formBuilder = inject(FormBuilder);
   private readonly publicService = inject(PublicService);
   private readonly athleteService = inject(AthleteService);
@@ -78,8 +79,28 @@ export class FacilityDetailsComponent {
     return this.currentUser?.role === 'athlete';
   }
 
+  get isBlockedInCurrentFacility() {
+    return !!this.facility
+      && !!this.currentUser
+      && (this.currentUser.blockedFacilities ?? []).includes(this.facility.id);
+  }
+
   getDayName(day: number) {
     return dayNames[day] ?? `Day ${day}`;
+  }
+
+  reserveFacility() {
+    if (!this.facility || !this.canReserve) {
+      return;
+    }
+
+    if (this.isBlockedInCurrentFacility) {
+      this.errorMessage =
+        'You are blocked in this facility and cannot create new reservations or training appointments.';
+      return;
+    }
+
+    void this.router.navigate(['/athlete/facilities', this.facility.id, 'reserve']);
   }
 
   submitReview() {

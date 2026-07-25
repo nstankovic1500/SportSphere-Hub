@@ -338,6 +338,20 @@ const getAthlete = async (athleteId: string) => {
   return user;
 };
 
+const ensureAthleteNotBlockedInFacility = async (
+  athleteId: Types.ObjectId | string,
+  facilityId: Types.ObjectId,
+) => {
+  const blockedAthlete = await User.exists({
+    _id: athleteId,
+    blockedFacilities: facilityId,
+  });
+
+  if (blockedAthlete) {
+    throw new AppError('You are blocked in this facility', 403);
+  }
+};
+
 const getPopulatedReservation = async (
   reservationId: Types.ObjectId | string,
 ) => {
@@ -629,10 +643,7 @@ const createReservation = async (
   }
 
   const resource = await getActiveResourceWithFacility(resourceId);
-
-  if ((athlete.blockedFacilities ?? []).some((facilityId) => facilityId.toString() === resource.facilityId._id.toString())) {
-    throw new AppError('You are blocked in this facility', 403);
-  }
+  await ensureAthleteNotBlockedInFacility(athlete._id, resource.facilityId._id);
 
   if (startTime.getTime() <= new Date().getTime()) {
     throw new AppError('Reservation must be in the future', 400);
@@ -719,10 +730,7 @@ const createTrainingAppointment = async (
   }
 
   const trainer = await getTrainerWithFacility(trainerId);
-
-  if ((athlete.blockedFacilities ?? []).some((facilityId) => facilityId.toString() === trainer.facilityId._id.toString())) {
-    throw new AppError('You are blocked in this facility', 403);
-  }
+  await ensureAthleteNotBlockedInFacility(athlete._id, trainer.facilityId._id);
 
   if (startTime.getTime() <= new Date().getTime()) {
     throw new AppError('Training appointment must be in the future', 400);

@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
+import { HttpParams } from '@angular/common/http';
 
 import { environment } from '../../../environments/environment';
 import type {
@@ -7,6 +8,8 @@ import type {
   EmployeeCreatedFacilityApiResponse,
   EmployeeCreatedResourceApiResponse,
   EmployeeCreatedTrainerApiResponse,
+  EmployeeAttendanceApiResponse,
+  EmployeeAttendanceUpdateApiResponse,
   EmployeeFacilityApiResponse,
   EmployeeFacilitiesApiResponse,
   EmployeeProfileApiResponse,
@@ -17,6 +20,7 @@ import type {
   CreateEmployeeFacilityRequest,
   CreateEmployeeResourceRequest,
   CreateEmployeeTrainerRequest,
+  EmployeeAttendanceType,
   UpdateEmployeeFacilityRequest,
   UpdateEmployeeProfileRequest,
   UpdateEmployeeResourceRequest,
@@ -57,6 +61,23 @@ export class EmployeeService {
     );
   }
 
+  getAttendance(facilityId: string, filters: { date?: string; type?: EmployeeAttendanceType }) {
+    let params = new HttpParams();
+
+    if (filters.date) {
+      params = params.set('date', filters.date);
+    }
+
+    if (filters.type) {
+      params = params.set('type', filters.type);
+    }
+
+    return this.http.get<EmployeeAttendanceApiResponse>(
+      `${environment.apiUrl}/employees/facilities/${facilityId}/attendance`,
+      { params },
+    );
+  }
+
   updateFacility(facilityId: string, payload: UpdateEmployeeFacilityRequest) {
     return this.http.patch<EmployeeFacilityApiResponse>(
       `${environment.apiUrl}/employees/facilities/${facilityId}`,
@@ -90,6 +111,20 @@ export class EmployeeService {
     );
   }
 
+  markReservationAttended(reservationId: string) {
+    return this.http.patch<EmployeeAttendanceUpdateApiResponse>(
+      `${environment.apiUrl}/employees/reservations/${reservationId}/attended`,
+      {},
+    );
+  }
+
+  markReservationNoShow(reservationId: string) {
+    return this.http.patch<EmployeeAttendanceUpdateApiResponse>(
+      `${environment.apiUrl}/employees/reservations/${reservationId}/no-show`,
+      {},
+    );
+  }
+
   getTrainers(facilityId: string) {
     return this.http.get<EmployeeTrainersApiResponse>(
       `${environment.apiUrl}/employees/facilities/${facilityId}/trainers`,
@@ -113,6 +148,20 @@ export class EmployeeService {
   deleteTrainer(trainerId: string) {
     return this.http.delete<ApiResponse<Record<string, never>>>(
       `${environment.apiUrl}/employees/trainers/${trainerId}`,
+    );
+  }
+
+  markTrainingCompleted(appointmentId: string) {
+    return this.http.patch<EmployeeAttendanceUpdateApiResponse>(
+      `${environment.apiUrl}/employees/training-appointments/${appointmentId}/completed`,
+      {},
+    );
+  }
+
+  markTrainingNoShow(appointmentId: string) {
+    return this.http.patch<EmployeeAttendanceUpdateApiResponse>(
+      `${environment.apiUrl}/employees/training-appointments/${appointmentId}/no-show`,
+      {},
     );
   }
 }

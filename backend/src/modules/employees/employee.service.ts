@@ -79,6 +79,7 @@ type AttendanceAppointment = IAppointment & {
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const timePattern = /^([01]\d|2[0-3]):([0-5]\d)$/;
 const ATTENDANCE_PERIOD = 10 * 60 * 1000;
+const ATTENDANCE_OFFSET = 2 * 60 * 60 * 1000;
 
 const validateObjectId = (value: string, fieldName: string) => {
   if (!Types.ObjectId.isValid(value)) {
@@ -252,12 +253,12 @@ const parseDateOnly = (date: string) => {
   return parsedDate;
 };
 
-const attencanceRecordEnabled = (
+const canRecordAttendance = (
   startTime: Date,
   status: ReservationStatus | AppointmentStatus,
 ) => {
   const now = new Date().getTime();
-  const start = startTime.getTime();
+  const start = startTime.getTime() - ATTENDANCE_OFFSET;
   const allowedStatuses = new Set([
     ReservationStatus.Pending,
     ReservationStatus.Confirmed,
@@ -281,7 +282,7 @@ const toAttendanceReservationItem = (reservation: AttendanceReservation): Attend
   startTime: reservation.startTime,
   endTime: reservation.endTime,
   status: reservation.status,
-  attencanceRecordEnabled: attencanceRecordEnabled(reservation.startTime, reservation.status),
+  canRecordAttendance: canRecordAttendance(reservation.startTime, reservation.status),
 });
 
 const toAttendanceAppointmentItem = (appointment: AttendanceAppointment): AttendanceItem => ({
@@ -297,12 +298,12 @@ const toAttendanceAppointmentItem = (appointment: AttendanceAppointment): Attend
   startTime: appointment.startTime,
   endTime: appointment.endTime,
   status: appointment.status,
-  attencanceRecordEnabled: attencanceRecordEnabled(appointment.startTime, appointment.status),
+  canRecordAttendance: canRecordAttendance(appointment.startTime, appointment.status),
 });
 
 const ensureAttendanceWindow = (startTime: Date) => {
   const now = new Date().getTime();
-  const start = startTime.getTime();
+  const start = startTime.getTime() - ATTENDANCE_OFFSET;
 
   if (now < start || now > start + ATTENDANCE_PERIOD) {
     throw new AppError('Attendance can only be recorded from startTime until 10 minutes after startTime', 400);

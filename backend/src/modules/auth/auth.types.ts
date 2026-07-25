@@ -35,6 +35,7 @@ interface LoginUser {
   role: UserRole;
   status: UserStatus;
   profileImage?: string;
+  blockedFacilities?: string[];
 }
 
 interface RegisteredUser {

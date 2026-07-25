@@ -14,9 +14,9 @@
         <p>{{ facility.hourlyPrice }} per hour</p>
         <p>{{ likesCount }} likes · {{ dislikesCount }} dislikes</p>
         @if (canReserve) {
-          <a class="reserve-link" [routerLink]="['/athlete/facilities', facility.id, 'reserve']">
+          <button type="button" class="reserve-link" (click)="reserveFacility()">
             Reserve
-          </a>
+          </button>
         }
       </div>
       <div class="sports-tags">

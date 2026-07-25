@@ -21,6 +21,8 @@ import type {
 } from './ad.model';
 import type {
   CreateEmployeeFacilityRequest,
+  EmployeeAttendanceResponse,
+  EmployeeAttendanceUpdateResponse,
   CreateEmployeeResourceRequest,
   EmployeeFacility,
   EmployeeProfile,
@@ -80,6 +82,8 @@ export type EmployeeResourcesApiResponse = ApiResponse<{ resources: EmployeeReso
 export type EmployeeCreatedResourceApiResponse = ApiResponse<{ resource: EmployeeResource }>;
 export type EmployeeTrainersApiResponse = ApiResponse<{ trainers: EmployeeTrainer[] }>;
 export type EmployeeCreatedTrainerApiResponse = ApiResponse<{ trainer: EmployeeTrainer }>;
+export type EmployeeAttendanceApiResponse = ApiResponse<EmployeeAttendanceResponse>;
+export type EmployeeAttendanceUpdateApiResponse = ApiResponse<EmployeeAttendanceUpdateResponse>;
 export type PublicTrainersApiResponse = ApiResponse<{ trainers: TrainerListItem[] }>;
 export type PublicTrainerApiResponse = ApiResponse<{ trainer: TrainerDetails }>;
 export type TrainerAvailabilityApiResponse = ApiResponse<{ availability: TrainerAvailability }>;

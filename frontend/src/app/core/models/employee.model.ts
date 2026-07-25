@@ -130,3 +130,37 @@ export interface CreateEmployeeTrainerRequest {
 export interface UpdateEmployeeTrainerRequest extends CreateEmployeeTrainerRequest {
   active: boolean;
 }
+
+export type EmployeeAttendanceType = 'all' | 'reservations' | 'trainings';
+
+export interface EmployeeAttendanceItem {
+  id: string;
+  type: 'reservation' | 'training';
+  athleteId: string;
+  athleteName: string;
+  resourceName: string | null;
+  trainerName: string | null;
+  sportName: string;
+  startTime: string;
+  endTime: string;
+  status:
+    | 'pending'
+    | 'confirmed'
+    | 'cancelled'
+    | 'attended'
+    | 'no_show'
+    | 'scheduled'
+    | 'completed';
+  canRecordAttendance: boolean;
+}
+
+export interface EmployeeAttendanceResponse {
+  items: EmployeeAttendanceItem[];
+}
+
+export interface EmployeeAttendanceUpdateResponse {
+  item: EmployeeAttendanceItem;
+  totalNoShows?: number;
+  allowedNoShows?: number;
+  athleteBlockedInFacility?: boolean;
+}

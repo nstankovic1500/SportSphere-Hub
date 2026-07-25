@@ -19,7 +19,7 @@ interface AttendanceItem {
   startTime: Date;
   endTime: Date;
   status: ReservationStatus | AppointmentStatus;
-  attencanceRecordEnabled: boolean;
+  canRecordAttendance: boolean;
 }
 
 interface AttendanceUpdateResult {

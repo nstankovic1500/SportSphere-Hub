@@ -10,6 +10,7 @@ export interface EmployeeData {
 }
 
 export interface User {
+  id?: string;
   username: string;
   firstName: string;
   lastName: string;
@@ -19,6 +20,7 @@ export interface User {
   favoriteSports?: string[];
   role: UserRole;
   status: UserStatus;
+  blockedFacilities?: string[];
   employeeData?: EmployeeData;
   createdAt?: string;
 }

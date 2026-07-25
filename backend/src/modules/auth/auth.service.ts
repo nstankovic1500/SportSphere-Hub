@@ -31,6 +31,7 @@ const CreateUser = (user: IUser & { _id: { toString(): string } }): LoginUser =>
     role: user.role,
     status: user.status,
     profileImage: user.profileImage,
+    blockedFacilities: (user.blockedFacilities ?? []).map((facilityId) => facilityId.toString()),
   };
 };
 

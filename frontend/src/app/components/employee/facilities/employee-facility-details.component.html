@@ -8,6 +8,7 @@
       <a routerLink="/employee/facilities">Back to facilities</a>
       @if (facility) {
         <a [routerLink]="['/employee/facilities', facility.id, 'edit']">Edit Facility</a>
+        <a [routerLink]="['/employee/facilities', facility.id, 'attendance']">Reservations and Trainings</a>
         <a [routerLink]="['/employee/facilities', facility.id, 'resources']">Manage Resources</a>
         <a [routerLink]="['/employee/facilities', facility.id, 'trainers']">Manage Trainers</a>
       }

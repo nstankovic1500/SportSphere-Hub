@@ -1,0 +1,119 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>Reservations and Trainings</h1>
+      <p>Review attendance for {{ selectedFacilityName }} and record arrivals within the allowed time window.</p>
+    </div>
+    <div class="header-links">
+      <a [routerLink]="['/employee/facilities', facilityId]">Back to facility</a>
+      <a routerLink="/employee/facilities">My facilities</a>
+    </div>
+  </header>
+
+  <section class="panel filters-panel">
+    <form [formGroup]="filterForm" class="filters">
+      <label>
+        <span>Date</span>
+        <input type="date" formControlName="date" />
+      </label>
+
+      <label>
+        <span>Type</span>
+        <select formControlName="type">
+          <option value="all">All</option>
+          <option value="reservations">Reservations</option>
+          <option value="trainings">Trainings</option>
+        </select>
+      </label>
+    </form>
+  </section>
+
+  @if (successMessage) {
+    <p class="state-message success">{{ successMessage }}</p>
+  }
+
+  @if (blockingMessage) {
+    <p class="state-message warning">{{ blockingMessage }}</p>
+  }
+
+  @if (isLoadingFacility || isLoadingAttendance) {
+    <p class="state-message">Loading attendance...</p>
+  } @else if (errorMessage) {
+    <p class="state-message error">{{ errorMessage }}</p>
+  } @else if (items.length === 0) {
+    <p class="state-message">No attendance items found for the selected filters.</p>
+  } @else {
+    <section class="panel table-panel">
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Athlete</th>
+              <th>Resource or Trainer</th>
+              <th>Sport</th>
+              <th>Start</th>
+              <th>End</th>
+              <th>Current Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of items; track item.id) {
+              <tr>
+                <td>{{ getTypeLabel(item) }}</td>
+                <td>{{ item.athleteName }}</td>
+                <td>{{ getActorName(item) }}</td>
+                <td>{{ item.sportName }}</td>
+                <td>{{ item.startTime | date: 'medium' }}</td>
+                <td>{{ item.endTime | date: 'medium' }}</td>
+                <td>
+                  <span class="status-badge" [class.closed]="!item.canRecordAttendance">
+                    {{ item.status }}
+                  </span>
+                </td>
+                <td>
+                  @if (item.canRecordAttendance) {
+                    <div class="action-buttons">
+                      @if (item.type === 'reservation') {
+                        <button
+                          type="button"
+                          (click)="markAttended(item)"
+                          [disabled]="isProcessing(item.id)">
+                          {{ isProcessing(item.id) ? 'Saving...' : 'Attended' }}
+                        </button>
+                        <button
+                          type="button"
+                          class="danger-button"
+                          (click)="markReservationNoShow(item)"
+                          [disabled]="isProcessing(item.id)">
+                          {{ isProcessing(item.id) ? 'Saving...' : 'No Show' }}
+                        </button>
+                      } @else {
+                        <button
+                          type="button"
+                          (click)="markCompleted(item)"
+                          [disabled]="isProcessing(item.id)">
+                          {{ isProcessing(item.id) ? 'Saving...' : 'Completed' }}
+                        </button>
+                        <button
+                          type="button"
+                          class="danger-button"
+                          (click)="markTrainingNoShow(item)"
+                          [disabled]="isProcessing(item.id)">
+                          {{ isProcessing(item.id) ? 'Saving...' : 'No Show' }}
+                        </button>
+                      }
+                    </div>
+                  } @else {
+                    <span class="muted">No actions available</span>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  }
+</section>
