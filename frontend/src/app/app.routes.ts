@@ -30,6 +30,8 @@ import { EmployeeResourcesComponent } from './components/employee/resources/empl
 import { EmployeeResourceFormComponent } from './components/employee/resources/employee-resource-form.component';
 import { EmployeePromotionsComponent } from './components/employee/promotions/employee-promotions.component';
 import { PromotionFormComponent } from './components/employee/promotions/promotion-form.component';
+import { EmployeeProductsComponent } from './components/employee/products/employee-products.component';
+import { ProductFormComponent } from './components/employee/products/product-form.component';
 import { EmployeeTrainersComponent } from './components/employee/trainers/employee-trainers.component';
 import { TrainerFormComponent } from './components/employee/trainers/trainer-form.component';
 
@@ -205,6 +207,30 @@ export const routes: Routes = [
   {
     path: 'employee/facilities/:facilityId/promotions/:promotionId/edit',
     component: PromotionFormComponent,
+    canActivate: [authGuard],
+    data: {
+      roles: ['employee'],
+    },
+  },
+  {
+    path: 'employee/facilities/:facilityId/products',
+    component: EmployeeProductsComponent,
+    canActivate: [authGuard],
+    data: {
+      roles: ['employee'],
+    },
+  },
+  {
+    path: 'employee/facilities/:facilityId/products/new',
+    component: ProductFormComponent,
+    canActivate: [authGuard],
+    data: {
+      roles: ['employee'],
+    },
+  },
+  {
+    path: 'employee/facilities/:facilityId/products/:productId/edit',
+    component: ProductFormComponent,
     canActivate: [authGuard],
     data: {
       roles: ['employee'],

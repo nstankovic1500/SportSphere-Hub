@@ -6,6 +6,8 @@ import { environment } from '../../../environments/environment';
 import type {
   ApiResponse,
   EmployeeCreatedFacilityApiResponse,
+  EmployeeProductApiResponse,
+  EmployeeProductsApiResponse,
   EmployeePromotionApiResponse,
   EmployeePromotionsApiResponse,
   EmployeeCreatedResourceApiResponse,
@@ -20,6 +22,7 @@ import type {
 } from '../models/api-response.model';
 import type {
   CreateEmployeeFacilityRequest,
+  EmployeeProductRequest,
   CreateEmployeePromotionRequest,
   CreateEmployeeResourceRequest,
   CreateEmployeeTrainerRequest,
@@ -82,6 +85,19 @@ export class EmployeeService {
     );
   }
 
+  getProducts(facilityId: string, active?: boolean) {
+    let params = new HttpParams();
+
+    if (typeof active === 'boolean') {
+      params = params.set('active', String(active));
+    }
+
+    return this.http.get<EmployeeProductsApiResponse>(
+      `${environment.apiUrl}/employees/facilities/${facilityId}/products`,
+      { params },
+    );
+  }
+
   getPromotions(facilityId: string) {
     return this.http.get<EmployeePromotionsApiResponse>(
       `${environment.apiUrl}/employees/facilities/${facilityId}/promotions`,
@@ -102,6 +118,13 @@ export class EmployeeService {
     );
   }
 
+  createProduct(facilityId: string, payload: EmployeeProductRequest) {
+    return this.http.post<EmployeeProductApiResponse>(
+      `${environment.apiUrl}/employees/facilities/${facilityId}/products`,
+      payload,
+    );
+  }
+
   updatePromotion(promotionId: string, payload: UpdateEmployeePromotionRequest) {
     return this.http.patch<EmployeePromotionApiResponse>(
       `${environment.apiUrl}/employees/promotions/${promotionId}`,
@@ -109,9 +132,22 @@ export class EmployeeService {
     );
   }
 
+  updateProduct(productId: string, payload: EmployeeProductRequest) {
+    return this.http.patch<EmployeeProductApiResponse>(
+      `${environment.apiUrl}/employees/products/${productId}`,
+      payload,
+    );
+  }
+
   deletePromotion(promotionId: string) {
     return this.http.delete<ApiResponse<Record<string, never>>>(
       `${environment.apiUrl}/employees/promotions/${promotionId}`,
+    );
+  }
+
+  deleteProduct(productId: string) {
+    return this.http.delete<ApiResponse<Record<string, never>>>(
+      `${environment.apiUrl}/employees/products/${productId}`,
     );
   }
 

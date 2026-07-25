@@ -12,7 +12,6 @@ import type {
   CreateEmployeeResourceBody,
   CreateEmployeeTrainerBody,
   UpdateEmployeeFacilityBody,
-  EmployeeProductBody,
   UpdateEmployeePromotionBody,
   UpdateEmployeeProfileBody,
   UpdateEmployeeResourceBody,

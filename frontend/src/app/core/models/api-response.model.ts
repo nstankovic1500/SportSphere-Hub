@@ -23,6 +23,7 @@ import type {
   CreateEmployeeFacilityRequest,
   EmployeeAttendanceResponse,
   EmployeeAttendanceUpdateResponse,
+  EmployeeProduct,
   EmployeePromotion,
   CreateEmployeeResourceRequest,
   EmployeeFacility,
@@ -85,6 +86,8 @@ export type EmployeeTrainersApiResponse = ApiResponse<{ trainers: EmployeeTraine
 export type EmployeeCreatedTrainerApiResponse = ApiResponse<{ trainer: EmployeeTrainer }>;
 export type EmployeeAttendanceApiResponse = ApiResponse<EmployeeAttendanceResponse>;
 export type EmployeeAttendanceUpdateApiResponse = ApiResponse<EmployeeAttendanceUpdateResponse>;
+export type EmployeeProductsApiResponse = ApiResponse<{ products: EmployeeProduct[] }>;
+export type EmployeeProductApiResponse = ApiResponse<{ product: EmployeeProduct }>;
 export type EmployeePromotionsApiResponse = ApiResponse<{ promotions: EmployeePromotion[] }>;
 export type EmployeePromotionApiResponse = ApiResponse<{ promotion: EmployeePromotion }>;
 export type PublicTrainersApiResponse = ApiResponse<{ trainers: TrainerListItem[] }>;

@@ -189,3 +189,24 @@ export interface CreateEmployeePromotionRequest {
 export interface UpdateEmployeePromotionRequest extends CreateEmployeePromotionRequest {
   active: boolean;
 }
+
+export interface EmployeeProduct {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  stock: number;
+  category: string;
+  image: string | null;
+  active: boolean;
+}
+
+export interface EmployeeProductRequest {
+  name: string;
+  description: string;
+  price: number;
+  stock: number;
+  category: string;
+  image: string;
+  active?: boolean;
+}

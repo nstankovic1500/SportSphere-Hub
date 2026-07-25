@@ -1,0 +1,93 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>{{ isEditMode ? 'Edit Product' : 'Create Product' }}</h1>
+      <p>{{ isEditMode ? 'Update the selected product.' : 'Add a new product for this facility.' }}</p>
+    </div>
+    <div class="header-links">
+      <a [routerLink]="['/employee/facilities', facilityId, 'products']">Back to products</a>
+      <a [routerLink]="['/employee/facilities', facilityId]">Facility details</a>
+    </div>
+  </header>
+
+  @if (isLoading) {
+    <p class="state-message">Loading product form...</p>
+  } @else {
+    <section class="panel">
+      @if (successMessage) { <p class="message success">{{ successMessage }}</p> }
+      @if (errorMessage) { <p class="message error">{{ errorMessage }}</p> }
+
+      <form [formGroup]="productForm" (ngSubmit)="submit()">
+        <div class="form-grid">
+          <div class="field">
+            <label for="name">Name</label>
+            <input id="name" type="text" formControlName="name" />
+            @if (productForm.controls.name.touched && productForm.controls.name.hasError('required')) {
+              <p class="field-error">Name is required.</p>
+            }
+          </div>
+
+          <div class="field">
+            <label for="category">Category</label>
+            <input id="category" type="text" formControlName="category" />
+            @if (productForm.controls.category.touched && productForm.controls.category.hasError('required')) {
+              <p class="field-error">Category is required.</p>
+            }
+          </div>
+
+          <div class="field field-wide">
+            <label for="description">Description</label>
+            <textarea id="description" rows="4" formControlName="description"></textarea>
+            @if (productForm.controls.description.touched && productForm.controls.description.hasError('required')) {
+              <p class="field-error">Description is required.</p>
+            }
+            @if (productForm.controls.description.touched && productForm.controls.description.hasError('maxlength')) {
+              <p class="field-error">Description can have at most 500 characters.</p>
+            }
+          </div>
+
+          <div class="field">
+            <label for="price">Price</label>
+            <input id="price" type="number" min="0" step="0.01" formControlName="price" />
+            @if (productForm.controls.price.touched && productForm.controls.price.hasError('required')) {
+              <p class="field-error">Price is required.</p>
+            }
+            @if (productForm.controls.price.touched && productForm.controls.price.hasError('min')) {
+              <p class="field-error">Price must be 0 or greater.</p>
+            }
+          </div>
+
+          <div class="field">
+            <label for="stock">Stock</label>
+            <input id="stock" type="number" min="0" step="1" formControlName="stock" />
+            @if (productForm.controls.stock.touched && productForm.controls.stock.hasError('required')) {
+              <p class="field-error">Stock is required.</p>
+            }
+            @if (productForm.controls.stock.touched && productForm.controls.stock.hasError('min')) {
+              <p class="field-error">Stock must be 0 or greater.</p>
+            }
+            @if (productForm.controls.stock.touched && productForm.controls.stock.hasError('pattern')) {
+              <p class="field-error">Stock must be a whole number.</p>
+            }
+          </div>
+
+          <div class="field field-wide">
+            <label for="image">Image</label>
+            <input id="image" type="text" formControlName="image" />
+          </div>
+
+          @if (isEditMode) {
+            <label class="checkbox-field">
+              <input type="checkbox" formControlName="active" />
+              <span>Active</span>
+            </label>
+          }
+        </div>
+
+        <button type="submit" [disabled]="isSubmitting">
+          {{ isSubmitting ? 'Saving...' : (isEditMode ? 'Save Changes' : 'Create Product') }}
+        </button>
+      </form>
+    </section>
+  }
+</section>

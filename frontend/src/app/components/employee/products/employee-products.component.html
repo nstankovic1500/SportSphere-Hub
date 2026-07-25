@@ -1,0 +1,83 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>Products</h1>
+      <p>Manage products for the selected facility.</p>
+    </div>
+    <div class="header-links">
+      <a [routerLink]="['/employee/facilities', facilityId]">Back to facility</a>
+      <a [routerLink]="['/employee/facilities', facilityId, 'products', 'new']">Create Product</a>
+    </div>
+  </header>
+
+  @if (successMessage) {
+    <p class="message success">{{ successMessage }}</p>
+  }
+
+  <section class="panel filter-panel">
+    <form [formGroup]="filterForm" class="filter-form">
+      <div class="field">
+        <label for="active">Active Filter</label>
+        <select id="active" formControlName="active">
+          <option value="all">All</option>
+          <option value="true">Active only</option>
+          <option value="false">Inactive only</option>
+        </select>
+      </div>
+    </form>
+  </section>
+
+  @if (isLoading) {
+    <p class="state-message">Loading products...</p>
+  } @else if (errorMessage && products.length === 0) {
+    <p class="state-message error">{{ errorMessage }}</p>
+  } @else if (products.length === 0) {
+    <section class="panel">
+      <p class="state-message">No products found.</p>
+    </section>
+  } @else {
+    @if (errorMessage) {
+      <p class="message error">{{ errorMessage }}</p>
+    }
+
+    <section class="panel">
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Category</th>
+              <th>Description</th>
+              <th>Price</th>
+              <th>Stock</th>
+              <th>Active</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (product of products; track product.id) {
+              <tr>
+                <td>{{ product.name }}</td>
+                <td>{{ product.category }}</td>
+                <td>{{ product.description }}</td>
+                <td>{{ product.price }}</td>
+                <td>{{ product.stock }}</td>
+                <td>{{ getActiveLabel(product) }}</td>
+                <td class="actions-cell">
+                  <a [routerLink]="['/employee/facilities', facilityId, 'products', product.id, 'edit']">Edit</a>
+                  <button
+                    type="button"
+                    class="secondary-button"
+                    [disabled]="isDeleting(product.id)"
+                    (click)="deleteProduct(product)">
+                    {{ isDeleting(product.id) ? 'Deleting...' : 'Delete' }}
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  }
+</section>
