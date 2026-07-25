@@ -12,6 +12,7 @@ import type {
   CreateEmployeeResourceBody,
   CreateEmployeeTrainerBody,
   UpdateEmployeeFacilityBody,
+  UpdateEmployeeOrderStatusBody,
   UpdateEmployeePromotionBody,
   UpdateEmployeeProfileBody,
   UpdateEmployeeResourceBody,
@@ -30,6 +31,7 @@ import {
   getAttendance as getAttendanceService,
   getFacilities as getFacilitiesService,
   getFacility as getFacilityService,
+  getFacilityOrders as getFacilityOrdersService,
   getFacilityProducts as getFacilityProductsService,
   getFacilityPromotions as getFacilityPromotionsService,
   getFacilityResources as getFacilityResourcesService,
@@ -38,6 +40,7 @@ import {
   markTrainingAttendance as markTrainingAttendanceService,
   getProfile as getProfileService,
   updateFacility as updateFacilityService,
+  updateOrderStatus as updateOrderStatusService,
   updateProduct as updateProductService,
   updatePromotion as updatePromotionService,
   updateProfile as updateProfileService,
@@ -123,6 +126,17 @@ const getFacilityProducts = asyncHandler(async (req: AuthenticatedRequest, res: 
   });
 });
 
+const getFacilityOrders = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const employeeId = String(req.auth?.userId);
+  const facilityId = String(req.params.facilityId);
+  const data = await getFacilityOrdersService(employeeId, facilityId);
+
+  res.status(200).json({
+    success: true,
+    data,
+  });
+});
+
 const createFacility = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const employeeId = String(req.auth?.userId);
   const body = req.body as CreateEmployeeFacilityBody;
@@ -187,6 +201,18 @@ const updateProduct = asyncHandler(async (req: AuthenticatedRequest, res: Respon
   const productId = String(req.params.productId);
   const body = req.body as EmployeeProductBody;
   const data = await updateProductService(employeeId, productId, body);
+
+  res.status(200).json({
+    success: true,
+    data,
+  });
+});
+
+const updateOrderStatus = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const employeeId = String(req.auth?.userId);
+  const orderId = String(req.params.id);
+  const body = req.body as UpdateEmployeeOrderStatusBody;
+  const data = await updateOrderStatusService(employeeId, orderId, body);
 
   res.status(200).json({
     success: true,
@@ -385,6 +411,7 @@ export {
   getAttendance,
   getFacilities,
   getFacility,
+  getFacilityOrders,
   getFacilityProducts,
   getFacilityPromotions,
   getFacilityResources,
@@ -395,6 +422,7 @@ export {
   markTrainingCompleted,
   markTrainingNoShow,
   updateFacility,
+  updateOrderStatus,
   updateProduct,
   updatePromotion,
   updateProfile,

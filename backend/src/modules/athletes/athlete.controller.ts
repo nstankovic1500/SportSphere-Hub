@@ -3,19 +3,27 @@ import type { Response } from 'express';
 import { asyncHandler } from '../../utils/asyncHandler';
 import type {
   AuthenticatedAthleteRequest,
+  CartItemBody,
   CreateReservationBody,
   CreateTrainingAppointmentBody,
+  UpdateCartItemBody,
   UpdateAthleteProfileBody,
 } from './athlete.types';
 import {
+  addCartItem as addCartItemService,
+  checkoutOrders as checkoutOrdersService,
   cancelTrainingAppointment as cancelTrainingAppointmentService,
   cancelReservation as cancelReservationService,
   createTrainingAppointment as createTrainingAppointmentService,
   createReservation as createReservationService,
+  deleteCartItem as deleteCartItemService,
+  getCart as getCartService,
+  getOrders as getOrdersService,
   getProfile as getProfileService,
   getReservations as getReservationsService,
   getResourceAvailability as getResourceAvailabilityService,
   getTrainingAppointments as getTrainingAppointmentsService,
+  updateCartItem as updateCartItemService,
   updateProfile as updateProfileService,
 } from './athlete.service';
 
@@ -83,9 +91,73 @@ const createReservation = asyncHandler(async (req: AuthenticatedAthleteRequest, 
   });
 });
 
+const getCart = asyncHandler(async (req: AuthenticatedAthleteRequest, res: Response) => {
+  const athleteId = String(req.auth?.userId);
+  const data = await getCartService(athleteId);
+
+  res.status(200).json({
+    success: true,
+    data,
+  });
+});
+
+const addCartItem = asyncHandler(async (req: AuthenticatedAthleteRequest, res: Response) => {
+  const athleteId = String(req.auth?.userId);
+  const body = req.body as CartItemBody;
+  const data = await addCartItemService(athleteId, body);
+
+  res.status(201).json({
+    success: true,
+    data,
+  });
+});
+
+const updateCartItem = asyncHandler(async (req: AuthenticatedAthleteRequest, res: Response) => {
+  const athleteId = String(req.auth?.userId);
+  const itemId = String(req.params.id);
+  const body = req.body as UpdateCartItemBody;
+  const data = await updateCartItemService(athleteId, itemId, body);
+
+  res.status(200).json({
+    success: true,
+    data,
+  });
+});
+
+const deleteCartItem = asyncHandler(async (req: AuthenticatedAthleteRequest, res: Response) => {
+  const athleteId = String(req.auth?.userId);
+  const itemId = String(req.params.id);
+  const data = await deleteCartItemService(athleteId, itemId);
+
+  res.status(200).json({
+    success: true,
+    data,
+  });
+});
+
+const checkoutOrders = asyncHandler(async (req: AuthenticatedAthleteRequest, res: Response) => {
+  const athleteId = String(req.auth?.userId);
+  const data = await checkoutOrdersService(athleteId);
+
+  res.status(201).json({
+    success: true,
+    data,
+  });
+});
+
 const getTrainingAppointments = asyncHandler(async (req: AuthenticatedAthleteRequest, res: Response) => {
   const athleteId = String(req.auth?.userId);
   const data = await getTrainingAppointmentsService(athleteId);
+
+  res.status(200).json({
+    success: true,
+    data,
+  });
+});
+
+const getOrders = asyncHandler(async (req: AuthenticatedAthleteRequest, res: Response) => {
+  const athleteId = String(req.auth?.userId);
+  const data = await getOrdersService(athleteId);
 
   res.status(200).json({
     success: true,
@@ -116,13 +188,19 @@ const cancelTrainingAppointment = asyncHandler(async (req: AuthenticatedAthleteR
 });
 
 export {
+  addCartItem,
   cancelTrainingAppointment,
   cancelReservation,
+  checkoutOrders,
   createTrainingAppointment,
   createReservation,
+  deleteCartItem,
+  getCart,
+  getOrders,
   getProfile,
   getResourceAvailability,
   getReservations,
   getTrainingAppointments,
+  updateCartItem,
   updateProfile,
 };

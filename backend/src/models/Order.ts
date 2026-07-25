@@ -1,9 +1,9 @@
 import { Schema, model, type Types } from 'mongoose';
 
 enum OrderStatus {
-  Ordered = 'ordered',
-  Accepted = 'accepted',
-  PickedUp = 'picked_up',
+  Pending = 'pending',
+  Processing = 'processing',
+  Completed = 'completed',
   Cancelled = 'cancelled',
 }
 
@@ -69,6 +69,6 @@ const orderSchema = new Schema<IOrder>(
   },
 );
 
-const Order = model<IOrder>('Order', orderSchema);
+const Order = model<IOrder>('order', orderSchema);
 
 export { Order, OrderStatus, type IOrder, type IOrderItem };

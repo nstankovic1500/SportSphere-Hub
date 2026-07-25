@@ -16,6 +16,7 @@ import {
   getAttendance,
   getFacilities,
   getFacility,
+  getFacilityOrders,
   getFacilityProducts,
   getFacilityPromotions,
   getFacilityResources,
@@ -26,6 +27,7 @@ import {
   markTrainingCompleted,
   markTrainingNoShow,
   updateFacility,
+  updateOrderStatus,
   updateProduct,
   updatePromotion,
   updateProfile,
@@ -45,6 +47,7 @@ employeeRouter.post('/facilities', createFacility);
 employeeRouter.get('/facilities/:facilityId', getFacility);
 employeeRouter.patch('/facilities/:facilityId', updateFacility);
 employeeRouter.get('/facilities/:facilityId/attendance', getAttendance);
+employeeRouter.get('/facilities/:facilityId/orders', getFacilityOrders);
 employeeRouter.get('/facilities/:facilityId/products', getFacilityProducts);
 employeeRouter.post('/facilities/:facilityId/products', createProduct);
 employeeRouter.get('/facilities/:facilityId/promotions', getFacilityPromotions);
@@ -54,6 +57,7 @@ employeeRouter.post('/facilities/:facilityId/resources', createResource);
 employeeRouter.get('/facilities/:facilityId/trainers', getFacilityTrainers);
 employeeRouter.post('/facilities/:facilityId/trainers', createTrainer);
 employeeRouter.patch('/products/:productId', updateProduct);
+employeeRouter.patch('/orders/:id/status', updateOrderStatus);
 employeeRouter.delete('/products/:productId', deleteProduct);
 employeeRouter.patch('/promotions/:promotionId', updatePromotion);
 employeeRouter.delete('/promotions/:promotionId', deletePromotion);

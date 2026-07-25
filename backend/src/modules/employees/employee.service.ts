@@ -23,12 +23,14 @@ import type {
   CreateEmployeeResourceBody,
   CreateEmployeeTrainerBody,
   EmployeeFacility,
+  EmployeeOrder,
   EmployeeProfile,
   EmployeeProduct,
   EmployeePromotion,
   EmployeeResource,
   EmployeeTrainer,
   UpdateEmployeeFacilityBody,
+  UpdateEmployeeOrderStatusBody,
   UpdateEmployeePromotionBody,
   UpdateEmployeeProfileBody,
   UpdateEmployeeResourceBody,
@@ -91,6 +93,28 @@ type AttendanceAppointment = IAppointment & {
     lastName: string;
   } | null;
   sportId: PopulatedSport | null;
+};
+
+type EmployeeOrderDocument = {
+  _id: Types.ObjectId;
+  athleteId: {
+    _id: Types.ObjectId;
+    firstName: string;
+    lastName: string;
+  };
+  facilityId: {
+    _id: Types.ObjectId;
+    name: string;
+  };
+  items: Array<{
+    productId: Types.ObjectId;
+    name: string;
+    quantity: number;
+    priceAtPurchase: number;
+  }>;
+  totalPrice: number;
+  status: OrderStatus;
+  createdAt?: Date;
 };
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -238,6 +262,23 @@ const toEmployeeProduct = (product: ProductDocument): EmployeeProduct => ({
   category: product.category,
   image: product.image ?? '',
   active: product.active,
+});
+
+const toEmployeeOrder = (order: EmployeeOrderDocument): EmployeeOrder => ({
+  id: order._id.toString(),
+  athleteId: order.athleteId._id.toString(),
+  athleteName: `${order.athleteId.firstName} ${order.athleteId.lastName}`.trim(),
+  facilityId: order.facilityId._id.toString(),
+  facilityName: order.facilityId.name,
+  items: order.items.map((item) => ({
+    productId: item.productId.toString(),
+    name: item.name,
+    quantity: item.quantity,
+    priceAtPurchase: item.priceAtPurchase,
+  })),
+  totalPrice: order.totalPrice,
+  status: order.status,
+  createdAt: order.createdAt ?? new Date(),
 });
 
 const getEmployee = async (employeeId: string) => {
@@ -1572,7 +1613,7 @@ const deleteProduct = async (employeeId: string, productId: string) => {
   const unfinishedOrder = await Order.findOne({
     facilityId: product.facilityId,
     status: {
-      $in: [OrderStatus.Ordered, OrderStatus.Accepted],
+      $in: [OrderStatus.Pending, OrderStatus.Processing],
     },
     'items.productId': product._id,
   }).select('_id');
@@ -1585,6 +1626,72 @@ const deleteProduct = async (employeeId: string, productId: string) => {
 
   return {
     message: 'Product deleted successfully',
+  };
+};
+
+const getFacilityOrders = async (employeeId: string, facilityId: string) => {
+  const facility = await getFacilityByEmployee(employeeId, facilityId);
+
+  const orders = (await Order.find({
+    facilityId: facility._id,
+  })
+    .populate({
+      path: 'athleteId',
+      select: 'firstName lastName',
+    })
+    .populate({
+      path: 'facilityId',
+      select: 'name',
+    })
+    .sort({ createdAt: -1 })
+    .lean()) as unknown as EmployeeOrderDocument[];
+
+  return {
+    orders: orders.map((order) => toEmployeeOrder(order)),
+  };
+};
+
+const updateOrderStatus = async (
+  employeeId: string,
+  orderId: string,
+  body: UpdateEmployeeOrderStatusBody,
+) => {
+  validateObjectId(orderId, 'order id');
+
+  const status = String(body.status ?? '').trim() as OrderStatus;
+
+  if (!Object.values(OrderStatus).includes(status)) {
+    throw new AppError('status must be pending, processing, completed or cancelled', 400);
+  }
+
+  const order = await Order.findById(orderId);
+
+  if (!order) {
+    throw new AppError('Order not found', 404);
+  }
+
+  await getFacilityByEmployee(employeeId, order.facilityId.toString());
+
+  order.status = status;
+  await order.save();
+
+  const updatedOrder = (await Order.findById(order._id)
+    .populate({
+      path: 'athleteId',
+      select: 'firstName lastName',
+    })
+    .populate({
+      path: 'facilityId',
+      select: 'name',
+    })
+    .lean()) as unknown as EmployeeOrderDocument | null;
+
+  if (!updatedOrder) {
+    throw new AppError('Order not found', 404);
+  }
+
+  return {
+    order: toEmployeeOrder(updatedOrder),
   };
 };
 
@@ -1795,6 +1902,7 @@ export {
   createProduct,
   createPromotion,
   getAttendance,
+  getFacilityOrders,
   getFacilityProducts,
   getFacilityPromotions,
   markReservationAttendance,
@@ -1809,6 +1917,7 @@ export {
   getFacilities,
   getFacility,
   updateProduct,
+  updateOrderStatus,
   updatePromotion,
   getFacilityResources,
   getFacilityTrainers,

@@ -99,6 +99,38 @@ interface PublicFacilitiesQuery {
   sortOrder?: 'asc' | 'desc';
 }
 
+interface PublicProduct {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  stock: number;
+  category: string;
+  image: string | null;
+  facility: {
+    id: string;
+    name: string;
+    city: string;
+  };
+}
+
+interface PublicProductFacilityGroup {
+  facility: {
+    id: string;
+    name: string;
+    city: string;
+  };
+  products: PublicProduct[];
+}
+
+interface PublicProductsResponse {
+  facilities: PublicProductFacilityGroup[];
+}
+
+interface PublicProductResponse {
+  product: PublicProduct;
+}
+
 export type {
   HomePromotion,
   TopFacilitty,
@@ -109,6 +141,10 @@ export type {
   PublicFacilityDetails,
   PublicFacilityDetailsResponse,
   PublicFacilityListItem,
+  PublicProduct,
+  PublicProductFacilityGroup,
+  PublicProductResponse,
+  PublicProductsResponse,
   PublicSport,
   HomeResponse,
   PublicResource,

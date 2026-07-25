@@ -2,6 +2,7 @@ import { Types } from 'mongoose';
 
 import { Facility, FacilityStatus, type IFacility } from '../../models/Facility';
 import { Promotion, type DiscountType } from '../../models/Promotion';
+import { Product, type IProduct } from '../../models/Product';
 import { Resource, type ResourceType } from '../../models/Resource';
 import { Review, ReviewReaction } from '../../models/Review';
 import { AppError } from '../../utils/AppError';
@@ -12,6 +13,8 @@ import type {
   PublicFacilitiesQuery,
   PublicFacilitiesResponse,
   PublicFacilityDetailsResponse,
+  PublicProduct,
+  PublicProductsResponse,
   PublicResource,
   PublicSport,
 } from './public.types';
@@ -50,6 +53,17 @@ type PopulatedPromotion = {
   } | null;
 };
 
+type PublicProductDocument = IProduct & {
+  _id: Types.ObjectId;
+  facilityId: {
+    _id: Types.ObjectId;
+    name: string;
+    city: string;
+    status: FacilityStatus;
+    active: boolean;
+  } | null;
+};
+
 const approvedActiveFacilityFilter = {
   status: FacilityStatus.Approved,
   active: true,
@@ -58,6 +72,21 @@ const approvedActiveFacilityFilter = {
 const toSportSummary = (sport: PopulatedSport): PublicSport => ({
   id: sport._id.toString(),
   name: sport.name,
+});
+
+const toPublicProduct = (product: PublicProductDocument): PublicProduct => ({
+  id: product._id.toString(),
+  name: product.name,
+  description: product.description,
+  price: product.price,
+  stock: product.stock,
+  category: product.category,
+  image: product.image ?? null,
+  facility: {
+    id: product.facilityId!._id.toString(),
+    name: product.facilityId!.name,
+    city: product.facilityId!.city,
+  },
 });
 
 const buildReviewStatsMap = async (facilityIds: Types.ObjectId[]) => {
@@ -356,9 +385,85 @@ const getFacilityById = async (
   };
 };
 
+const getProducts = async (): Promise<PublicProductsResponse> => {
+  const products = (await Product.find({
+    active: true,
+  })
+    .populate({
+      path: 'facilityId',
+      select: 'name city status active',
+    })
+    .sort({ name: 1 })
+    .lean()) as unknown as PublicProductDocument[];
+
+  const groupedProducts = new Map<
+    string,
+    { facility: PublicProduct['facility']; products: PublicProduct[] }
+  >();
+
+  for (const product of products) {
+    if (
+      !product.facilityId ||
+      product.facilityId.status !== FacilityStatus.Approved ||
+      product.facilityId.active !== true
+    ) {
+      continue;
+    }
+
+    const mappedProduct = toPublicProduct(product);
+    const existingGroup = groupedProducts.get(mappedProduct.facility.id);
+
+    if (existingGroup) {
+      existingGroup.products.push(mappedProduct);
+    } else {
+      groupedProducts.set(mappedProduct.facility.id, {
+        facility: mappedProduct.facility,
+        products: [mappedProduct],
+      });
+    }
+  }
+
+  return {
+    facilities: Array.from(groupedProducts.values()).sort((first, second) =>
+      first.facility.name.localeCompare(second.facility.name),
+    ),
+  };
+};
+
+const getProductById = async (id: string) => {
+  if (!Types.ObjectId.isValid(id)) {
+    throw new AppError('Invalid product id', 400);
+  }
+
+  const product = (await Product.findById(id)
+    .populate({
+      path: 'facilityId',
+      select: 'name city status active',
+    })
+    .lean()) as unknown as PublicProductDocument | null;
+
+  if (!product || !product.active) {
+    throw new AppError('Product not found', 404);
+  }
+
+  if (
+    !product.facilityId ||
+    product.facilityId.status !== FacilityStatus.Approved ||
+    product.facilityId.active !== true
+  ) {
+    throw new AppError('Product not found', 404);
+  }
+
+  return {
+    product: toPublicProduct(product),
+  };
+};
+
 export {
   getCities,
   getFacilities,
   getFacilityById,
   getHomeData,
+  getProductById,
+  getProducts,
 };

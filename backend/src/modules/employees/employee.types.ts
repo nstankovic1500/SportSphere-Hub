@@ -1,4 +1,5 @@
 import type { FacilityStatus, IGeoPoint, IOpeningHour } from '../../models/Facility';
+import type { OrderStatus } from '../../models/Order';
 import type { DiscountType } from '../../models/Promotion';
 import type { ResourceType } from '../../models/Resource';
 import type { UserRole, UserStatus } from '../../models/User';
@@ -203,6 +204,27 @@ interface EmployeeProductBody {
   active?: boolean;
 }
 
+interface EmployeeOrder {
+  id: string;
+  athleteId: string;
+  athleteName: string;
+  facilityId: string;
+  facilityName: string;
+  items: Array<{
+    productId: string;
+    name: string;
+    quantity: number;
+    priceAtPurchase: number;
+  }>;
+  totalPrice: number;
+  status: OrderStatus;
+  createdAt: Date;
+}
+
+interface UpdateEmployeeOrderStatusBody {
+  status?: OrderStatus;
+}
+
 export type {
   CreateEmployeeFacilityBody,
   EmployeeProductBody,
@@ -211,12 +233,14 @@ export type {
   CreateEmployeeTrainerBody,
   EmployeeFacility,
   EmployeeFavoriteSport,
+  EmployeeOrder,
   EmployeeProfile,
   EmployeeProduct,
   EmployeePromotion,
   EmployeeResource,
   EmployeeTrainer,
   UpdateEmployeeFacilityBody,
+  UpdateEmployeeOrderStatusBody,
   UpdateEmployeePromotionBody,
   UpdateEmployeeProfileBody,
   UpdateEmployeeResourceBody,

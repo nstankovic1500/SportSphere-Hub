@@ -1,7 +1,10 @@
 import { Types } from 'mongoose';
 
 import { Appointment, AppointmentStatus, type IAppointment } from '../../models/Appointment';
+import { Cart, type ICart } from '../../models/Cart';
 import { Facility, FacilityStatus, type IOpeningHour } from '../../models/Facility';
+import { Order, OrderStatus, type IOrder } from '../../models/Order';
+import { Product, type IProduct } from '../../models/Product';
 import { Reservation, ReservationStatus, type IReservation } from '../../models/Reservation';
 import { Resource, type IResource } from '../../models/Resource';
 import { Sport, type ISport } from '../../models/Sport';
@@ -9,12 +12,17 @@ import { Trainer, type ITrainer } from '../../models/Trainer';
 import { User, type IUser } from '../../models/User';
 import { AppError } from '../../utils/AppError';
 import type {
+  AthleteCartItem,
+  AthleteCartResponse,
+  AthleteOrder,
   AthleteProfile,
   AthleteReservation,
-  TrainingAppointment,
+  CartItemBody,
   CreateTrainingAppointmentBody,
   CreateReservationBody,
   ResourceAvailability,
+  TrainingAppointment,
+  UpdateCartItemBody,
   UpdateAthleteProfileBody,
 } from './athlete.types';
 
@@ -94,6 +102,36 @@ type PopulatedAppointment = IAppointment & {
   sportId: {
     _id: Types.ObjectId;
     name: string;
+  };
+};
+
+type ProductWithFacility = IProduct & {
+  _id: Types.ObjectId;
+  facilityId: {
+    _id: Types.ObjectId;
+    name: string;
+    city: string;
+    status: FacilityStatus;
+    active: boolean;
+  };
+};
+
+type CartDocument = ICart & {
+  _id: Types.ObjectId;
+  items: Array<{
+    _id?: Types.ObjectId;
+    productId: Types.ObjectId;
+    quantity: number;
+  }>;
+  save: () => Promise<unknown>;
+};
+
+type PopulatedOrder = IOrder & {
+  _id: Types.ObjectId;
+  facilityId: {
+    _id: Types.ObjectId;
+    name: string;
+    city: string;
   };
 };
 
@@ -337,6 +375,137 @@ const getAthlete = async (athleteId: string) => {
 
   return user;
 };
+
+const getCartDocument = async (athleteId: string) => {
+  let cart = await Cart.findOne({ athleteId });
+
+  if (!cart) {
+    cart = await Cart.create({
+      athleteId,
+      items: [],
+    });
+  }
+
+  return cart as CartDocument;
+};
+
+const getActiveProductWithFacility = async (productId: string) => {
+  if (!Types.ObjectId.isValid(productId)) {
+    throw new AppError('Invalid product id', 400);
+  }
+
+  const product = (await Product.findById(productId)
+    .populate({
+      path: 'facilityId',
+      select: 'name city status active',
+    })
+    .lean()) as unknown as ProductWithFacility | null;
+
+  if (!product || !product.active) {
+    throw new AppError('Product not found', 404);
+  }
+
+  if (
+    !product.facilityId ||
+    product.facilityId.status !== FacilityStatus.Approved ||
+    product.facilityId.active !== true
+  ) {
+    throw new AppError('Product is not available', 400);
+  }
+
+  return product;
+};
+
+const validateCartQuantity = (value: unknown) => {
+  const quantity = Number(value);
+
+  if (!Number.isInteger(quantity) || quantity < 1) {
+    throw new AppError('quantity must be a positive integer', 400);
+  }
+
+  return quantity;
+};
+
+const mapCartItems = async (cart: CartDocument): Promise<AthleteCartResponse> => {
+  if (cart.items.length === 0) {
+    return {
+      items: [],
+      totalPrice: 0,
+    };
+  }
+
+  const products = (await Product.find({
+    _id: {
+      $in: cart.items.map((item) => item.productId),
+    },
+    active: true,
+  })
+    .populate({
+      path: 'facilityId',
+      select: 'name city status active',
+    })
+    .lean()) as unknown as ProductWithFacility[];
+
+  const productMap = new Map(
+    products
+      .filter(
+        (product) =>
+          !!product.facilityId &&
+          product.facilityId.status === FacilityStatus.Approved &&
+          product.facilityId.active === true,
+      )
+      .map((product) => [product._id.toString(), product]),
+  );
+
+  const items: AthleteCartItem[] = cart.items
+    .map((item) => {
+      const product = productMap.get(item.productId.toString());
+
+      if (!product) {
+        return null;
+      }
+
+      return {
+        id: item._id?.toString() ?? '',
+        productId: product._id.toString(),
+        name: product.name,
+        quantity: item.quantity,
+        price: product.price,
+        category: product.category,
+        image: product.image ?? null,
+        facility: {
+          id: product.facilityId._id.toString(),
+          name: product.facilityId.name,
+          city: product.facilityId.city,
+        },
+        lineTotal: product.price * item.quantity,
+      };
+    })
+    .filter((item): item is AthleteCartItem => item !== null);
+
+  return {
+    items,
+    totalPrice: items.reduce((sum, item) => sum + item.lineTotal, 0),
+  };
+};
+
+const toAthleteOrder = (order: PopulatedOrder): AthleteOrder => ({
+  id: order._id.toString(),
+  facility: {
+    id: order.facilityId._id.toString(),
+    name: order.facilityId.name,
+    city: order.facilityId.city,
+  },
+  items: order.items.map((item) => ({
+    productId: item.productId.toString(),
+    name: item.name,
+    quantity: item.quantity,
+    priceAtPurchase: item.priceAtPurchase,
+  })),
+  totalPrice: order.totalPrice,
+  status: order.status,
+  createdAt: order.createdAt ?? new Date(),
+});
 
 const ensureAthleteNotBlockedInFacility = async (
   athleteId: Types.ObjectId | string,
@@ -832,14 +1001,211 @@ const createTrainingAppointment = async (
   };
 };
 
+const getCart = async (athleteId: string) => {
+  const cart = await getCartDocument(athleteId);
+  return mapCartItems(cart);
+};
+
+const addCartItem = async (athleteId: string, body: CartItemBody) => {
+  const productId = String(body.productId ?? '').trim();
+  const quantity = validateCartQuantity(body.quantity);
+  const product = await getActiveProductWithFacility(productId);
+  const cart = await getCartDocument(athleteId);
+  const existingItem = cart.items.find(
+    (item) => item.productId.toString() === product._id.toString(),
+  );
+  const nextQuantity = existingItem ? existingItem.quantity + quantity : quantity;
+
+  if (nextQuantity > product.stock) {
+    throw new AppError('Requested quantity exceeds available stock', 400);
+  }
+
+  if (existingItem) {
+    existingItem.quantity = nextQuantity;
+  } else {
+    cart.items.push({
+      productId: product._id,
+      quantity,
+    });
+  }
+
+  await cart.save();
+
+  return getCart(athleteId);
+};
+
+const updateCartItem = async (
+  athleteId: string,
+  itemId: string,
+  body: UpdateCartItemBody,
+) => {
+  if (!Types.ObjectId.isValid(itemId)) {
+    throw new AppError('Invalid cart item id', 400);
+  }
+
+  const quantity = validateCartQuantity(body.quantity);
+  const cart = await getCartDocument(athleteId);
+  const item = cart.items.find((currentItem) => currentItem._id?.toString() === itemId);
+
+  if (!item) {
+    throw new AppError('Cart item not found', 404);
+  }
+
+  const product = await getActiveProductWithFacility(item.productId.toString());
+
+  if (quantity > product.stock) {
+    throw new AppError('Requested quantity exceeds available stock', 400);
+  }
+
+  item.quantity = quantity;
+  await cart.save();
+
+  return getCart(athleteId);
+};
+
+const deleteCartItem = async (athleteId: string, itemId: string) => {
+  if (!Types.ObjectId.isValid(itemId)) {
+    throw new AppError('Invalid cart item id', 400);
+  }
+
+  const cart = await getCartDocument(athleteId);
+  const nextItems = cart.items.filter((item) => item._id?.toString() !== itemId);
+
+  if (nextItems.length === cart.items.length) {
+    throw new AppError('Cart item not found', 404);
+  }
+
+  cart.items = nextItems;
+  await cart.save();
+
+  return getCart(athleteId);
+};
+
+const checkoutOrders = async (athleteId: string) => {
+  const athlete = await getAthlete(athleteId);
+  const cart = await getCartDocument(athleteId);
+
+  if (cart.items.length === 0) {
+    throw new AppError('Cart is empty', 400);
+  }
+
+  const cartSummary = await mapCartItems(cart);
+
+  if (cartSummary.items.length === 0) {
+    throw new AppError('Cart does not contain available products', 400);
+  }
+
+  const productIds = cartSummary.items.map((item) => new Types.ObjectId(item.productId));
+  const products = await Product.find({
+    _id: { $in: productIds },
+    active: true,
+  });
+  const productMap = new Map(products.map((product) => [product._id!.toString(), product]));
+  const groupedByFacility = new Map<
+    string,
+    { facilityId: Types.ObjectId; items: AthleteCartItem[] }
+  >();
+
+  for (const item of cartSummary.items) {
+    const product = productMap.get(item.productId);
+
+    if (!product) {
+      throw new AppError(`Product ${item.name} is no longer available`, 400);
+    }
+
+    if (item.quantity > product.stock) {
+      throw new AppError(`Insufficient stock for ${item.name}`, 400);
+    }
+
+    const existingGroup = groupedByFacility.get(item.facility.id);
+
+    if (existingGroup) {
+      existingGroup.items.push(item);
+    } else {
+      groupedByFacility.set(item.facility.id, {
+        facilityId: product.facilityId,
+        items: [item],
+      });
+    }
+  }
+
+  const createdOrderIds: Types.ObjectId[] = [];
+
+  for (const group of groupedByFacility.values()) {
+    const order = await Order.create({
+      athleteId: athlete._id,
+      facilityId: group.facilityId,
+      items: group.items.map((item) => ({
+        productId: new Types.ObjectId(item.productId),
+        name: item.name,
+        quantity: item.quantity,
+        priceAtPurchase: item.price,
+      })),
+      totalPrice: group.items.reduce((sum, item) => sum + item.lineTotal, 0),
+      status: OrderStatus.Pending,
+      createdAt: new Date(),
+    });
+
+    createdOrderIds.push(order._id as Types.ObjectId);
+
+    for (const item of group.items) {
+      const product = productMap.get(item.productId);
+
+      if (product) {
+        product.stock -= item.quantity;
+        await product.save();
+      }
+    }
+  }
+
+  cart.items = [];
+  await cart.save();
+
+  const orders = (await Order.find({
+    _id: { $in: createdOrderIds },
+  })
+    .populate({
+      path: 'facilityId',
+      select: 'name city',
+    })
+    .sort({ createdAt: -1 })
+    .lean()) as unknown as PopulatedOrder[];
+
+  return {
+    orders: orders.map((order) => toAthleteOrder(order)),
+  };
+};
+
+const getOrders = async (athleteId: string) => {
+  const orders = (await Order.find({
+    athleteId: new Types.ObjectId(athleteId),
+  })
+    .populate({
+      path: 'facilityId',
+      select: 'name city',
+    })
+    .sort({ createdAt: -1 })
+    .lean()) as unknown as PopulatedOrder[];
+
+  return {
+    orders: orders.map((order) => toAthleteOrder(order)),
+  };
+};
+
 export {
+  addCartItem,
   cancelTrainingAppointment,
   cancelReservation,
+  checkoutOrders,
   createTrainingAppointment,
   createReservation,
+  deleteCartItem,
+  getCart,
+  getOrders,
   getProfile,
   getReservations,
   getResourceAvailability,
   getTrainingAppointments,
+  updateCartItem,
   updateProfile,
 };

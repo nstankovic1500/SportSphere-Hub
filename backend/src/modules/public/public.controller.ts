@@ -7,6 +7,8 @@ import {
   getFacilities as getFacilitiesService,
   getFacilityById,
   getHomeData,
+  getProductById as getProductByIdService,
+  getProducts as getProductsService,
 } from './public.service';
 
 const getHome = asyncHandler(async (_req: Request, res: Response) => {
@@ -45,9 +47,29 @@ const getFacilityDetails = asyncHandler(async (req: Request, res: Response) => {
   });
 });
 
+const getProducts = asyncHandler(async (_req: Request, res: Response) => {
+  const data = await getProductsService();
+
+  res.status(200).json({
+    success: true,
+    data,
+  });
+});
+
+const getProduct = asyncHandler(async (req: Request, res: Response) => {
+  const data = await getProductByIdService(String(req.params.id));
+
+  res.status(200).json({
+    success: true,
+    data,
+  });
+});
+
 export {
   getCities,
   getFacilities,
   getFacilityDetails,
   getHome,
+  getProduct,
+  getProducts,
 };

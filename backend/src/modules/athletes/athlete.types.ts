@@ -1,6 +1,7 @@
 import type { Request } from 'express';
 
 import type { AppointmentStatus } from '../../models/Appointment';
+import type { OrderStatus } from '../../models/Order';
 import type { ReservationStatus } from '../../models/Reservation';
 import type { FacilityStatus, IOpeningHour } from '../../models/Facility';
 import type { ResourceType } from '../../models/Resource';
@@ -88,6 +89,56 @@ interface CreateTrainingAppointmentBody {
   endTime?: string;
 }
 
+interface CartItemBody {
+  productId?: string;
+  quantity?: number;
+}
+
+interface UpdateCartItemBody {
+  quantity?: number;
+}
+
+interface AthleteCartItem {
+  id: string;
+  productId: string;
+  name: string;
+  quantity: number;
+  price: number;
+  category: string;
+  image: string | null;
+  facility: {
+    id: string;
+    name: string;
+    city: string;
+  };
+  lineTotal: number;
+}
+
+interface AthleteCartResponse {
+  items: AthleteCartItem[];
+  totalPrice: number;
+}
+
+interface AthleteOrderItem {
+  productId: string;
+  name: string;
+  quantity: number;
+  priceAtPurchase: number;
+}
+
+interface AthleteOrder {
+  id: string;
+  facility: {
+    id: string;
+    name: string;
+    city: string;
+  };
+  items: AthleteOrderItem[];
+  totalPrice: number;
+  status: OrderStatus;
+  createdAt: Date;
+}
+
 interface AuthenticatedAthleteRequest extends Request {
   auth?: {
     userId: string;
@@ -102,9 +153,14 @@ export type {
   AthleteReservation,
   TrainingAppointment,
   AthleteFavoriteSport,
+  AthleteCartItem,
+  AthleteCartResponse,
+  AthleteOrder,
+  CartItemBody,
   CreateReservationBody,
   CreateTrainingAppointmentBody,
   AuthenticatedAthleteRequest,
   ResourceAvailability,
+  UpdateCartItemBody,
   UpdateAthleteProfileBody,
 };
