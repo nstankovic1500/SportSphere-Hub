@@ -3,11 +3,16 @@ import type { Request, Response } from 'express';
 import { AppError } from '../../utils/AppError';
 import { asyncHandler } from '../../utils/asyncHandler';
 import type { AuthenticatedRequest, LoginRequestBody, RegisterRequestBody } from './auth.types';
-import { adminLogin, getCurrentUser, login, register } from './auth.service';
+import {
+  adminLogin as adminLoginService,
+  getCurrentUser,
+  login as loginService,
+  register as registerService,
+} from './auth.service';
 
-const loginController = asyncHandler(async (req: Request, res: Response) => {
+const login = asyncHandler(async (req: Request, res: Response) => {
   const body = req.body as LoginRequestBody;
-  const data = await login(body.username, body.password);
+  const data = await loginService(body.username, body.password);
 
   res.status(200).json({
     success: true,
@@ -15,9 +20,9 @@ const loginController = asyncHandler(async (req: Request, res: Response) => {
   });
 });
 
-const adminLoginController = asyncHandler(async (req: Request, res: Response) => {
+const adminLogin = asyncHandler(async (req: Request, res: Response) => {
   const body = req.body as LoginRequestBody;
-  const data = await adminLogin(body.username, body.password);
+  const data = await adminLoginService(body.username, body.password);
 
   res.status(200).json({
     success: true,
@@ -25,9 +30,9 @@ const adminLoginController = asyncHandler(async (req: Request, res: Response) =>
   });
 });
 
-const registerController = asyncHandler(async (req: Request, res: Response) => {
+const register = asyncHandler(async (req: Request, res: Response) => {
   const body = req.body as RegisterRequestBody;
-  const data = await register(body);
+  const data = await registerService(body);
 
   res.status(201).json({
     success: true,
@@ -36,7 +41,7 @@ const registerController = asyncHandler(async (req: Request, res: Response) => {
   });
 });
 
-const currentUserController = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+const currentUser = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   if (!req.auth) {
     throw new AppError('Invalid or expired token', 401);
   }
@@ -51,4 +56,4 @@ const currentUserController = asyncHandler(async (req: AuthenticatedRequest, res
   });
 });
 
-export { adminLoginController, currentUserController, loginController, registerController };
+export { adminLogin, currentUser, login, register };

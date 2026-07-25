@@ -2,13 +2,13 @@ import type { Request, Response } from 'express';
 
 import { asyncHandler } from '../../utils/asyncHandler';
 import {
-  approveRegistrationRequest,
-  getRegistrationRequests,
-  rejectRegistrationRequest,
+  approveRegistrationRequest as approveRegistrationRequestService,
+  getRegistrationRequests as getRegistrationRequestsService,
+  rejectRegistrationRequest as rejectRegistrationRequestService,
 } from './admin.service';
 
-const getRegistrationRequestsController = asyncHandler(async (_req: Request, res: Response) => {
-  const data = await getRegistrationRequests();
+const getRegistrationRequests = asyncHandler(async (_req: Request, res: Response) => {
+  const data = await getRegistrationRequestsService();
 
   res.status(200).json({
     success: true,
@@ -16,9 +16,9 @@ const getRegistrationRequestsController = asyncHandler(async (_req: Request, res
   });
 });
 
-const approveRegistrationRequestController = asyncHandler(async (req: Request, res: Response) => {
+const approveRegistrationRequest = asyncHandler(async (req: Request, res: Response) => {
   const id = String(req.params.id);
-  const data = await approveRegistrationRequest(id);
+  const data = await approveRegistrationRequestService(id);
 
   res.status(200).json({
     success: true,
@@ -26,9 +26,9 @@ const approveRegistrationRequestController = asyncHandler(async (req: Request, r
   });
 });
 
-const rejectRegistrationRequestController = asyncHandler(async (req: Request, res: Response) => {
+const rejectRegistrationRequest = asyncHandler(async (req: Request, res: Response) => {
   const id = String(req.params.id);
-  const data = await rejectRegistrationRequest(id);
+  const data = await rejectRegistrationRequestService(id);
 
   res.status(200).json({
     success: true,
@@ -37,7 +37,7 @@ const rejectRegistrationRequestController = asyncHandler(async (req: Request, re
 });
 
 export {
-  approveRegistrationRequestController,
-  getRegistrationRequestsController,
-  rejectRegistrationRequestController,
+  approveRegistrationRequest,
+  getRegistrationRequests,
+  rejectRegistrationRequest,
 };

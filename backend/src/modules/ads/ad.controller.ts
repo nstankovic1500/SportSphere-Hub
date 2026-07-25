@@ -3,23 +3,23 @@ import type { Response } from 'express';
 import { asyncHandler } from '../../utils/asyncHandler';
 import type { AuthenticatedRequest } from '../auth/auth.types';
 import {
-  acceptApplyRequest,
-  closeAd,
-  createAd,
-  getAdRequests,
-  getAds,
-  applyToAd,
-  rejectApplyRequest,
+  acceptApplyRequest as acceptApplyRequestService,
+  closeAd as closeAdService,
+  createAd as createAdService,
+  getAdRequests as getAdRequestsService,
+  getAds as getAdsService,
+  applyToAd as applyToAdService,
+  rejectApplyRequest as rejectApplyRequestService,
 } from './ad.service';
 import type {
   AdsQuery,
   AdBody,
 } from './ad.types';
 
-const getAdsController = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+const getAds = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const athleteId = String(req.auth?.userId);
   const query = req.query as AdsQuery;
-  const data = await getAds(athleteId, query);
+  const data = await getAdsService(athleteId, query);
 
   res.status(200).json({
     success: true,
@@ -27,10 +27,10 @@ const getAdsController = asyncHandler(async (req: AuthenticatedRequest, res: Res
   });
 });
 
-const createAdController = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+const createAd = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const athleteId = String(req.auth?.userId);
   const body = req.body as AdBody;
-  const data = await createAd(athleteId, body);
+  const data = await createAdService(athleteId, body);
 
   res.status(201).json({
     success: true,
@@ -38,10 +38,10 @@ const createAdController = asyncHandler(async (req: AuthenticatedRequest, res: R
   });
 });
 
-const closeAdController = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+const closeAd = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const athleteId = String(req.auth?.userId);
   const adId = String(req.params.id);
-  const data = await closeAd(athleteId, adId);
+  const data = await closeAdService(athleteId, adId);
 
   res.status(200).json({
     success: true,
@@ -49,10 +49,10 @@ const closeAdController = asyncHandler(async (req: AuthenticatedRequest, res: Re
   });
 });
 
-const applyToAdController = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+const applyToAd = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const athleteId = String(req.auth?.userId);
   const adId = String(req.params.id);
-  const data = await applyToAd(athleteId, adId);
+  const data = await applyToAdService(athleteId, adId);
 
   res.status(201).json({
     success: true,
@@ -60,10 +60,10 @@ const applyToAdController = asyncHandler(async (req: AuthenticatedRequest, res: 
   });
 });
 
-const getAdRequestsController = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+const getAdRequests = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const athleteId = String(req.auth?.userId);
   const adId = String(req.params.id);
-  const data = await getAdRequests(athleteId, adId);
+  const data = await getAdRequestsService(athleteId, adId);
 
   res.status(200).json({
     success: true,
@@ -71,10 +71,10 @@ const getAdRequestsController = asyncHandler(async (req: AuthenticatedRequest, r
   });
 });
 
-const acceptApplyRequestController = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+const acceptApplyRequest = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const athleteId = String(req.auth?.userId);
   const applyRequestId = String(req.params.id);
-  const data = await acceptApplyRequest(athleteId, applyRequestId);
+  const data = await acceptApplyRequestService(athleteId, applyRequestId);
 
   res.status(200).json({
     success: true,
@@ -82,10 +82,10 @@ const acceptApplyRequestController = asyncHandler(async (req: AuthenticatedReque
   });
 });
 
-const rejectApplyRequestController = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+const rejectApplyRequest = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const athleteId = String(req.auth?.userId);
   const applyRequestId = String(req.params.id);
-  const data = await rejectApplyRequest(athleteId, applyRequestId);
+  const data = await rejectApplyRequestService(athleteId, applyRequestId);
 
   res.status(200).json({
     success: true,
@@ -94,11 +94,11 @@ const rejectApplyRequestController = asyncHandler(async (req: AuthenticatedReque
 });
 
 export {
-  acceptApplyRequestController,
-  closeAdController,
-  createAdController,
-  getAdRequestsController,
-  getAdsController,
-  applyToAdController,
-  rejectApplyRequestController,
+  acceptApplyRequest,
+  closeAd,
+  createAd,
+  getAdRequests,
+  getAds,
+  applyToAd,
+  rejectApplyRequest,
 };

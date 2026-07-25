@@ -2,9 +2,14 @@ import type { Request, Response } from 'express';
 
 import { asyncHandler } from '../../utils/asyncHandler';
 import type { PublicFacilitiesQuery } from './public.types';
-import { getCities, getFacilities, getFacilityById, getHomeData } from './public.service';
+import {
+  getCities as getCitiesService,
+  getFacilities as getFacilitiesService,
+  getFacilityById,
+  getHomeData,
+} from './public.service';
 
-const getHomeController = asyncHandler(async (_req: Request, res: Response) => {
+const getHome = asyncHandler(async (_req: Request, res: Response) => {
   const data = await getHomeData();
 
   res.status(200).json({
@@ -13,8 +18,8 @@ const getHomeController = asyncHandler(async (_req: Request, res: Response) => {
   });
 });
 
-const getCitiesController = asyncHandler(async (_req: Request, res: Response) => {
-  const data = await getCities();
+const getCities = asyncHandler(async (_req: Request, res: Response) => {
+  const data = await getCitiesService();
 
   res.status(200).json({
     success: true,
@@ -22,8 +27,8 @@ const getCitiesController = asyncHandler(async (_req: Request, res: Response) =>
   });
 });
 
-const getFacilitiesController = asyncHandler(async (req: Request, res: Response) => {
-  const data = await getFacilities(req.query as PublicFacilitiesQuery);
+const getFacilities = asyncHandler(async (req: Request, res: Response) => {
+  const data = await getFacilitiesService(req.query as PublicFacilitiesQuery);
 
   res.status(200).json({
     success: true,
@@ -31,7 +36,7 @@ const getFacilitiesController = asyncHandler(async (req: Request, res: Response)
   });
 });
 
-const getFacilityDetailsController = asyncHandler(async (req: Request, res: Response) => {
+const getFacilityDetails = asyncHandler(async (req: Request, res: Response) => {
   const data = await getFacilityById(String(req.params.id));
 
   res.status(200).json({
@@ -41,8 +46,8 @@ const getFacilityDetailsController = asyncHandler(async (req: Request, res: Resp
 });
 
 export {
-  getCitiesController,
-  getFacilitiesController,
-  getFacilityDetailsController,
-  getHomeController,
+  getCities,
+  getFacilities,
+  getFacilityDetails,
+  getHome,
 };

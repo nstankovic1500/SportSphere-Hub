@@ -4,9 +4,9 @@ import { authMiddleware } from '../../middleware/auth.middleware';
 import { roleMiddleware } from '../../middleware/role.middleware';
 import { UserRole } from '../../models/User';
 import {
-  approveRegistrationRequestController,
-  getRegistrationRequestsController,
-  rejectRegistrationRequestController,
+  approveRegistrationRequest,
+  getRegistrationRequests,
+  rejectRegistrationRequest,
 } from './admin.controller';
 
 const adminRouter = Router();
@@ -14,8 +14,8 @@ const adminRouter = Router();
 adminRouter.use(authMiddleware);
 adminRouter.use(roleMiddleware(UserRole.Admin));
 
-adminRouter.get('/registrationRequests', getRegistrationRequestsController);
-adminRouter.patch('/registrationRequests/:id/approve', approveRegistrationRequestController);
-adminRouter.patch('/registrationRequests/:id/reject', rejectRegistrationRequestController);
+adminRouter.get('/registrationRequests', getRegistrationRequests);
+adminRouter.patch('/registrationRequests/:id/approve', approveRegistrationRequest);
+adminRouter.patch('/registrationRequests/:id/reject', rejectRegistrationRequest);
 
 export { adminRouter };

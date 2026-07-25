@@ -1,9 +1,9 @@
 import { Router } from 'express';
 
-import { getSportsController } from './sport.controller';
+import { getSports } from './sport.controller';
 
 const sportRouter = Router();
 
-sportRouter.get('/', getSportsController);
+sportRouter.get('/', getSports);
 
 export { sportRouter };

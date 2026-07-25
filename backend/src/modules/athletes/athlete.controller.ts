@@ -7,17 +7,17 @@ import type {
   UpdateAthleteProfileBody,
 } from './athlete.types';
 import {
-  cancelReservation,
-  createReservation,
-  getProfile,
-  getReservations,
-  getResourceAvailability,
-  updateProfile,
+  cancelReservation as cancelReservationService,
+  createReservation as createReservationService,
+  getProfile as getProfileService,
+  getReservations as getReservationsService,
+  getResourceAvailability as getResourceAvailabilityService,
+  updateProfile as updateProfileService,
 } from './athlete.service';
 
-const getProfileController = asyncHandler(async (req: AuthenticatedAthleteRequest, res: Response) => {
+const getProfile = asyncHandler(async (req: AuthenticatedAthleteRequest, res: Response) => {
   const athleteId = String(req.auth?.userId);
-  const data = await getProfile(athleteId);
+  const data = await getProfileService(athleteId);
 
   res.status(200).json({
     success: true,
@@ -25,10 +25,10 @@ const getProfileController = asyncHandler(async (req: AuthenticatedAthleteReques
   });
 });
 
-const updateProfileController = asyncHandler(async (req: AuthenticatedAthleteRequest, res: Response) => {
+const updateProfile = asyncHandler(async (req: AuthenticatedAthleteRequest, res: Response) => {
   const athleteId = String(req.auth?.userId);
   const body = req.body as UpdateAthleteProfileBody;
-  const data = await updateProfile(athleteId, body);
+  const data = await updateProfileService(athleteId, body);
 
   res.status(200).json({
     success: true,
@@ -36,9 +36,9 @@ const updateProfileController = asyncHandler(async (req: AuthenticatedAthleteReq
   });
 });
 
-const getReservationsController = asyncHandler(async (req: AuthenticatedAthleteRequest, res: Response) => {
+const getReservations = asyncHandler(async (req: AuthenticatedAthleteRequest, res: Response) => {
   const athleteId = String(req.auth?.userId);
-  const data = await getReservations(athleteId);
+  const data = await getReservationsService(athleteId);
 
   res.status(200).json({
     success: true,
@@ -46,10 +46,10 @@ const getReservationsController = asyncHandler(async (req: AuthenticatedAthleteR
   });
 });
 
-const cancelReservationController = asyncHandler(async (req: AuthenticatedAthleteRequest, res: Response) => {
+const cancelReservation = asyncHandler(async (req: AuthenticatedAthleteRequest, res: Response) => {
   const athleteId = String(req.auth?.userId);
   const reservationId = String(req.params.id);
-  const data = await cancelReservation(athleteId, reservationId);
+  const data = await cancelReservationService(athleteId, reservationId);
 
   res.status(200).json({
     success: true,
@@ -57,10 +57,10 @@ const cancelReservationController = asyncHandler(async (req: AuthenticatedAthlet
   });
 });
 
-const getResourceAvailabilityController = asyncHandler(async (req: AuthenticatedAthleteRequest, res: Response) => {
+const getResourceAvailability = asyncHandler(async (req: AuthenticatedAthleteRequest, res: Response) => {
   const resourceId = String(req.params.resourceId);
   const date = String(req.query.date ?? '');
-  const data = await getResourceAvailability(resourceId, date);
+  const data = await getResourceAvailabilityService(resourceId, date);
 
   res.status(200).json({
     success: true,
@@ -68,10 +68,10 @@ const getResourceAvailabilityController = asyncHandler(async (req: Authenticated
   });
 });
 
-const createReservationController = asyncHandler(async (req: AuthenticatedAthleteRequest, res: Response) => {
+const createReservation = asyncHandler(async (req: AuthenticatedAthleteRequest, res: Response) => {
   const athleteId = String(req.auth?.userId);
   const body = req.body as CreateReservationBody;
-  const data = await createReservation(athleteId, body);
+  const data = await createReservationService(athleteId, body);
 
   res.status(201).json({
     success: true,
@@ -80,10 +80,10 @@ const createReservationController = asyncHandler(async (req: AuthenticatedAthlet
 });
 
 export {
-  cancelReservationController,
-  createReservationController,
-  getProfileController,
-  getResourceAvailabilityController,
-  getReservationsController,
-  updateProfileController,
+  cancelReservation,
+  createReservation,
+  getProfile,
+  getResourceAvailability,
+  getReservations,
+  updateProfile,
 };

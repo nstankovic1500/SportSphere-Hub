@@ -2,17 +2,17 @@ import { Router } from 'express';
 
 import { authMiddleware } from '../../middleware/auth.middleware';
 import {
-  adminLoginController,
-  currentUserController,
-  loginController,
-  registerController,
+  adminLogin,
+  currentUser,
+  login,
+  register,
 } from './auth.controller';
 
 const authRouter = Router();
 
-authRouter.post('/adminLogin', adminLoginController);
-authRouter.post('/login', loginController);
-authRouter.post('/register', registerController);
-authRouter.get('/current', authMiddleware, currentUserController);
+authRouter.post('/adminLogin', adminLogin);
+authRouter.post('/login', login);
+authRouter.post('/register', register);
+authRouter.get('/current', authMiddleware, currentUser);
 
 export { authRouter };

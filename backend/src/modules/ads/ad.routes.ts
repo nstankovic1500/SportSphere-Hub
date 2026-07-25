@@ -4,13 +4,13 @@ import { authMiddleware } from '../../middleware/auth.middleware';
 import { roleMiddleware } from '../../middleware/role.middleware';
 import { UserRole } from '../../models/User';
 import {
-  acceptApplyRequestController,
-  closeAdController,
-  createAdController,
-  getAdRequestsController,
-  getAdsController,
-  applyToAdController,
-  rejectApplyRequestController,
+  acceptApplyRequest,
+  closeAd,
+  createAd,
+  getAdRequests,
+  getAds,
+  applyToAd,
+  rejectApplyRequest,
 } from './ad.controller';
 
 const adRouter = Router();
@@ -19,16 +19,16 @@ const applyRequestRouter = Router();
 adRouter.use(authMiddleware);
 adRouter.use(roleMiddleware(UserRole.Athlete));
 
-adRouter.get('/', getAdsController);
-adRouter.post('/', createAdController);
-adRouter.patch('/:id/close', closeAdController);
-adRouter.post('/:id/apply', applyToAdController);
-adRouter.get('/:id/requests', getAdRequestsController);
+adRouter.get('/', getAds);
+adRouter.post('/', createAd);
+adRouter.patch('/:id/close', closeAd);
+adRouter.post('/:id/apply', applyToAd);
+adRouter.get('/:id/requests', getAdRequests);
 
 applyRequestRouter.use(authMiddleware);
 applyRequestRouter.use(roleMiddleware(UserRole.Athlete));
 
-applyRequestRouter.patch('/:id/accept', acceptApplyRequestController);
-applyRequestRouter.patch('/:id/reject', rejectApplyRequestController);
+applyRequestRouter.patch('/:id/accept', acceptApplyRequest);
+applyRequestRouter.patch('/:id/reject', rejectApplyRequest);
 
 export { adRouter, applyRequestRouter };
