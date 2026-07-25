@@ -113,14 +113,52 @@ interface UpdateEmployeeResourceBody {
   active?: boolean;
 }
 
+interface EmployeeTrainer {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  sports: EmployeeFavoriteSport[];
+  workingHours: IOpeningHour[];
+  active: boolean;
+  createdAt: Date;
+}
+
+interface CreateEmployeeTrainerBody {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  phone?: string;
+  sports?: string[];
+  workingHours?: IOpeningHour[];
+  biography?: string;
+  pricePerHour?: number;
+}
+
+interface UpdateEmployeeTrainerBody {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  phone?: string;
+  sports?: string[];
+  workingHours?: IOpeningHour[];
+  biography?: string;
+  pricePerHour?: number;
+  active?: boolean;
+}
+
 export type {
   CreateEmployeeFacilityBody,
   CreateEmployeeResourceBody,
+  CreateEmployeeTrainerBody,
   EmployeeFacility,
   EmployeeFavoriteSport,
   EmployeeProfile,
   EmployeeResource,
+  EmployeeTrainer,
   UpdateEmployeeFacilityBody,
   UpdateEmployeeProfileBody,
   UpdateEmployeeResourceBody,
+  UpdateEmployeeTrainerBody,
 };

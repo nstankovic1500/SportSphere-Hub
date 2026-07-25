@@ -1,20 +1,25 @@
 import { Types } from 'mongoose';
 
 import { Facility, FacilityStatus, type IFacility, type IOpeningHour } from '../../models/Facility';
+import { Appointment, AppointmentStatus } from '../../models/Appointment';
 import { Reservation, ReservationStatus } from '../../models/Reservation';
 import { Resource, ResourceType, type IResource } from '../../models/Resource';
 import { Sport, type ISport } from '../../models/Sport';
+import { Trainer, type ITrainer } from '../../models/Trainer';
 import { User, UserRole, type IUser } from '../../models/User';
 import { AppError } from '../../utils/AppError';
 import type {
   CreateEmployeeFacilityBody,
   CreateEmployeeResourceBody,
+  CreateEmployeeTrainerBody,
   EmployeeFacility,
   EmployeeProfile,
   EmployeeResource,
+  EmployeeTrainer,
   UpdateEmployeeFacilityBody,
   UpdateEmployeeProfileBody,
   UpdateEmployeeResourceBody,
+  UpdateEmployeeTrainerBody,
 } from './employee.types';
 
 type PopulatedSport = ISport & { _id: Types.ObjectId };
@@ -32,6 +37,11 @@ type FacilityWithSports = IFacility & {
 type PopulatedResource = IResource & {
   _id: Types.ObjectId;
   sportId: PopulatedSport;
+};
+
+type PopulatedTrainer = ITrainer & {
+  _id: Types.ObjectId;
+  sports: PopulatedSport[];
 };
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -111,6 +121,25 @@ const toEmployeeResource = (resource: PopulatedResource): EmployeeResource => {
     capacity: resource.capacity,
     equipmentDescription: resource.equipmentDescription,
     active: resource.active,
+  };
+};
+
+const toEmployeeTrainer = (trainer: PopulatedTrainer): EmployeeTrainer => {
+  const sports = (trainer.sports ?? []) as PopulatedSport[];
+
+  return {
+    id: trainer._id.toString(),
+    firstName: trainer.firstName,
+    lastName: trainer.lastName,
+    email: trainer.email,
+    phone: trainer.phone,
+    sports: sports.map((sport) => ({
+      id: sport._id.toString(),
+      name: sport.name,
+    })),
+    workingHours: trainer.workingHours ?? [],
+    active: trainer.active,
+    createdAt: trainer.createdAt ?? new Date(),
   };
 };
 
@@ -361,6 +390,26 @@ const validateEquipmentDescription = (value: unknown) => {
   }
 
   return equipmentDescription;
+};
+
+const validateBiography = (value: unknown) => {
+  const biography = requireTrimmedText(value, 'biography');
+
+  if (biography.length > 1000) {
+    throw new AppError('biography must be at most 1000 characters', 400);
+  }
+
+  return biography;
+};
+
+const validatePricePerHour = (value: unknown) => {
+  const pricePerHour = Number(value);
+
+  if (Number.isNaN(pricePerHour) || pricePerHour < 0) {
+    throw new AppError('pricePerHour must be greater than or equal to 0', 400);
+  }
+
+  return pricePerHour;
 };
 
 const validateFacilitySport = async (
@@ -799,15 +848,186 @@ const deleteResource = async (employeeId: string, resourceId: string) => {
   };
 };
 
+const getFacilityTrainers = async (employeeId: string, facilityId: string) => {
+  const facility = await getFacilityByEmployee(employeeId, facilityId);
+
+  const trainers = (await Trainer.find({
+    facilityId: facility._id,
+  })
+    .populate({
+      path: 'sports',
+      select: 'name',
+    })
+    .sort({ lastName: 1, firstName: 1 })
+    .lean()) as unknown as PopulatedTrainer[];
+
+  return {
+    trainers: trainers.map((trainer) => toEmployeeTrainer(trainer)),
+  };
+};
+
+const createTrainer = async (
+  employeeId: string,
+  facilityId: string,
+  body: CreateEmployeeTrainerBody,
+) => {
+  const facility = await getFacilityByEmployee(employeeId, facilityId);
+  const firstName = requireTrimmedText(body.firstName, 'firstName');
+  const lastName = requireTrimmedText(body.lastName, 'lastName');
+  const email = requireTrimmedText(body.email, 'email').toLowerCase();
+  const phone = requireTrimmedText(body.phone, 'phone');
+  const sports = await validateSports(body.sports ?? [], 1);
+  const workingHours = validateOpeningHours(body.workingHours ?? []);
+  const biography = validateBiography(body.biography);
+  const pricePerHour = validatePricePerHour(body.pricePerHour);
+
+  if (!emailPattern.test(email)) {
+    throw new AppError('email must be valid', 400);
+  }
+
+  const existingTrainer = await Trainer.findOne({ email });
+
+  if (existingTrainer) {
+    throw new AppError('email already exists', 409);
+  }
+
+  const createdTrainer = await Trainer.create({
+    firstName,
+    lastName,
+    email,
+    phone,
+    facilityId: facility._id,
+    sports,
+    workingHours,
+    biography,
+    pricePerHour,
+    active: true,
+    createdAt: new Date(),
+  });
+
+  const trainer = (await Trainer.findById(createdTrainer._id)
+    .populate({
+      path: 'sports',
+      select: 'name',
+    })
+    .lean()) as unknown as PopulatedTrainer | null;
+
+  if (!trainer) {
+    throw new AppError('Trainer not found', 404);
+  }
+
+  return {
+    trainer: toEmployeeTrainer(trainer),
+  };
+};
+
+const updateTrainer = async (
+  employeeId: string,
+  trainerId: string,
+  body: UpdateEmployeeTrainerBody,
+) => {
+  validateObjectId(trainerId, 'trainer id');
+
+  const trainer = await Trainer.findById(trainerId);
+
+  if (!trainer) {
+    throw new AppError('Trainer not found', 404);
+  }
+
+  await getFacilityByEmployee(employeeId, trainer.facilityId.toString());
+
+  const firstName = requireTrimmedText(body.firstName, 'firstName');
+  const lastName = requireTrimmedText(body.lastName, 'lastName');
+  const email = requireTrimmedText(body.email, 'email').toLowerCase();
+  const phone = requireTrimmedText(body.phone, 'phone');
+  const sports = await validateSports(body.sports ?? [], 1);
+  const workingHours = validateOpeningHours(body.workingHours ?? []);
+  const biography = validateBiography(body.biography);
+  const pricePerHour = validatePricePerHour(body.pricePerHour);
+  const active = typeof body.active === 'boolean' ? body.active : trainer.active;
+
+  if (!emailPattern.test(email)) {
+    throw new AppError('email must be valid', 400);
+  }
+
+  const existingTrainer = await Trainer.findOne({
+    email,
+    _id: { $ne: trainer._id },
+  });
+
+  if (existingTrainer) {
+    throw new AppError('email already exists', 409);
+  }
+
+  trainer.firstName = firstName;
+  trainer.lastName = lastName;
+  trainer.email = email;
+  trainer.phone = phone;
+  trainer.sports = sports;
+  trainer.workingHours = workingHours;
+  trainer.biography = biography;
+  trainer.pricePerHour = pricePerHour;
+  trainer.active = active;
+
+  await trainer.save();
+
+  const updatedTrainer = (await Trainer.findById(trainer._id)
+    .populate({
+      path: 'sports',
+      select: 'name',
+    })
+    .lean()) as unknown as PopulatedTrainer | null;
+
+  if (!updatedTrainer) {
+    throw new AppError('Trainer not found', 404);
+  }
+
+  return {
+    trainer: toEmployeeTrainer(updatedTrainer),
+  };
+};
+
+const deleteTrainer = async (employeeId: string, trainerId: string) => {
+  validateObjectId(trainerId, 'trainer id');
+
+  const trainer = await Trainer.findById(trainerId);
+
+  if (!trainer) {
+    throw new AppError('Trainer not found', 404);
+  }
+
+  await getFacilityByEmployee(employeeId, trainer.facilityId.toString());
+
+  const futureAppointment = await Appointment.findOne({
+    trainerId: trainer._id,
+    startTime: { $gt: new Date() },
+    status: { $ne: AppointmentStatus.Cancelled },
+  }).select('_id');
+
+  if (futureAppointment) {
+    throw new AppError('Trainer cannot be deleted because of future non-cancelled appointments', 400);
+  }
+
+  await Trainer.deleteOne({ _id: trainer._id });
+
+  return {
+    message: 'Trainer deleted successfully',
+  };
+};
+
 export {
   createFacility,
   createResource,
+  createTrainer,
   deleteResource,
+  deleteTrainer,
   getFacilities,
   getFacility,
   getFacilityResources,
+  getFacilityTrainers,
   getProfile,
   updateProfile,
   updateFacility,
   updateResource,
+  updateTrainer,
 };
