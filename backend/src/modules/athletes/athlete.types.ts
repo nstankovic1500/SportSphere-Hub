@@ -139,6 +139,10 @@ interface AthleteOrder {
   createdAt: Date;
 }
 
+interface UpdateAthleteOrderStatusBody {
+  status?: OrderStatus;
+}
+
 interface AuthenticatedAthleteRequest extends Request {
   auth?: {
     userId: string;
@@ -161,6 +165,7 @@ export type {
   CreateTrainingAppointmentBody,
   AuthenticatedAthleteRequest,
   ResourceAvailability,
+  UpdateAthleteOrderStatusBody,
   UpdateCartItemBody,
   UpdateAthleteProfileBody,
 };

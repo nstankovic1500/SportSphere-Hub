@@ -6,6 +6,7 @@ import type {
   CartItemBody,
   CreateReservationBody,
   CreateTrainingAppointmentBody,
+  UpdateAthleteOrderStatusBody,
   UpdateCartItemBody,
   UpdateAthleteProfileBody,
 } from './athlete.types';
@@ -23,6 +24,7 @@ import {
   getReservations as getReservationsService,
   getResourceAvailability as getResourceAvailabilityService,
   getTrainingAppointments as getTrainingAppointmentsService,
+  updateOrderStatus as updateOrderStatusService,
   updateCartItem as updateCartItemService,
   updateProfile as updateProfileService,
 } from './athlete.service';
@@ -165,6 +167,18 @@ const getOrders = asyncHandler(async (req: AuthenticatedAthleteRequest, res: Res
   });
 });
 
+const updateOrderStatus = asyncHandler(async (req: AuthenticatedAthleteRequest, res: Response) => {
+  const athleteId = String(req.auth?.userId);
+  const orderId = String(req.params.id);
+  const body = req.body as UpdateAthleteOrderStatusBody;
+  const data = await updateOrderStatusService(athleteId, orderId, body);
+
+  res.status(200).json({
+    success: true,
+    data,
+  });
+});
+
 const createTrainingAppointment = asyncHandler(async (req: AuthenticatedAthleteRequest, res: Response) => {
   const athleteId = String(req.auth?.userId);
   const body = req.body as CreateTrainingAppointmentBody;
@@ -201,6 +215,7 @@ export {
   getResourceAvailability,
   getReservations,
   getTrainingAppointments,
+  updateOrderStatus,
   updateCartItem,
   updateProfile,
 };

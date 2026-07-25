@@ -6,6 +6,8 @@ import { environment } from '../../../environments/environment';
 import type {
   ApiResponse,
   EmployeeCreatedFacilityApiResponse,
+  EmployeeOrderApiResponse,
+  EmployeeOrdersApiResponse,
   EmployeeProductApiResponse,
   EmployeeProductsApiResponse,
   EmployeePromotionApiResponse,
@@ -22,6 +24,7 @@ import type {
 } from '../models/api-response.model';
 import type {
   CreateEmployeeFacilityRequest,
+  EmployeeOrder,
   EmployeeProductRequest,
   CreateEmployeePromotionRequest,
   CreateEmployeeResourceRequest,
@@ -29,6 +32,7 @@ import type {
   EmployeeAttendanceType,
   UpdateEmployeePromotionRequest,
   UpdateEmployeeFacilityRequest,
+  UpdateEmployeeOrderStatusRequest,
   UpdateEmployeeProfileRequest,
   UpdateEmployeeResourceRequest,
   UpdateEmployeeTrainerRequest,
@@ -85,6 +89,12 @@ export class EmployeeService {
     );
   }
 
+  getOrders(facilityId: string) {
+    return this.http.get<EmployeeOrdersApiResponse>(
+      `${environment.apiUrl}/employees/facilities/${facilityId}/orders`,
+    );
+  }
+
   getProducts(facilityId: string, active?: boolean) {
     let params = new HttpParams();
 
@@ -135,6 +145,13 @@ export class EmployeeService {
   updateProduct(productId: string, payload: EmployeeProductRequest) {
     return this.http.patch<EmployeeProductApiResponse>(
       `${environment.apiUrl}/employees/products/${productId}`,
+      payload,
+    );
+  }
+
+  updateOrderStatus(orderId: string, payload: UpdateEmployeeOrderStatusRequest) {
+    return this.http.patch<EmployeeOrderApiResponse>(
+      `${environment.apiUrl}/employees/orders/${orderId}/status`,
       payload,
     );
   }

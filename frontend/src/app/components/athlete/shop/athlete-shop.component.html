@@ -1,0 +1,109 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>Shop</h1>
+      <p>Browse active products across available facilities.</p>
+    </div>
+    <div class="header-links">
+      <a routerLink="/athlete/cart">Cart</a>
+      <a routerLink="/athlete/orders">My Orders</a>
+    </div>
+  </header>
+
+  <section class="panel filter-panel">
+    <form [formGroup]="filterForm" class="filter-form">
+      <div class="field">
+        <label for="facilityId">Facility</label>
+        <select id="facilityId" formControlName="facilityId">
+          <option value="">All facilities</option>
+          @for (facility of facilities; track facility.id) {
+            <option [value]="facility.id">{{ facility.name }} - {{ facility.city }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="category">Category</label>
+        <select id="category" formControlName="category">
+          <option value="">All categories</option>
+          @for (category of categories; track category) {
+            <option [value]="category">{{ category }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="name">Search</label>
+        <input id="name" type="text" formControlName="name" placeholder="Name or description" />
+      </div>
+    </form>
+  </section>
+
+  @if (successMessage) {
+    <p class="message success">{{ successMessage }}</p>
+  }
+
+  @if (isLoading) {
+    <p class="state-message">Loading products...</p>
+  } @else if (errorMessage && filteredProducts.length === 0) {
+    <p class="state-message error">{{ errorMessage }}</p>
+  } @else if (filteredProducts.length === 0) {
+    <section class="panel">
+      <p class="state-message">No products found.</p>
+    </section>
+  } @else {
+    @if (errorMessage) {
+      <p class="message error">{{ errorMessage }}</p>
+    }
+
+    <section class="products-grid">
+      @for (product of filteredProducts; track product.id) {
+        <article class="product-card">
+          <img
+            [src]="product.image || 'https://placehold.co/320x180?text=Product'"
+            [alt]="product.name"
+            (error)="onImageError($event)" />
+
+          <div class="product-content">
+            <div class="product-meta">
+              <h2>{{ product.name }}</h2>
+              <span class="category">{{ product.category }}</span>
+            </div>
+
+            <p class="description">{{ product.description }}</p>
+            <p><strong>Facility:</strong> {{ product.facility.name }}</p>
+            <p><strong>Price:</strong> {{ product.price }} RSD</p>
+            <p><strong>Stock:</strong> {{ product.stock }}</p>
+
+            <div class="quantity-row">
+              <label [for]="'quantity-' + product.id">Quantity</label>
+              <input
+                [id]="'quantity-' + product.id"
+                type="number"
+                min="1"
+                [max]="product.stock"
+                [value]="getQuantity(product.id)"
+                (input)="setQuantity(product.id, $any($event.target).value, product.stock)" />
+            </div>
+
+            <button
+              type="button"
+              [class.added]="isAdded(product.id)"
+              [disabled]="product.stock === 0 || isAdding(product.id)"
+              (click)="addToCart(product)">
+              {{
+                product.stock === 0
+                  ? 'Out of stock'
+                  : isAdding(product.id)
+                    ? 'Adding...'
+                    : isAdded(product.id)
+                      ? 'Added to cart!'
+                      : 'Add to Cart'
+              }}
+            </button>
+          </div>
+        </article>
+      }
+    </section>
+  }
+</section>

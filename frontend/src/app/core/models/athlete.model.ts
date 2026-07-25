@@ -72,3 +72,53 @@ export interface CreateFacilityReviewRequest {
   reaction: 'like' | 'dislike';
   comment: string;
 }
+
+export interface AthleteCartItem {
+  id: string;
+  productId: string;
+  name: string;
+  quantity: number;
+  price: number;
+  category: string;
+  image: string | null;
+  facility: {
+    id: string;
+    name: string;
+    city: string;
+  };
+  lineTotal: number;
+}
+
+export interface AthleteCartResponseData {
+  items: AthleteCartItem[];
+  totalPrice: number;
+}
+
+export interface AthleteCartItemRequest {
+  productId: string;
+  quantity: number;
+}
+
+export interface AthleteCartQuantityRequest {
+  quantity: number;
+}
+
+export interface AthleteOrderItem {
+  productId: string;
+  name: string;
+  quantity: number;
+  priceAtPurchase: number;
+}
+
+export interface AthleteOrder {
+  id: string;
+  facility: {
+    id: string;
+    name: string;
+    city: string;
+  };
+  items: AthleteOrderItem[];
+  totalPrice: number;
+  status: 'pending' | 'processing' | 'completed' | 'cancelled';
+  createdAt: string;
+}

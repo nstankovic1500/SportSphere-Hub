@@ -2,8 +2,15 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 
 import { environment } from '../../../environments/environment';
-import type { ApiResponse } from '../models/api-response.model';
 import type {
+  ApiResponse,
+  AthleteCartApiResponse,
+  AthleteOrderApiResponse,
+  AthleteOrdersApiResponse,
+} from '../models/api-response.model';
+import type {
+  AthleteCartItemRequest,
+  AthleteCartQuantityRequest,
   AthleteReservationRequest,
   AthleteProfile,
   AthleteReservation,
@@ -67,6 +74,52 @@ export class AthleteService {
     return this.http.post<ApiResponse<{ review: FacilityComment }>>(
       `${environment.apiUrl}/facilities/${facilityId}/reviews`,
       payload,
+    );
+  }
+
+  getCart() {
+    return this.http.get<AthleteCartApiResponse>(
+      `${environment.apiUrl}/athletes/cart`,
+    );
+  }
+
+  addCartItem(payload: AthleteCartItemRequest) {
+    return this.http.post<AthleteCartApiResponse>(
+      `${environment.apiUrl}/cart/items`,
+      payload,
+    );
+  }
+
+  updateCartItem(itemId: string, payload: AthleteCartQuantityRequest) {
+    return this.http.patch<AthleteCartApiResponse>(
+      `${environment.apiUrl}/cart/items/${itemId}`,
+      payload,
+    );
+  }
+
+  deleteCartItem(itemId: string) {
+    return this.http.delete<AthleteCartApiResponse>(
+      `${environment.apiUrl}/cart/items/${itemId}`,
+    );
+  }
+
+  checkoutOrders() {
+    return this.http.post<AthleteOrdersApiResponse>(
+      `${environment.apiUrl}/orders`,
+      {},
+    );
+  }
+
+  getOrders() {
+    return this.http.get<AthleteOrdersApiResponse>(
+      `${environment.apiUrl}/athletes/orders`,
+    );
+  }
+
+  updateOrderStatus(orderId: string, status: 'cancelled') {
+    return this.http.patch<AthleteOrderApiResponse>(
+      `${environment.apiUrl}/athletes/orders/${orderId}/status`,
+      { status },
     );
   }
 }

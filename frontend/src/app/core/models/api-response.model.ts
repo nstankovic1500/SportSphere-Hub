@@ -12,6 +12,8 @@ import type {
   FacilityDetailsResponseData,
   FacilityReviewsResponseData,
   HomeResponseData,
+  PublicProductResponseData,
+  PublicProductsResponseData,
 } from './public.model';
 import type {
   AdCreateResponseData,
@@ -21,6 +23,7 @@ import type {
 } from './ad.model';
 import type {
   CreateEmployeeFacilityRequest,
+  EmployeeOrder,
   EmployeeAttendanceResponse,
   EmployeeAttendanceUpdateResponse,
   EmployeeProduct,
@@ -31,6 +34,10 @@ import type {
   EmployeeResource,
   EmployeeTrainer,
 } from './employee.model';
+import type {
+  AthleteCartResponseData,
+  AthleteOrder,
+} from './athlete.model';
 import type {
   AthleteTrainingAppointment,
   TrainerAvailability,
@@ -72,6 +79,8 @@ export type PublicCitiesApiResponse = ApiResponse<CitiesResponseData>;
 export type PublicFacilitiesApiResponse = ApiResponse<FacilitiesResponseData>;
 export type PublicFacilityDetailsApiResponse = ApiResponse<FacilityDetailsResponseData>;
 export type PublicFacilityReviewsApiResponse = ApiResponse<FacilityReviewsResponseData>;
+export type PublicProductsApiResponse = ApiResponse<PublicProductsResponseData>;
+export type PublicProductApiResponse = ApiResponse<PublicProductResponseData>;
 export type AdListApiResponse = ApiResponse<AdListResponseData>;
 export type AdCreateApiResponse = ApiResponse<AdCreateResponseData>;
 export type AdRequestsApiResponse = ApiResponse<AdRequestsResponseData>;
@@ -86,6 +95,8 @@ export type EmployeeTrainersApiResponse = ApiResponse<{ trainers: EmployeeTraine
 export type EmployeeCreatedTrainerApiResponse = ApiResponse<{ trainer: EmployeeTrainer }>;
 export type EmployeeAttendanceApiResponse = ApiResponse<EmployeeAttendanceResponse>;
 export type EmployeeAttendanceUpdateApiResponse = ApiResponse<EmployeeAttendanceUpdateResponse>;
+export type EmployeeOrdersApiResponse = ApiResponse<{ orders: EmployeeOrder[] }>;
+export type EmployeeOrderApiResponse = ApiResponse<{ order: EmployeeOrder }>;
 export type EmployeeProductsApiResponse = ApiResponse<{ products: EmployeeProduct[] }>;
 export type EmployeeProductApiResponse = ApiResponse<{ product: EmployeeProduct }>;
 export type EmployeePromotionsApiResponse = ApiResponse<{ promotions: EmployeePromotion[] }>;
@@ -97,3 +108,6 @@ export type AthleteTrainingAppointmentsApiResponse =
   ApiResponse<{ appointments: AthleteTrainingAppointment[] }>;
 export type AthleteTrainingAppointmentApiResponse =
   ApiResponse<{ appointment: AthleteTrainingAppointment }>;
+export type AthleteCartApiResponse = ApiResponse<AthleteCartResponseData>;
+export type AthleteOrdersApiResponse = ApiResponse<{ orders: AthleteOrder[] }>;
+export type AthleteOrderApiResponse = ApiResponse<{ order: AthleteOrder }>;

@@ -119,3 +119,35 @@ export interface FacilitiesQueryParams {
   sortBy?: 'name' | 'city';
   sortOrder?: 'asc' | 'desc';
 }
+
+export interface PublicProduct {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  stock: number;
+  category: string;
+  image: string | null;
+  facility: {
+    id: string;
+    name: string;
+    city: string;
+  };
+}
+
+export interface PublicProductFacilityGroup {
+  facility: {
+    id: string;
+    name: string;
+    city: string;
+  };
+  products: PublicProduct[];
+}
+
+export interface PublicProductsResponseData {
+  facilities: PublicProductFacilityGroup[];
+}
+
+export interface PublicProductResponseData {
+  product: PublicProduct;
+}

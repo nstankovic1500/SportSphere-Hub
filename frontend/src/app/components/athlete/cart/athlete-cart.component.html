@@ -1,0 +1,90 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>Cart</h1>
+      <p>Review your selected products before checkout.</p>
+    </div>
+    <div class="header-links">
+      <a routerLink="/athlete/shop">Back to shop</a>
+      <a routerLink="/athlete/orders">My Orders</a>
+    </div>
+  </header>
+
+  @if (successMessage) {
+    <p class="message success">{{ successMessage }}</p>
+  }
+
+  @if (isLoading) {
+    <p class="state-message">Loading cart...</p>
+  } @else if (errorMessage && items.length === 0) {
+    <p class="state-message error">{{ errorMessage }}</p>
+  } @else if (items.length === 0) {
+    <section class="panel">
+      <p class="state-message">Your cart is empty.</p>
+    </section>
+  } @else {
+    @if (errorMessage) {
+      <p class="message error">{{ errorMessage }}</p>
+    }
+
+    <section class="panel">
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Facility</th>
+              <th>Unit Price</th>
+              <th>Quantity</th>
+              <th>Subtotal</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of items; track item.id) {
+              <tr>
+                <td class="product-cell">
+                  <img
+                    [src]="item.image || 'https://placehold.co/120x120?text=Product'"
+                    [alt]="item.name"
+                    (error)="onImageError($event)" />
+                  <div>
+                    <strong>{{ item.name }}</strong>
+                    <div>{{ item.category }}</div>
+                  </div>
+                </td>
+                <td>{{ item.facility.name }}</td>
+                <td>{{ formatCurrency(item.price) }}</td>
+                <td>
+                  <div class="quantity-controls">
+                    <button type="button" [disabled]="item.quantity <= 1 || isUpdating(item.id)" (click)="updateQuantity(item, item.quantity - 1)">-</button>
+                    <input
+                      type="number"
+                      min="1"
+                      [value]="item.quantity"
+                      [disabled]="isUpdating(item.id)"
+                      (change)="onQuantityInput(item, $any($event.target).value)" />
+                    <button type="button" [disabled]="isUpdating(item.id)" (click)="updateQuantity(item, item.quantity + 1)">+</button>
+                  </div>
+                </td>
+                <td>{{ formatCurrency(item.lineTotal) }}</td>
+                <td>
+                  <button type="button" class="secondary-button" [disabled]="isUpdating(item.id)" (click)="removeItem(item)">
+                    {{ isUpdating(item.id) ? 'Working...' : 'Remove' }}
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="cart-footer">
+        <p><strong>Total:</strong> {{ formatCurrency(totalPrice) }}</p>
+        <button type="button" [disabled]="items.length === 0 || isCheckingOut" (click)="checkout()">
+          {{ isCheckingOut ? 'Checking out...' : 'Checkout' }}
+        </button>
+      </div>
+    </section>
+  }
+</section>

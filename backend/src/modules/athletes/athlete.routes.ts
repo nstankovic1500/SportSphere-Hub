@@ -17,6 +17,7 @@ import {
   getResourceAvailability,
   getReservations,
   getTrainingAppointments,
+  updateOrderStatus,
   updateCartItem,
   updateProfile,
 } from './athlete.controller';
@@ -30,6 +31,7 @@ athleteRouter.get('/profile', getProfile);
 athleteRouter.patch('/profile', updateProfile);
 athleteRouter.get('/cart', getCart);
 athleteRouter.get('/orders', getOrders);
+athleteRouter.patch('/orders/:id/status', updateOrderStatus);
 athleteRouter.get('/resources/:resourceId/availability', getResourceAvailability);
 athleteRouter.get('/reservations', getReservations);
 athleteRouter.post('/reservations', createReservation);

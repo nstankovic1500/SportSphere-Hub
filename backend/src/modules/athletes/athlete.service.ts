@@ -22,6 +22,7 @@ import type {
   CreateReservationBody,
   ResourceAvailability,
   TrainingAppointment,
+  UpdateAthleteOrderStatusBody,
   UpdateCartItemBody,
   UpdateAthleteProfileBody,
 } from './athlete.types';
@@ -1152,8 +1153,22 @@ const checkoutOrders = async (athleteId: string) => {
       const product = productMap.get(item.productId);
 
       if (product) {
-        product.stock -= item.quantity;
-        await product.save();
+        const updatedProduct = await Product.findOneAndUpdate(
+          {
+            _id: product._id,
+            stock: { $gte: item.quantity },
+          },
+          {
+            $inc: { stock: -item.quantity },
+          },
+          {
+            new: true,
+          },
+        ).select('_id');
+
+        if (!updatedProduct) {
+          throw new AppError(`Insufficient stock for ${item.name}`, 400);
+        }
       }
     }
   }
@@ -1192,6 +1207,53 @@ const getOrders = async (athleteId: string) => {
   };
 };
 
+const updateOrderStatus = async (
+  athleteId: string,
+  orderId: string,
+  body: UpdateAthleteOrderStatusBody,
+) => {
+  if (!Types.ObjectId.isValid(orderId)) {
+    throw new AppError('Invalid order id', 400);
+  }
+
+  const status = String(body.status ?? '').trim() as OrderStatus;
+
+  if (status !== OrderStatus.Cancelled) {
+    throw new AppError('Athlete can only set order status to cancelled', 400);
+  }
+
+  const order = await Order.findOne({
+    _id: new Types.ObjectId(orderId),
+    athleteId: new Types.ObjectId(athleteId),
+  });
+
+  if (!order) {
+    throw new AppError('Order not found', 404);
+  }
+
+  if (order.status === OrderStatus.Completed || order.status === OrderStatus.Cancelled) {
+    throw new AppError('Only active orders can be cancelled', 400);
+  }
+
+  order.status = OrderStatus.Cancelled;
+  await order.save();
+
+  const updatedOrder = (await Order.findById(order._id)
+    .populate({
+      path: 'facilityId',
+      select: 'name city',
+    })
+    .lean()) as unknown as PopulatedOrder | null;
+
+  if (!updatedOrder) {
+    throw new AppError('Order not found', 404);
+  }
+
+  return {
+    order: toAthleteOrder(updatedOrder),
+  };
+};
+
 export {
   addCartItem,
   cancelTrainingAppointment,
@@ -1206,6 +1268,7 @@ export {
   getReservations,
   getResourceAvailability,
   getTrainingAppointments,
+  updateOrderStatus,
   updateCartItem,
   updateProfile,
 };

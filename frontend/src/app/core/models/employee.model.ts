@@ -210,3 +210,26 @@ export interface EmployeeProductRequest {
   image: string;
   active?: boolean;
 }
+
+export interface EmployeeOrderItem {
+  productId: string;
+  name: string;
+  quantity: number;
+  priceAtPurchase: number;
+}
+
+export interface EmployeeOrder {
+  id: string;
+  athleteId: string;
+  athleteName: string;
+  facilityId: string;
+  facilityName: string;
+  items: EmployeeOrderItem[];
+  totalPrice: number;
+  status: 'pending' | 'processing' | 'completed' | 'cancelled';
+  createdAt: string;
+}
+
+export interface UpdateEmployeeOrderStatusRequest {
+  status: 'pending' | 'processing' | 'completed' | 'cancelled';
+}
