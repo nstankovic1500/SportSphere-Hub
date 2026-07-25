@@ -5,15 +5,18 @@ import { roleMiddleware } from '../../middleware/role.middleware';
 import { UserRole } from '../../models/User';
 import {
   createFacility,
+  createProduct,
   createPromotion,
   createResource,
   createTrainer,
+  deleteProduct,
   deletePromotion,
   deleteResource,
   deleteTrainer,
   getAttendance,
   getFacilities,
   getFacility,
+  getFacilityProducts,
   getFacilityPromotions,
   getFacilityResources,
   getFacilityTrainers,
@@ -23,6 +26,7 @@ import {
   markTrainingCompleted,
   markTrainingNoShow,
   updateFacility,
+  updateProduct,
   updatePromotion,
   updateProfile,
   updateResource,
@@ -41,12 +45,16 @@ employeeRouter.post('/facilities', createFacility);
 employeeRouter.get('/facilities/:facilityId', getFacility);
 employeeRouter.patch('/facilities/:facilityId', updateFacility);
 employeeRouter.get('/facilities/:facilityId/attendance', getAttendance);
+employeeRouter.get('/facilities/:facilityId/products', getFacilityProducts);
+employeeRouter.post('/facilities/:facilityId/products', createProduct);
 employeeRouter.get('/facilities/:facilityId/promotions', getFacilityPromotions);
 employeeRouter.post('/facilities/:facilityId/promotions', createPromotion);
 employeeRouter.get('/facilities/:facilityId/resources', getFacilityResources);
 employeeRouter.post('/facilities/:facilityId/resources', createResource);
 employeeRouter.get('/facilities/:facilityId/trainers', getFacilityTrainers);
 employeeRouter.post('/facilities/:facilityId/trainers', createTrainer);
+employeeRouter.patch('/products/:productId', updateProduct);
+employeeRouter.delete('/products/:productId', deleteProduct);
 employeeRouter.patch('/promotions/:promotionId', updatePromotion);
 employeeRouter.delete('/promotions/:promotionId', deletePromotion);
 employeeRouter.patch('/resources/:resourceId', updateResource);

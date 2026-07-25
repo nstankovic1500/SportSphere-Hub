@@ -2,7 +2,9 @@ import { Types } from 'mongoose';
 
 import { Facility, FacilityStatus, type IFacility, type IOpeningHour } from '../../models/Facility';
 import { Appointment, AppointmentStatus, type IAppointment } from '../../models/Appointment';
+import { Order, OrderStatus } from '../../models/Order';
 import { Promotion, DiscountType, type IPromotion } from '../../models/Promotion';
+import { Product, type IProduct } from '../../models/Product';
 import { Reservation, ReservationStatus, type IReservation } from '../../models/Reservation';
 import { Resource, ResourceType, type IResource } from '../../models/Resource';
 import { Sport, type ISport } from '../../models/Sport';
@@ -16,11 +18,13 @@ import type {
 } from './attendance.types';
 import type {
   CreateEmployeeFacilityBody,
+  EmployeeProductBody,
   CreateEmployeePromotionBody,
   CreateEmployeeResourceBody,
   CreateEmployeeTrainerBody,
   EmployeeFacility,
   EmployeeProfile,
+  EmployeeProduct,
   EmployeePromotion,
   EmployeeResource,
   EmployeeTrainer,
@@ -56,6 +60,10 @@ type PopulatedTrainer = ITrainer & {
 type PopulatedPromotion = IPromotion & {
   _id: Types.ObjectId;
   sportId: PopulatedSport;
+};
+
+type ProductDocument = IProduct & {
+  _id: Types.ObjectId;
 };
 
 type AttendanceAthlete = {
@@ -219,6 +227,17 @@ const toEmployeePromotion = (promotion: PopulatedPromotion): EmployeePromotion =
   discountValue: promotion.discountValue,
   active: promotion.active,
   state: getPromotionState(promotion),
+});
+
+const toEmployeeProduct = (product: ProductDocument): EmployeeProduct => ({
+  id: product._id.toString(),
+  name: product.name,
+  description: product.description,
+  price: product.price,
+  stock: product.stock,
+  category: product.category,
+  image: product.image ?? '',
+  active: product.active,
 });
 
 const getEmployee = async (employeeId: string) => {
@@ -596,6 +615,36 @@ const validatePromotionDate = (value: unknown, fieldName: string) => {
   return parsedDate;
 };
 
+const validateProductDescription = (value: unknown) => {
+  const description = requireTrimmedText(value, 'description');
+
+  if (description.length > 500) {
+    throw new AppError('description must be at most 500 characters', 400);
+  }
+
+  return description;
+};
+
+const validateProductPrice = (value: unknown) => {
+  const price = Number(value);
+
+  if (Number.isNaN(price) || price < 0) {
+    throw new AppError('price must be greater than or equal to 0', 400);
+  }
+
+  return price;
+};
+
+const validateProductStock = (value: unknown) => {
+  const stock = Number(value);
+
+  if (!Number.isInteger(stock) || stock < 0) {
+    throw new AppError('stock must be a non-negative integer', 400);
+  }
+
+  return stock;
+};
+
 const validateResourceType = (value: unknown) => {
   const type = String(value ?? '').trim() as ResourceType;
 
@@ -712,6 +761,57 @@ const validatePromotionPayload = async (
     endDate,
     discountType,
     discountValue,
+  };
+};
+
+const getProductByEmployee = async (employeeId: string, productId: string) => {
+  validateObjectId(productId, 'product id');
+
+  const product = await Product.findById(productId);
+
+  if (!product) {
+    throw new AppError('Product not found', 404);
+  }
+
+  await getFacilityByEmployee(employeeId, product.facilityId.toString());
+
+  return product;
+};
+
+const validateProductPayload = async (
+  facilityId: Types.ObjectId,
+  body: EmployeeProductBody | EmployeeProductBody,
+  currentProduct?: ProductDocument,
+) => {
+  const name = requireTrimmedText(body.name, 'name');
+  const description = validateProductDescription(body.description);
+  const price = validateProductPrice(body.price);
+  const stock = validateProductStock(body.stock);
+  const category = requireTrimmedText(body.category, 'category');
+  const image = typeof body.image === 'string' ? body.image.trim() : '';
+  const active = typeof body.active === 'boolean' ? body.active : true;
+
+  const existingProduct = await Product.findOne({
+    facilityId,
+    name: {
+      $regex: `^${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`,
+      $options: 'i',
+    },
+    ...(currentProduct ? { _id: { $ne: currentProduct._id } } : {}),
+  }).select('_id');
+
+  if (existingProduct) {
+    throw new AppError('Product name must be unique inside the facility', 409);
+  }
+
+  return {
+    name,
+    description,
+    price,
+    stock,
+    category,
+    image,
+    active,
   };
 };
 
@@ -1391,6 +1491,103 @@ const deletePromotion = async (employeeId: string, promotionId: string) => {
   };
 };
 
+const getFacilityProducts = async (
+  employeeId: string,
+  facilityId: string,
+  active?: string,
+) => {
+  const facility = await getFacilityByEmployee(employeeId, facilityId);
+  const filters: {
+    facilityId: Types.ObjectId;
+    active?: boolean;
+  } = {
+    facilityId: facility._id as Types.ObjectId,
+  };
+
+  if (typeof active === 'string' && active.trim().length > 0) {
+    if (active !== 'true' && active !== 'false') {
+      throw new AppError('active filter must be true or false', 400);
+    }
+
+    filters.active = active === 'true';
+  }
+
+  const products = (await Product.find(filters).sort({ name: 1 }).lean()) as ProductDocument[];
+
+  return {
+    products: products.map((product) => toEmployeeProduct(product)),
+  };
+};
+
+const createProduct = async (
+  employeeId: string,
+  facilityId: string,
+  body: EmployeeProductBody,
+) => {
+  const facility = await getFacilityByEmployee(employeeId, facilityId);
+  const payload = await validateProductPayload(facility._id as Types.ObjectId, body);
+
+  const product = await Product.create({
+    facilityId: facility._id,
+    name: payload.name,
+    description: payload.description,
+    price: payload.price,
+    stock: payload.stock,
+    category: payload.category,
+    image: payload.image,
+    active: payload.active,
+  });
+
+  return {
+    product: toEmployeeProduct(product.toObject()),
+  };
+};
+
+const updateProduct = async (
+  employeeId: string,
+  productId: string,
+  body: EmployeeProductBody,
+) => {
+  const product = await getProductByEmployee(employeeId, productId);
+  const payload = await validateProductPayload(product.facilityId, body, product);
+
+  product.name = payload.name;
+  product.description = payload.description;
+  product.price = payload.price;
+  product.stock = payload.stock;
+  product.category = payload.category;
+  product.image = payload.image;
+  product.active = payload.active;
+
+  await product.save();
+
+  return {
+    product: toEmployeeProduct(product.toObject()),
+  };
+};
+
+const deleteProduct = async (employeeId: string, productId: string) => {
+  const product = await getProductByEmployee(employeeId, productId);
+
+  const unfinishedOrder = await Order.findOne({
+    facilityId: product.facilityId,
+    status: {
+      $in: [OrderStatus.Ordered, OrderStatus.Accepted],
+    },
+    'items.productId': product._id,
+  }).select('_id');
+
+  if (unfinishedOrder) {
+    throw new AppError('Product cannot be deleted while it exists in unfinished orders', 400);
+  }
+
+  await Product.deleteOne({ _id: product._id });
+
+  return {
+    message: 'Product deleted successfully',
+  };
+};
+
 const getAttendance = async (
   employeeId: string,
   facilityId: string,
@@ -1595,8 +1792,10 @@ const markTrainingAttendance = async (
 };
 
 export {
+  createProduct,
   createPromotion,
   getAttendance,
+  getFacilityProducts,
   getFacilityPromotions,
   markReservationAttendance,
   markTrainingAttendance,
@@ -1605,9 +1804,11 @@ export {
   createTrainer,
   deleteResource,
   deleteTrainer,
+  deleteProduct,
   deletePromotion,
   getFacilities,
   getFacility,
+  updateProduct,
   updatePromotion,
   getFacilityResources,
   getFacilityTrainers,

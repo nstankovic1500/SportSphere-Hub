@@ -182,14 +182,37 @@ interface UpdateEmployeePromotionBody {
   active?: boolean;
 }
 
+interface EmployeeProduct {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  stock: number;
+  category: string;
+  image: string | null;
+  active: boolean;
+}
+
+interface EmployeeProductBody {
+  name?: string;
+  description?: string;
+  price?: number;
+  stock?: number;
+  category?: string;
+  image?: string;
+  active?: boolean;
+}
+
 export type {
   CreateEmployeeFacilityBody,
+  EmployeeProductBody,
   CreateEmployeePromotionBody,
   CreateEmployeeResourceBody,
   CreateEmployeeTrainerBody,
   EmployeeFacility,
   EmployeeFavoriteSport,
   EmployeeProfile,
+  EmployeeProduct,
   EmployeePromotion,
   EmployeeResource,
   EmployeeTrainer,

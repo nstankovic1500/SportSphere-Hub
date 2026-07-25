@@ -7,10 +7,12 @@ import { ReservationStatus } from '../../models/Reservation';
 import type { AttendanceQuery } from './attendance.types';
 import type {
   CreateEmployeeFacilityBody,
+  EmployeeProductBody,
   CreateEmployeePromotionBody,
   CreateEmployeeResourceBody,
   CreateEmployeeTrainerBody,
   UpdateEmployeeFacilityBody,
+  EmployeeProductBody,
   UpdateEmployeePromotionBody,
   UpdateEmployeeProfileBody,
   UpdateEmployeeResourceBody,
@@ -18,15 +20,18 @@ import type {
 } from './employee.types';
 import {
   createFacility as createFacilityService,
+  createProduct as createProductService,
   createPromotion as createPromotionService,
   createResource as createResourceService,
   createTrainer as createTrainerService,
+  deleteProduct as deleteProductService,
   deletePromotion as deletePromotionService,
   deleteResource as deleteResourceService,
   deleteTrainer as deleteTrainerService,
   getAttendance as getAttendanceService,
   getFacilities as getFacilitiesService,
   getFacility as getFacilityService,
+  getFacilityProducts as getFacilityProductsService,
   getFacilityPromotions as getFacilityPromotionsService,
   getFacilityResources as getFacilityResourcesService,
   getFacilityTrainers as getFacilityTrainersService,
@@ -34,6 +39,7 @@ import {
   markTrainingAttendance as markTrainingAttendanceService,
   getProfile as getProfileService,
   updateFacility as updateFacilityService,
+  updateProduct as updateProductService,
   updatePromotion as updatePromotionService,
   updateProfile as updateProfileService,
   updateResource as updateResourceService,
@@ -105,6 +111,19 @@ const getFacilityPromotions = asyncHandler(async (req: AuthenticatedRequest, res
   });
 });
 
+const getFacilityProducts = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const employeeId = String(req.auth?.userId);
+  const facilityId = String(req.params.facilityId);
+  const active =
+    typeof req.query.active === 'string' ? req.query.active : undefined;
+  const data = await getFacilityProductsService(employeeId, facilityId, active);
+
+  res.status(200).json({
+    success: true,
+    data,
+  });
+});
+
 const createFacility = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const employeeId = String(req.auth?.userId);
   const body = req.body as CreateEmployeeFacilityBody;
@@ -121,6 +140,18 @@ const createPromotion = asyncHandler(async (req: AuthenticatedRequest, res: Resp
   const facilityId = String(req.params.facilityId);
   const body = req.body as CreateEmployeePromotionBody;
   const data = await createPromotionService(employeeId, facilityId, body);
+
+  res.status(201).json({
+    success: true,
+    data,
+  });
+});
+
+const createProduct = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const employeeId = String(req.auth?.userId);
+  const facilityId = String(req.params.facilityId);
+  const body = req.body as EmployeeProductBody;
+  const data = await createProductService(employeeId, facilityId, body);
 
   res.status(201).json({
     success: true,
@@ -145,6 +176,18 @@ const updatePromotion = asyncHandler(async (req: AuthenticatedRequest, res: Resp
   const promotionId = String(req.params.promotionId);
   const body = req.body as UpdateEmployeePromotionBody;
   const data = await updatePromotionService(employeeId, promotionId, body);
+
+  res.status(200).json({
+    success: true,
+    data,
+  });
+});
+
+const updateProduct = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const employeeId = String(req.auth?.userId);
+  const productId = String(req.params.productId);
+  const body = req.body as EmployeeProductBody;
+  const data = await updateProductService(employeeId, productId, body);
 
   res.status(200).json({
     success: true,
@@ -203,6 +246,18 @@ const deletePromotion = asyncHandler(async (req: AuthenticatedRequest, res: Resp
   const employeeId = String(req.auth?.userId);
   const promotionId = String(req.params.promotionId);
   const data = await deletePromotionService(employeeId, promotionId);
+
+  res.status(200).json({
+    success: true,
+    message: data.message,
+    data: {},
+  });
+});
+
+const deleteProduct = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const employeeId = String(req.auth?.userId);
+  const productId = String(req.params.productId);
+  const data = await deleteProductService(employeeId, productId);
 
   res.status(200).json({
     success: true,
@@ -320,15 +375,18 @@ const markTrainingNoShow = asyncHandler(async (req: AuthenticatedRequest, res: R
 
 export {
   createFacility,
+  createProduct,
   createPromotion,
   createResource,
   createTrainer,
+  deleteProduct,
   deletePromotion,
   deleteResource,
   deleteTrainer,
   getAttendance,
   getFacilities,
   getFacility,
+  getFacilityProducts,
   getFacilityPromotions,
   getFacilityResources,
   getFacilityTrainers,
@@ -338,6 +396,7 @@ export {
   markTrainingCompleted,
   markTrainingNoShow,
   updateFacility,
+  updateProduct,
   updatePromotion,
   updateProfile,
   updateResource,
