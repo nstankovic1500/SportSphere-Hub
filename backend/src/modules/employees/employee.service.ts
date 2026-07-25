@@ -1,14 +1,20 @@
 import { Types } from 'mongoose';
 
 import { Facility, FacilityStatus, type IFacility, type IOpeningHour } from '../../models/Facility';
+import { Reservation, ReservationStatus } from '../../models/Reservation';
+import { Resource, ResourceType, type IResource } from '../../models/Resource';
 import { Sport, type ISport } from '../../models/Sport';
 import { User, UserRole, type IUser } from '../../models/User';
 import { AppError } from '../../utils/AppError';
 import type {
   CreateEmployeeFacilityBody,
+  CreateEmployeeResourceBody,
   EmployeeFacility,
   EmployeeProfile,
+  EmployeeResource,
+  UpdateEmployeeFacilityBody,
   UpdateEmployeeProfileBody,
+  UpdateEmployeeResourceBody,
 } from './employee.types';
 
 type PopulatedSport = ISport & { _id: Types.ObjectId };
@@ -23,8 +29,19 @@ type FacilityWithSports = IFacility & {
   sports: PopulatedSport[];
 };
 
+type PopulatedResource = IResource & {
+  _id: Types.ObjectId;
+  sportId: PopulatedSport;
+};
+
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const timePattern = /^([01]\d|2[0-3]):([0-5]\d)$/;
+
+const validateObjectId = (value: string, fieldName: string) => {
+  if (!Types.ObjectId.isValid(value)) {
+    throw new AppError(`Invalid ${fieldName}`, 400);
+  }
+};
 
 const toEmployeeProfile = (user: EmployeeUser): EmployeeProfile => {
   const favoriteSports = (user.favoriteSports ?? []) as PopulatedSport[];
@@ -67,15 +84,33 @@ const toEmployeeFacility = (facility: FacilityWithSports): EmployeeFacility => {
     country: facility.country,
     address: facility.address,
     description: facility.description,
+    location: facility.location,
+    openingHours: facility.openingHours ?? [],
     status: facility.status,
     active: facility.active,
     hourlyPrice: facility.hourlyPrice,
+    allowedNoShows: facility.allowedNoShows,
     images: facility.images ?? [],
     sports: sports.map((sport) => ({
       id: sport._id.toString(),
       name: sport.name,
     })),
     createdAt: facility.createdAt ?? new Date(),
+  };
+};
+
+const toEmployeeResource = (resource: PopulatedResource): EmployeeResource => {
+  return {
+    id: resource._id.toString(),
+    name: resource.name,
+    type: resource.type,
+    sport: {
+      id: resource.sportId._id.toString(),
+      name: resource.sportId.name,
+    },
+    capacity: resource.capacity,
+    equipmentDescription: resource.equipmentDescription,
+    active: resource.active,
   };
 };
 
@@ -92,6 +127,65 @@ const getEmployee = async (employeeId: string) => {
   }
 
   return user;
+};
+
+const getEmployeeAsUser = async (employeeId: string) => {
+  const user = await User.findById(employeeId).select('_id role');
+
+  if (!user || !(user.role === UserRole.Employee)) {
+    throw new AppError('Employee not found', 404);
+  }
+
+  return user;
+};
+
+const getFacilityByEmployee = async (employeeId: string, facilityId: string) => {
+  validateObjectId(facilityId, 'facility id');
+
+  const facility = await Facility.findOne({
+    _id: new Types.ObjectId(facilityId),
+    employeeIds: new Types.ObjectId(employeeId),
+  });
+
+  if (!facility) {
+    throw new AppError('Facility not found', 404);
+  }
+
+  return facility;
+};
+
+const getFacilityByEmployeeWithSports = async (employeeId: string, facilityId: string) => {
+  validateObjectId(facilityId, 'facility id');
+
+  const facility = (await Facility.findOne({
+    _id: new Types.ObjectId(facilityId),
+    employeeIds: new Types.ObjectId(employeeId),
+  })
+    .populate({
+      path: 'sports',
+      select: 'name',
+    })
+    .lean()) as unknown as FacilityWithSports | null;
+
+  if (!facility) {
+    throw new AppError('Facility not found', 404);
+  }
+
+  return facility;
+};
+
+const getResourceByEmployee = async (employeeId: string, resourceId: string) => {
+  validateObjectId(resourceId, 'resource id');
+
+  const resource = await Resource.findById(resourceId);
+
+  if (!resource) {
+    throw new AppError('Resource not found', 404);
+  }
+
+  await getFacilityByEmployee(employeeId, resource.facilityId.toString());
+
+  return resource;
 };
 
 const validateSports = async (sports: unknown, minimumCount: number) => {
@@ -200,6 +294,162 @@ const validateOpeningHours = (openingHours: unknown) => {
   });
 };
 
+const validateCoordinates = (longitudeValue: unknown, latitudeValue: unknown) => {
+  const longitude = Number(longitudeValue);
+  const latitude = Number(latitudeValue);
+
+  if (Number.isNaN(longitude) || longitude < -180 || longitude > 180) {
+    throw new AppError('longitude must be from -180 to 180', 400);
+  }
+
+  if (Number.isNaN(latitude) || latitude < -90 || latitude > 90) {
+    throw new AppError('latitude must be from -90 to 90', 400);
+  }
+
+  return { longitude, latitude };
+};
+
+const validateHourlyPrice = (value: unknown) => {
+  const hourlyPrice = Number(value);
+
+  if (Number.isNaN(hourlyPrice) || hourlyPrice < 0) {
+    throw new AppError('hourlyPrice must be greater than or equal to 0', 400);
+  }
+
+  return hourlyPrice;
+};
+
+const validateAllowedNoShows = (value: unknown) => {
+  const allowedNoShows = Number(value);
+
+  if (!Number.isInteger(allowedNoShows) || allowedNoShows < 0) {
+    throw new AppError('allowedNoShows must be a non-negative integer', 400);
+  }
+
+  return allowedNoShows;
+};
+
+const validateResourceType = (value: unknown) => {
+  const type = String(value ?? '').trim() as ResourceType;
+
+  if (!Object.values(ResourceType).includes(type)) {
+    throw new AppError('type must be a valid resource type', 400);
+  }
+
+  return type;
+};
+
+const validateResourceCapacity = (value: unknown, type: ResourceType) => {
+  const capacity = Number(value);
+
+  if (!Number.isInteger(capacity) || capacity < 1) {
+    throw new AppError('capacity must be a positive integer', 400);
+  }
+
+  if (type === ResourceType.Outdoor && capacity < 4) {
+    throw new AppError('outdoor resource capacity must be at least 4', 400);
+  }
+
+  return capacity;
+};
+
+const validateEquipmentDescription = (value: unknown) => {
+  const equipmentDescription = requireTrimmedText(value, 'equipmentDescription');
+
+  if (equipmentDescription.length > 300) {
+    throw new AppError('equipmentDescription must be at most 300 characters', 400);
+  }
+
+  return equipmentDescription;
+};
+
+const validateFacilitySport = async (
+  facility: IFacility,
+  sportIdValue: unknown,
+) => {
+  const sportId = String(sportIdValue ?? '').trim();
+  validateObjectId(sportId, 'sport id');
+
+  if (!(facility.sports ?? []).some((item) => item.toString() === sportId)) {
+    throw new AppError('sport must belong to the facility sports', 400);
+  }
+
+  const sport = await Sport.findOne({
+    _id: new Types.ObjectId(sportId),
+    active: true,
+  }).select('name');
+
+  if (!sport || !sport._id) {
+    throw new AppError('sport must reference an existing active sport', 400);
+  }
+
+  return {
+    sportId: sport._id,
+    sportName: sport.name,
+  };
+};
+
+const countOtherActiveOutdoorResources = async (
+  facilityId: Types.ObjectId,
+  excludedResourceId?: Types.ObjectId,
+) => {
+  const filters: Record<string, unknown> = {
+    facilityId,
+    type: ResourceType.Outdoor,
+    active: true,
+  };
+
+  if (excludedResourceId) {
+    filters._id = { $ne: excludedResourceId };
+  }
+
+  return Resource.countDocuments(filters);
+};
+
+const ensureOutdoorRequirementAfterChange = async (
+  resource: IResource,
+  nextType: ResourceType,
+  nextActive: boolean,
+) => {
+  const currentlyActiveOutdoor =
+    resource.type === ResourceType.Outdoor && resource.active === true;
+  const nextActiveOutdoor =
+    nextType === ResourceType.Outdoor && nextActive === true;
+
+  if (!currentlyActiveOutdoor || nextActiveOutdoor) {
+    return;
+  }
+
+  const otherActiveOutdoorCount = await countOtherActiveOutdoorResources(
+    resource.facilityId,
+    resource._id,
+  );
+
+  if (otherActiveOutdoorCount === 0) {
+    throw new AppError('Facility must contain at least one active outdoor resource', 400);
+  }
+};
+
+const validateResourcePayload = async (
+  facility: IFacility,
+  body: CreateEmployeeResourceBody | UpdateEmployeeResourceBody,
+) => {
+  const name = requireTrimmedText(body.name, 'name');
+  const type = validateResourceType(body.type);
+  const { sportId, sportName } = await validateFacilitySport(facility, body.sportId);
+  const capacity = validateResourceCapacity(body.capacity, type);
+  const equipmentDescription = validateEquipmentDescription(body.equipmentDescription);
+
+  return {
+    name,
+    type,
+    sportId,
+    sportName,
+    capacity,
+    equipmentDescription,
+  };
+};
+
 const requireTrimmedText = (value: unknown, fieldName: string) => {
   const text = typeof value === 'string' ? value.trim() : '';
 
@@ -299,11 +549,7 @@ const updateProfile = async (employeeId: string, body: UpdateEmployeeProfileBody
 };
 
 const getFacilities = async (employeeId: string) => {
-  const employee = await User.findById(employeeId).select('_id role');
-
-  if (!employee || !(employee.role === UserRole.Employee)) {
-    throw new AppError('Employee not found', 404);
-  }
+  await getEmployeeAsUser(employeeId);
 
   const facilities = (await Facility.find({
     employeeIds: new Types.ObjectId(employeeId),
@@ -321,42 +567,21 @@ const getFacilities = async (employeeId: string) => {
 };
 
 const createFacility = async (employeeId: string, body: CreateEmployeeFacilityBody) => {
-  const employee = await User.findById(employeeId).select('_id role');
-
-  if (!employee || !(employee.role === UserRole.Employee)) {
-    throw new AppError('Employee not found', 404);
-  }
+  const employee = await getEmployeeAsUser(employeeId);
 
   const name = requireTrimmedText(body.name, 'name');
   const city = requireTrimmedText(body.city, 'city');
   const country = requireTrimmedText(body.country, 'country');
   const address = requireTrimmedText(body.address, 'address');
   const description = requireTrimmedText(body.description, 'description');
-  const longitude = Number(body.longitude);
-  const latitude = Number(body.latitude);
+  const { longitude, latitude } = validateCoordinates(body.longitude, body.latitude);
   const sports = await validateSports(body.sports ?? [], 1);
   const openingHours = validateOpeningHours(body.openingHours ?? []);
-  const hourlyPrice = Number(body.hourlyPrice);
-  const allowedNoShows = Number(body.allowedNoShows);
+  const hourlyPrice = validateHourlyPrice(body.hourlyPrice);
+  const allowedNoShows = validateAllowedNoShows(body.allowedNoShows);
   const images = Array.isArray(body.images)
     ? body.images.map((image) => String(image).trim()).filter(Boolean)
     : [];
-
-  if (Number.isNaN(longitude) || longitude < -180 || longitude > 180) {
-    throw new AppError('longitude must be from -180 to 180', 400);
-  }
-
-  if (Number.isNaN(latitude) || latitude < -90 || latitude > 90) {
-    throw new AppError('latitude must be from -90 to 90', 400);
-  }
-
-  if (Number.isNaN(hourlyPrice) || hourlyPrice < 0) {
-    throw new AppError('hourlyPrice must be greater than or equal to 0', 400);
-  }
-
-  if (!Number.isInteger(allowedNoShows) || allowedNoShows < 0) {
-    throw new AppError('allowedNoShows must be a non-negative integer', 400);
-  }
 
   const createdFacility = await Facility.create({
     name,
@@ -395,9 +620,194 @@ const createFacility = async (employeeId: string, body: CreateEmployeeFacilityBo
   };
 };
 
+const getFacility = async (employeeId: string, facilityId: string) => {
+  const facility = await getFacilityByEmployeeWithSports(employeeId, facilityId);
+
+  return {
+    facility: toEmployeeFacility(facility),
+  };
+};
+
+const updateFacility = async (
+  employeeId: string,
+  facilityId: string,
+  body: UpdateEmployeeFacilityBody,
+) => {
+  const facility = await getFacilityByEmployee(employeeId, facilityId);
+
+  const name = requireTrimmedText(body.name, 'name');
+  const city = requireTrimmedText(body.city, 'city');
+  const country = requireTrimmedText(body.country, 'country');
+  const address = requireTrimmedText(body.address, 'address');
+  const description = requireTrimmedText(body.description, 'description');
+  const { longitude, latitude } = validateCoordinates(body.longitude, body.latitude);
+  const sports = await validateSports(body.sports ?? [], 1);
+  const openingHours = validateOpeningHours(body.openingHours ?? []);
+  const hourlyPrice = validateHourlyPrice(body.hourlyPrice);
+  const allowedNoShows = validateAllowedNoShows(body.allowedNoShows);
+
+  facility.name = name;
+  facility.city = city;
+  facility.country = country;
+  facility.address = address;
+  facility.description = description;
+  facility.location = {
+    type: 'Point',
+    coordinates: [longitude, latitude],
+  };
+  facility.sports = sports;
+  facility.openingHours = openingHours;
+  facility.hourlyPrice = hourlyPrice;
+  facility.allowedNoShows = allowedNoShows;
+
+  await facility.save();
+
+  const updatedFacility = await getFacilityByEmployeeWithSports(employeeId, facilityId);
+
+  return {
+    facility: toEmployeeFacility(updatedFacility),
+  };
+};
+
+const getFacilityResources = async (employeeId: string, facilityId: string) => {
+  const facility = await getFacilityByEmployee(employeeId, facilityId);
+
+  const resources = (await Resource.find({
+    facilityId: facility._id,
+  })
+    .populate({
+      path: 'sportId',
+      select: 'name',
+    })
+    .sort({ name: 1 })
+    .lean()) as unknown as PopulatedResource[];
+
+  return {
+    resources: resources.map((resource) => toEmployeeResource(resource)),
+  };
+};
+
+const createResource = async (
+  employeeId: string,
+  facilityId: string,
+  body: CreateEmployeeResourceBody,
+) => {
+  const facility = await getFacilityByEmployee(employeeId, facilityId);
+  const payload = await validateResourcePayload(facility, body);
+
+  const existingResource = await Resource.findOne({
+    facilityId: facility._id,
+    name: payload.name,
+  });
+
+  if (existingResource) {
+    throw new AppError('Resource name must be unique inside the facility', 400);
+  }
+
+  const createdResource = await Resource.create({
+    facilityId: facility._id,
+    name: payload.name,
+    type: payload.type,
+    sportId: payload.sportId,
+    capacity: payload.capacity,
+    equipmentDescription: payload.equipmentDescription,
+    active: true,
+  });
+
+  const resource = (await Resource.findById(createdResource._id)
+    .populate({
+      path: 'sportId',
+      select: 'name',
+    })
+    .lean()) as unknown as PopulatedResource | null;
+
+  if (!resource) {
+    throw new AppError('Resource not found', 404);
+  }
+
+  return {
+    resource: toEmployeeResource(resource),
+  };
+};
+
+const updateResource = async (
+  employeeId: string,
+  resourceId: string,
+  body: UpdateEmployeeResourceBody,
+) => {
+  const resource = await getResourceByEmployee(employeeId, resourceId);
+  const facility = await getFacilityByEmployee(employeeId, resource.facilityId.toString());
+  const payload = await validateResourcePayload(facility, body);
+  const active = typeof body.active === 'boolean' ? body.active : resource.active;
+
+  const existingResource = await Resource.findOne({
+    facilityId: facility._id,
+    name: payload.name,
+    _id: { $ne: resource._id },
+  });
+
+  if (existingResource) {
+    throw new AppError('Resource name must be unique inside the facility', 400);
+  }
+
+  await ensureOutdoorRequirementAfterChange(resource, payload.type, active);
+
+  resource.name = payload.name;
+  resource.type = payload.type;
+  resource.sportId = payload.sportId;
+  resource.capacity = payload.capacity;
+  resource.equipmentDescription = payload.equipmentDescription;
+  resource.active = active;
+
+  await resource.save();
+
+  const updatedResource = (await Resource.findById(resource._id)
+    .populate({
+      path: 'sportId',
+      select: 'name',
+    })
+    .lean()) as unknown as PopulatedResource | null;
+
+  if (!updatedResource) {
+    throw new AppError('Resource not found', 404);
+  }
+
+  return {
+    resource: toEmployeeResource(updatedResource),
+  };
+};
+
+const deleteResource = async (employeeId: string, resourceId: string) => {
+  const resource = await getResourceByEmployee(employeeId, resourceId);
+
+  await ensureOutdoorRequirementAfterChange(resource, resource.type, false);
+
+  const futureReservation = await Reservation.findOne({
+    resourceId: resource._id,
+    status: { $ne: ReservationStatus.Cancelled },
+    startTime: { $gt: new Date() },
+  }).select('_id');
+
+  if (futureReservation) {
+    throw new AppError('Resource cannot be deleted because it has future non-cancelled reservations', 400);
+  }
+
+  await Resource.deleteOne({ _id: resource._id });
+
+  return {
+    message: 'Resource deleted successfully',
+  };
+};
+
 export {
   createFacility,
+  createResource,
+  deleteResource,
   getFacilities,
+  getFacility,
+  getFacilityResources,
   getProfile,
   updateProfile,
+  updateFacility,
+  updateResource,
 };
