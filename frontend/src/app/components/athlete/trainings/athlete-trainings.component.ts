@@ -1,0 +1,70 @@
+import { CommonModule, DatePipe } from '@angular/common';
+import { Component, inject } from '@angular/core';
+import { RouterLink } from '@angular/router';
+
+import type { AthleteTrainingAppointment } from '../../../core/models/trainer.model';
+import { TrainerService } from '../../../core/services/trainer.service';
+
+@Component({
+  selector: 'app-athlete-trainings',
+  standalone: true,
+  imports: [CommonModule, RouterLink, DatePipe],
+  templateUrl: './athlete-trainings.component.html',
+  styleUrl: './athlete-trainings.component.css',
+})
+export class AthleteTrainingsComponent {
+  private readonly trainerService = inject(TrainerService);
+
+  appointments: AthleteTrainingAppointment[] = [];
+  cancellingIds = new Set<string>();
+  isLoading = true;
+  errorMessage = '';
+  successMessage = '';
+
+  constructor() {
+    this.loadAppointments();
+  }
+
+  cancelAppointment(appointment: AthleteTrainingAppointment) {
+    if (!appointment.canCancel || this.cancellingIds.has(appointment.id)) {
+      return;
+    }
+
+    this.cancellingIds.add(appointment.id);
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    this.trainerService.cancelTrainingAppointment(appointment.id).subscribe({
+      next: (response) => {
+        this.appointments = this.appointments.map((currentAppointment) =>
+          currentAppointment.id === appointment.id
+            ? response.data.appointment
+            : currentAppointment,
+        );
+        this.cancellingIds.delete(appointment.id);
+        this.successMessage = 'Training appointment cancelled successfully.';
+      },
+      error: (error) => {
+        this.cancellingIds.delete(appointment.id);
+        this.errorMessage = error.error?.message ?? 'Unable to cancel training appointment.';
+      },
+    });
+  }
+
+  isCancelling(appointmentId: string) {
+    return this.cancellingIds.has(appointmentId);
+  }
+
+  private loadAppointments() {
+    this.trainerService.getTrainingAppointments().subscribe({
+      next: (response) => {
+        this.appointments = response.data.appointments;
+        this.isLoading = false;
+      },
+      error: (error) => {
+        this.errorMessage = error.error?.message ?? 'Unable to load training history.';
+        this.isLoading = false;
+      },
+    });
+  }
+}

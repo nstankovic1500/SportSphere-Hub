@@ -8,6 +8,7 @@ import { employeeRouter } from '../modules/employees/employee.routes';
 import { publicRouter } from '../modules/public/public.routes';
 import { reviewRouter } from '../modules/reviews/review.routes';
 import { sportRouter } from '../modules/sports/sport.routes';
+import { trainerRouter } from '../modules/trainers/trainer.routes';
 
 const router = Router();
 
@@ -30,5 +31,6 @@ router.use('/facilities', reviewRouter);
 router.use('/apply-requests', applyRequestRouter);
 router.use('/public', publicRouter);
 router.use('/sports', sportRouter);
+router.use('/trainers', trainerRouter);
 
 export { router };

@@ -138,6 +138,8 @@ const toEmployeeTrainer = (trainer: PopulatedTrainer): EmployeeTrainer => {
       name: sport.name,
     })),
     workingHours: trainer.workingHours ?? [],
+    biography: trainer.biography,
+    pricePerHour: trainer.pricePerHour,
     active: trainer.active,
     createdAt: trainer.createdAt ?? new Date(),
   };

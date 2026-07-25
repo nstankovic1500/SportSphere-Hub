@@ -12,6 +12,9 @@ import { ReservationComponent } from './components/athlete/reservation/reservati
 import { AdListComponent } from './components/athlete/ads/ad-list.component';
 import { CreateAdComponent } from './components/athlete/ads/create-ad.component';
 import { AdRequestsComponent } from './components/athlete/ads/ad-requests.component';
+import { AthleteTrainersComponent } from './components/athlete/trainers/athlete-trainers.component';
+import { TrainerBookingComponent } from './components/athlete/trainers/trainer-booking.component';
+import { AthleteTrainingsComponent } from './components/athlete/trainings/athlete-trainings.component';
 import { FacilityDetailsComponent } from './components/public/facility-details/facility-details.component';
 import { FacilitiesComponent } from './components/public/facilities/facilities.component';
 import { HomeComponent } from './components/public/home/home.component';
@@ -24,6 +27,8 @@ import { EmployeeFacilityDetailsComponent } from './components/employee/faciliti
 import { EditFacilityComponent } from './components/employee/facilities/edit-facility.component';
 import { EmployeeResourcesComponent } from './components/employee/resources/employee-resources.component';
 import { EmployeeResourceFormComponent } from './components/employee/resources/employee-resource-form.component';
+import { EmployeeTrainersComponent } from './components/employee/trainers/employee-trainers.component';
+import { TrainerFormComponent } from './components/employee/trainers/trainer-form.component';
 
 export const routes: Routes = [
   {
@@ -99,6 +104,30 @@ export const routes: Routes = [
     },
   },
   {
+    path: 'athlete/trainers',
+    component: AthleteTrainersComponent,
+    canActivate: [authGuard],
+    data: {
+      roles: ['athlete'],
+    },
+  },
+  {
+    path: 'athlete/trainers/:trainerId',
+    component: TrainerBookingComponent,
+    canActivate: [authGuard],
+    data: {
+      roles: ['athlete'],
+    },
+  },
+  {
+    path: 'athlete/trainings',
+    component: AthleteTrainingsComponent,
+    canActivate: [authGuard],
+    data: {
+      roles: ['athlete'],
+    },
+  },
+  {
     path: 'employee',
     component: EmployeeComponent,
     canActivate: [authGuard],
@@ -165,6 +194,30 @@ export const routes: Routes = [
   {
     path: 'employee/facilities/:facilityId/resources/:resourceId/edit',
     component: EmployeeResourceFormComponent,
+    canActivate: [authGuard],
+    data: {
+      roles: ['employee'],
+    },
+  },
+  {
+    path: 'employee/facilities/:facilityId/trainers',
+    component: EmployeeTrainersComponent,
+    canActivate: [authGuard],
+    data: {
+      roles: ['employee'],
+    },
+  },
+  {
+    path: 'employee/facilities/:facilityId/trainers/new',
+    component: TrainerFormComponent,
+    canActivate: [authGuard],
+    data: {
+      roles: ['employee'],
+    },
+  },
+  {
+    path: 'employee/facilities/:facilityId/trainers/:trainerId/edit',
+    component: TrainerFormComponent,
     canActivate: [authGuard],
     data: {
       roles: ['employee'],

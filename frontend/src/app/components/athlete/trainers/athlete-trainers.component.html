@@ -1,0 +1,71 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>Find Trainers</h1>
+      <p>Browse active trainers, filter by facility or sport, and book a training session.</p>
+    </div>
+    <nav class="page-links">
+      <a routerLink="/athlete">Dashboard</a>
+      <a routerLink="/athlete/trainings">My Trainings</a>
+    </nav>
+  </header>
+
+  <form class="filters" [formGroup]="filterForm" (ngSubmit)="applyFilters()">
+    <label>
+      <span>Facility</span>
+      <select formControlName="facilityId">
+        <option value="">All facilities</option>
+        @for (facility of facilities; track facility.id) {
+          <option [value]="facility.id">{{ facility.name }} - {{ facility.city }}</option>
+        }
+      </select>
+    </label>
+
+    <label>
+      <span>Sport</span>
+      <select formControlName="sportId">
+        <option value="">All sports</option>
+        @for (sport of sports; track sport.id) {
+          <option [value]="sport.id">{{ sport.name }}</option>
+        }
+      </select>
+    </label>
+
+    <div class="filter-actions">
+      <button type="submit" [disabled]="isFiltering">
+        {{ isFiltering ? 'Filtering...' : 'Apply filters' }}
+      </button>
+      <button type="button" class="secondary-button" (click)="resetFilters()" [disabled]="isFiltering">
+        Reset
+      </button>
+    </div>
+  </form>
+
+  @if (isLoading) {
+    <p class="state-message">Loading trainers...</p>
+  } @else if (errorMessage) {
+    <p class="state-message error">{{ errorMessage }}</p>
+  } @else if (trainers.length === 0) {
+    <p class="state-message">No trainers found for the selected filters.</p>
+  } @else {
+    <div class="trainer-grid">
+      @for (trainer of trainers; track trackByTrainerId($index, trainer)) {
+        <article class="trainer-card">
+          <div class="trainer-card__header">
+            <h2>{{ trainer.firstName }} {{ trainer.lastName }}</h2>
+            <span class="price">{{ trainer.hourlyPrice }} / hour</span>
+          </div>
+
+          <p class="specialization">{{ trainer.specialization }}</p>
+          <p><strong>Facility:</strong> {{ trainer.facility.name }}, {{ trainer.facility.city }}</p>
+          <p><strong>Sports:</strong> {{ getSportsLabel(trainer) }}</p>
+          <p><strong>Average rating:</strong> {{ trainer.ratingAverage }} ({{ trainer.ratingCount }})</p>
+
+          <div class="card-actions">
+            <a [routerLink]="['/athlete/trainers', trainer.id]">Details / Book</a>
+          </div>
+        </article>
+      }
+    </div>
+  }
+</section>

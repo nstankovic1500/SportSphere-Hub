@@ -1,5 +1,6 @@
 import type { Request } from 'express';
 
+import type { AppointmentStatus } from '../../models/Appointment';
 import type { ReservationStatus } from '../../models/Reservation';
 import type { FacilityStatus, IOpeningHour } from '../../models/Facility';
 import type { ResourceType } from '../../models/Resource';
@@ -68,6 +69,25 @@ interface CreateReservationBody {
   endTime?: string;
 }
 
+interface TrainingAppointment {
+  id: string;
+  trainerName: string;
+  facilityName: string;
+  city: string;
+  sportName: string;
+  startTime: Date;
+  endTime: Date;
+  status: AppointmentStatus;
+  canCancel: boolean;
+}
+
+interface CreateTrainingAppointmentBody {
+  trainerId?: string;
+  sportId?: string;
+  startTime?: string;
+  endTime?: string;
+}
+
 interface AuthenticatedAthleteRequest extends Request {
   auth?: {
     userId: string;
@@ -80,8 +100,10 @@ interface AuthenticatedAthleteRequest extends Request {
 export type {
   AthleteProfile,
   AthleteReservation,
+  TrainingAppointment,
   AthleteFavoriteSport,
   CreateReservationBody,
+  CreateTrainingAppointmentBody,
   AuthenticatedAthleteRequest,
   ResourceAvailability,
   UpdateAthleteProfileBody,

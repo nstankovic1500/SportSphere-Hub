@@ -121,6 +121,8 @@ interface EmployeeTrainer {
   phone: string;
   sports: EmployeeFavoriteSport[];
   workingHours: IOpeningHour[];
+  biography: string;
+  pricePerHour: number;
   active: boolean;
   createdAt: Date;
 }

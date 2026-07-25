@@ -4,14 +4,18 @@ import { asyncHandler } from '../../utils/asyncHandler';
 import type {
   AuthenticatedAthleteRequest,
   CreateReservationBody,
+  CreateTrainingAppointmentBody,
   UpdateAthleteProfileBody,
 } from './athlete.types';
 import {
+  cancelTrainingAppointment as cancelTrainingAppointmentService,
   cancelReservation as cancelReservationService,
+  createTrainingAppointment as createTrainingAppointmentService,
   createReservation as createReservationService,
   getProfile as getProfileService,
   getReservations as getReservationsService,
   getResourceAvailability as getResourceAvailabilityService,
+  getTrainingAppointments as getTrainingAppointmentsService,
   updateProfile as updateProfileService,
 } from './athlete.service';
 
@@ -79,11 +83,46 @@ const createReservation = asyncHandler(async (req: AuthenticatedAthleteRequest, 
   });
 });
 
+const getTrainingAppointments = asyncHandler(async (req: AuthenticatedAthleteRequest, res: Response) => {
+  const athleteId = String(req.auth?.userId);
+  const data = await getTrainingAppointmentsService(athleteId);
+
+  res.status(200).json({
+    success: true,
+    data,
+  });
+});
+
+const createTrainingAppointment = asyncHandler(async (req: AuthenticatedAthleteRequest, res: Response) => {
+  const athleteId = String(req.auth?.userId);
+  const body = req.body as CreateTrainingAppointmentBody;
+  const data = await createTrainingAppointmentService(athleteId, body);
+
+  res.status(201).json({
+    success: true,
+    data,
+  });
+});
+
+const cancelTrainingAppointment = asyncHandler(async (req: AuthenticatedAthleteRequest, res: Response) => {
+  const athleteId = String(req.auth?.userId);
+  const appointmentId = String(req.params.id);
+  const data = await cancelTrainingAppointmentService(athleteId, appointmentId);
+
+  res.status(200).json({
+    success: true,
+    data,
+  });
+});
+
 export {
+  cancelTrainingAppointment,
   cancelReservation,
+  createTrainingAppointment,
   createReservation,
   getProfile,
   getResourceAvailability,
   getReservations,
+  getTrainingAppointments,
   updateProfile,
 };

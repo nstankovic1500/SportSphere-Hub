@@ -60,8 +60,8 @@ export class EmployeeResourceFormComponent {
     this.successMessage = '';
 
     const request$ = this.isEditMode && this.resourceId
-      ? this.employeeService.updateResource(this.resourceId, this.buildUpdatePayload())
-      : this.employeeService.createResource(this.facilityId, this.buildCreatePayload());
+      ? this.employeeService.updateResource(this.resourceId, this.makeUpdatePayload())
+      : this.employeeService.createResource(this.facilityId, this.makeCreatePayload());
 
     request$.subscribe({
       next: () => {
@@ -117,7 +117,7 @@ export class EmployeeResourceFormComponent {
     });
   }
 
-  private buildCreatePayload(): CreateEmployeeResourceRequest {
+  private makeCreatePayload(): CreateEmployeeResourceRequest {
     const formValue = this.resourceForm.getRawValue();
     return {
       name: formValue.name.trim(),
@@ -128,7 +128,7 @@ export class EmployeeResourceFormComponent {
     };
   }
 
-  private buildUpdatePayload(): UpdateEmployeeResourceRequest {
+  private makeUpdatePayload(): UpdateEmployeeResourceRequest {
     const formValue = this.resourceForm.getRawValue();
     return {
       name: formValue.name.trim(),

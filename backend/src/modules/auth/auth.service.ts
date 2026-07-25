@@ -186,13 +186,13 @@ const validateEmployeeData = async (employeeData: RegisterEmployeeData | undefin
 
   const sameCompanyCount = await User.countDocuments({
     role: UserRole.Employee,
-    "employeeData.companyName": employeeData.companyName,
+    "employeeData.pib": employeeData.pib,
   });
 
   if (sameCompanyCount >= 2) {
     throw new AppError(
-      "Only two employee users may be registered for the same company.",
-      400
+      "Only two employee users may be registered for the same PIB.",
+      400,
     );
   }
 };

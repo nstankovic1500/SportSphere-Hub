@@ -1,14 +1,18 @@
 import { Types } from 'mongoose';
 
+import { Appointment, AppointmentStatus, type IAppointment } from '../../models/Appointment';
 import { Facility, FacilityStatus, type IOpeningHour } from '../../models/Facility';
 import { Reservation, ReservationStatus, type IReservation } from '../../models/Reservation';
 import { Resource, type IResource } from '../../models/Resource';
 import { Sport, type ISport } from '../../models/Sport';
+import { Trainer, type ITrainer } from '../../models/Trainer';
 import { User, type IUser } from '../../models/User';
 import { AppError } from '../../utils/AppError';
 import type {
   AthleteProfile,
   AthleteReservation,
+  TrainingAppointment,
+  CreateTrainingAppointmentBody,
   CreateReservationBody,
   ResourceAvailability,
   UpdateAthleteProfileBody,
@@ -17,6 +21,10 @@ import type {
 const CAN_BE_CANCELLED = new Set<ReservationStatus>([
   ReservationStatus.Pending,
   ReservationStatus.Confirmed,
+]);
+
+const CAN_CANCEL_APPOINTMENT = new Set<AppointmentStatus>([
+  AppointmentStatus.Scheduled,
 ]);
 
 type PopulatedSport = ISport & { _id: Types.ObjectId };
@@ -58,6 +66,37 @@ type ResourceWithRefs = IResource & {
   };
 };
 
+type TrainerWithRefs = Omit<ITrainer, 'sports' | 'facilityId'> & {
+  _id: Types.ObjectId;
+  facilityId: {
+    _id: Types.ObjectId;
+    name: string;
+    city: string;
+    status: FacilityStatus;
+    active: boolean;
+    openingHours?: IOpeningHour[];
+  };
+  sports: PopulatedSport[];
+};
+
+type PopulatedAppointment = IAppointment & {
+  _id: Types.ObjectId;
+  trainerId: {
+    _id: Types.ObjectId;
+    firstName: string;
+    lastName: string;
+  };
+  facilityId: {
+    _id: Types.ObjectId;
+    name: string;
+    city: string;
+  };
+  sportId: {
+    _id: Types.ObjectId;
+    name: string;
+  };
+};
+
 const populateReservationRefs = (query: any) => {
   return query
     .populate({
@@ -67,6 +106,22 @@ const populateReservationRefs = (query: any) => {
     .populate({
       path: 'resourceId',
       select: 'name',
+    })
+    .populate({
+      path: 'sportId',
+      select: 'name',
+    });
+};
+
+const populateAppointmentRefs = (query: any) => {
+  return query
+    .populate({
+      path: 'trainerId',
+      select: 'firstName lastName',
+    })
+    .populate({
+      path: 'facilityId',
+      select: 'name city',
     })
     .populate({
       path: 'sportId',
@@ -107,6 +162,15 @@ const canCancelReservation = (
     reservation.startTime.getTime() - new Date().getTime();
 
   return hoursUntilStart >= 12 * 60 * 60 * 1000;
+};
+
+const canCancelTrainingAppointment = (
+  appointment: Pick<IAppointment, 'status' | 'startTime'>,
+) => {
+  return (
+    CAN_CANCEL_APPOINTMENT.has(appointment.status) &&
+    appointment.startTime.getTime() > new Date().getTime()
+  );
 };
 
 const parseDateOnly = (date: string) => {
@@ -195,6 +259,38 @@ const getActiveResourceWithFacility = async (resourceId: string) => {
   return resource;
 };
 
+const getTrainerWithFacility = async (trainerId: string) => {
+  if (!Types.ObjectId.isValid(trainerId)) {
+    throw new AppError('Invalid trainer id', 400);
+  }
+
+  const trainer = (await Trainer.findById(trainerId)
+    .populate({
+      path: 'facilityId',
+      select: 'name city status active openingHours',
+    })
+    .populate({
+      path: 'sports',
+      select: 'name active',
+      match: { active: true },
+    })
+    .lean()) as unknown as TrainerWithRefs | null;
+
+  if (!trainer || !(trainer.active === true)) {
+    throw new AppError('Trainer not found', 404);
+  }
+
+  if (
+    !trainer.facilityId ||
+    !(trainer.facilityId.status === FacilityStatus.Approved) ||
+    !(trainer.facilityId.active === true)
+  ) {
+    throw new AppError('Trainer facility is not available for appointments', 400);
+  }
+
+  return trainer;
+};
+
 const toAthleteReservation = (
   reservation: PopulatedReservation,
 ): AthleteReservation => {
@@ -208,6 +304,22 @@ const toAthleteReservation = (
     endTime: reservation.endTime,
     status: reservation.status,
     canCancel: canCancelReservation(reservation),
+  };
+};
+
+const toTrainingAppointment = (
+  appointment: PopulatedAppointment,
+): TrainingAppointment => {
+  return {
+    id: appointment._id.toString(),
+    trainerName: `${appointment.trainerId.firstName} ${appointment.trainerId.lastName}`.trim(),
+    facilityName: appointment.facilityId.name,
+    city: appointment.facilityId.city,
+    sportName: appointment.sportId.name,
+    startTime: appointment.startTime,
+    endTime: appointment.endTime,
+    status: appointment.status,
+    canCancel: canCancelTrainingAppointment(appointment),
   };
 };
 
@@ -230,6 +342,12 @@ const getPopulatedReservation = async (
   reservationId: Types.ObjectId | string,
 ) => {
   return populateReservationRefs(Reservation.findById(reservationId)).lean();
+};
+
+const getPopulatedAppointment = async (
+  appointmentId: Types.ObjectId | string,
+) => {
+  return populateAppointmentRefs(Appointment.findById(appointmentId)).lean();
 };
 
 const validateFavoriteSports = async (favoriteSports: unknown) => {
@@ -349,6 +467,24 @@ const getReservations = async (
   };
 };
 
+const getTrainingAppointments = async (
+  athleteId: string,
+) => {
+  const appointments = (await populateAppointmentRefs(
+    Appointment.find({
+      athleteId: new Types.ObjectId(athleteId),
+    }),
+  )
+    .sort({ startTime: -1 })
+    .lean()) as unknown as PopulatedAppointment[];
+
+  return {
+    appointments: appointments.map((appointment) =>
+      toTrainingAppointment(appointment),
+    ),
+  };
+};
+
 const cancelReservation = async (
   athleteId: string,
   reservationId: string,
@@ -388,6 +524,48 @@ const cancelReservation = async (
 
   return {
     reservation: toAthleteReservation(updatedReservation),
+  };
+};
+
+const cancelTrainingAppointment = async (
+  athleteId: string,
+  appointmentId: string,
+) => {
+  if (!Types.ObjectId.isValid(appointmentId)) {
+    throw new AppError('Invalid appointment id', 400);
+  }
+
+  const appointment = await Appointment.findById(appointmentId);
+
+  if (!appointment) {
+    throw new AppError('Training appointment not found', 404);
+  }
+
+  if (!(appointment.athleteId.toString() === athleteId)) {
+    throw new AppError('You do not have permission to access this training appointment', 403);
+  }
+
+  if (!CAN_CANCEL_APPOINTMENT.has(appointment.status)) {
+    throw new AppError('Only scheduled training appointments can be cancelled', 400);
+  }
+
+  if (!(appointment.startTime.getTime() > new Date().getTime())) {
+    throw new AppError('Only future training appointments can be cancelled', 400);
+  }
+
+  appointment.status = AppointmentStatus.Cancelled;
+  await appointment.save();
+
+  const updatedAppointment = (await getPopulatedAppointment(
+    appointmentId,
+  )) as unknown as PopulatedAppointment | null;
+
+  if (!updatedAppointment) {
+    throw new AppError('Training appointment not found', 404);
+  }
+
+  return {
+    appointment: toTrainingAppointment(updatedAppointment),
   };
 };
 
@@ -526,11 +704,134 @@ const createReservation = async (
   };
 };
 
+const createTrainingAppointment = async (
+  athleteId: string,
+  body: CreateTrainingAppointmentBody,
+) => {
+  const trainerId = String(body.trainerId ?? '').trim();
+  const startTime = parseDateTime(body.startTime, 'startTime');
+  const endTime = parseDateTime(body.endTime, 'endTime');
+
+  const athlete = await User.findById(athleteId);
+
+  if (!athlete) {
+    throw new AppError('Athlete not found', 404);
+  }
+
+  const trainer = await getTrainerWithFacility(trainerId);
+
+  if ((athlete.blockedFacilities ?? []).some((facilityId) => facilityId.toString() === trainer.facilityId._id.toString())) {
+    throw new AppError('You are blocked in this facility', 403);
+  }
+
+  if (startTime.getTime() <= new Date().getTime()) {
+    throw new AppError('Training appointment must be in the future', 400);
+  }
+
+  if (!isOnFullHour(startTime) || !isOnFullHour(endTime)) {
+    throw new AppError('startTime and endTime must be on full hours', 400);
+  }
+
+  if (endTime.getTime() <= startTime.getTime()) {
+    throw new AppError('endTime must be after startTime', 400);
+  }
+
+  if (!(getDateKey(startTime) === getDateKey(endTime))) {
+    throw new AppError('Training appointment must start and end on the same date', 400);
+  }
+
+  if (endTime.getTime() - startTime.getTime() < 60 * 60 * 1000) {
+    throw new AppError('Minimum training appointment duration is 1 hour', 400);
+  }
+
+  const availableSports = trainer.sports ?? [];
+
+  if (availableSports.length === 0) {
+    throw new AppError('Trainer has no active sports', 400);
+  }
+
+  let selectedSport = availableSports[0];
+
+  if (availableSports.length > 1) {
+    const sportId = String(body.sportId ?? '').trim();
+
+    if (!sportId) {
+      throw new AppError('sportId is required when trainer supports multiple sports', 400);
+    }
+
+    selectedSport =
+      availableSports.find((sport) => sport._id.toString() === sportId) ?? availableSports[0];
+
+    if (!(selectedSport._id.toString() === sportId)) {
+      throw new AppError('sportId must be one of the trainer supported sports', 400);
+    }
+  } else if (body.sportId) {
+    const sportId = String(body.sportId).trim();
+
+    if (!(availableSports[0]._id.toString() === sportId)) {
+      throw new AppError('sportId must be one of the trainer supported sports', 400);
+    }
+  }
+
+  const openingHours = getOpeningHoursForDate(
+    trainer.workingHours && trainer.workingHours.length > 0
+      ? trainer.workingHours
+      : trainer.facilityId.openingHours,
+    startTime,
+  );
+  const openingDateTime = toDateTimeFromDayAndTime(startTime, openingHours.open);
+  const closingDateTime = toDateTimeFromDayAndTime(startTime, openingHours.close);
+
+  if (
+    startTime.getTime() < openingDateTime.getTime() ||
+    endTime.getTime() > closingDateTime.getTime()
+  ) {
+    throw new AppError('Training appointment must fit inside trainer working hours', 400);
+  }
+
+  const overlappingAppointment = await Appointment.findOne({
+    trainerId: trainer._id,
+    status: { $ne: AppointmentStatus.Cancelled },
+    startTime: { $lt: endTime },
+    endTime: { $gt: startTime },
+  }).select('_id');
+
+  if (overlappingAppointment) {
+    throw new AppError('Training appointment overlaps with an existing appointment', 400);
+  }
+
+  const createdAppointment = await Appointment.create({
+    trainerId: trainer._id,
+    athleteId: athlete._id,
+    facilityId: trainer.facilityId._id,
+    sportId: selectedSport._id,
+    startTime,
+    endTime,
+    status: AppointmentStatus.Scheduled,
+    createdAt: new Date(),
+  });
+
+  const appointment = (await getPopulatedAppointment(
+    createdAppointment._id,
+  )) as unknown as PopulatedAppointment | null;
+
+  if (!appointment) {
+    throw new AppError('Training appointment not found', 404);
+  }
+
+  return {
+    appointment: toTrainingAppointment(appointment),
+  };
+};
+
 export {
+  cancelTrainingAppointment,
   cancelReservation,
+  createTrainingAppointment,
   createReservation,
   getProfile,
   getReservations,
   getResourceAvailability,
+  getTrainingAppointments,
   updateProfile,
 };

@@ -25,7 +25,14 @@ import type {
   EmployeeFacility,
   EmployeeProfile,
   EmployeeResource,
+  EmployeeTrainer,
 } from './employee.model';
+import type {
+  AthleteTrainingAppointment,
+  TrainerAvailability,
+  TrainerDetails,
+  TrainerListItem,
+} from './trainer.model';
 
 export interface ApiResponse<T> {
   success: boolean;
@@ -71,3 +78,12 @@ export type EmployeeCreatedFacilityApiResponse = ApiResponse<{ facility: Employe
 export type EmployeeFacilityApiResponse = ApiResponse<{ facility: EmployeeFacility }>;
 export type EmployeeResourcesApiResponse = ApiResponse<{ resources: EmployeeResource[] }>;
 export type EmployeeCreatedResourceApiResponse = ApiResponse<{ resource: EmployeeResource }>;
+export type EmployeeTrainersApiResponse = ApiResponse<{ trainers: EmployeeTrainer[] }>;
+export type EmployeeCreatedTrainerApiResponse = ApiResponse<{ trainer: EmployeeTrainer }>;
+export type PublicTrainersApiResponse = ApiResponse<{ trainers: TrainerListItem[] }>;
+export type PublicTrainerApiResponse = ApiResponse<{ trainer: TrainerDetails }>;
+export type TrainerAvailabilityApiResponse = ApiResponse<{ availability: TrainerAvailability }>;
+export type AthleteTrainingAppointmentsApiResponse =
+  ApiResponse<{ appointments: AthleteTrainingAppointment[] }>;
+export type AthleteTrainingAppointmentApiResponse =
+  ApiResponse<{ appointment: AthleteTrainingAppointment }>;

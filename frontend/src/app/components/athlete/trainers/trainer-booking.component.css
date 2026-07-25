@@ -1,0 +1,98 @@
+.page,
+.layout,
+.booking-form,
+.slot-grid,
+.page-links {
+  display: grid;
+  gap: 1rem;
+}
+
+.page-header,
+.panel {
+  background: #ffffff;
+  border: 1px solid #d9e2ec;
+  border-radius: 1rem;
+  padding: 1.25rem;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: start;
+}
+
+.page-links {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.page-links a,
+button,
+.slot-button {
+  border: none;
+  border-radius: 999px;
+  padding: 0.75rem 1rem;
+  background: #0f766e;
+  color: #ffffff;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.layout {
+  grid-template-columns: 1.1fr 1fr;
+  align-items: start;
+}
+
+label {
+  display: grid;
+  gap: 0.4rem;
+}
+
+input,
+select {
+  border: 1px solid #cbd5e1;
+  border-radius: 0.75rem;
+  padding: 0.8rem 0.9rem;
+}
+
+.muted {
+  color: #475569;
+}
+
+.slot-grid {
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+}
+
+.slot-button {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.slot-button.selected {
+  background: #0f766e;
+  color: #ffffff;
+}
+
+.summary-panel button {
+  width: fit-content;
+}
+
+.state-message.error {
+  color: #b91c1c;
+}
+
+.state-message.success {
+  color: #15803d;
+}
+
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .page-header {
+    display: grid;
+  }
+}

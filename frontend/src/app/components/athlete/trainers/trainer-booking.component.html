@@ -1,0 +1,105 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>Trainer Details</h1>
+      <p>Review trainer information, load free terms, and book a whole-hour training session.</p>
+    </div>
+    <nav class="page-links">
+      <a routerLink="/athlete/trainers">Back to trainers</a>
+      <a routerLink="/athlete/trainings">My Trainings</a>
+    </nav>
+  </header>
+
+  @if (isLoadingTrainer) {
+    <p class="state-message">Loading trainer details...</p>
+  } @else if (errorMessage && !trainer) {
+    <p class="state-message error">{{ errorMessage }}</p>
+  } @else if (trainer) {
+    <div class="layout">
+      <article class="panel">
+        <h2>{{ trainer.firstName }} {{ trainer.lastName }}</h2>
+        <p class="muted">{{ trainer.specialization }}</p>
+        <p><strong>Facility:</strong> {{ trainer.facility.name }}, {{ trainer.facility.city }}</p>
+        <p><strong>Sports:</strong> {{ sportsLabel }}</p>
+        <p><strong>Hourly price:</strong> {{ trainer.hourlyPrice }}</p>
+        <p><strong>Phone:</strong> {{ trainer.phone }}</p>
+        <p><strong>Email:</strong> {{ trainer.email }}</p>
+        <p><strong>Biography:</strong> {{ trainer.biography }}</p>
+      </article>
+
+      <section class="panel">
+        <form [formGroup]="bookingForm" (ngSubmit)="loadAvailability()" class="booking-form">
+          @if (requiresSportSelection) {
+            <label>
+              <span>Sport</span>
+              <select formControlName="sportId">
+                <option value="">Select a sport</option>
+                @for (sport of trainer.sports; track sport.id) {
+                  <option [value]="sport.id">{{ sport.name }}</option>
+                }
+              </select>
+            </label>
+          }
+
+          <label>
+            <span>Date</span>
+            <input type="date" formControlName="date" />
+          </label>
+
+          <button type="submit" [disabled]="isLoadingAvailability">
+            {{ isLoadingAvailability ? 'Loading...' : 'Load availability' }}
+          </button>
+        </form>
+
+        @if (successMessage) {
+          <p class="state-message success">{{ successMessage }}</p>
+        }
+
+        @if (errorMessage && trainer) {
+          <p class="state-message error">{{ errorMessage }}</p>
+        }
+
+        @if (availability) {
+          <div class="availability-summary">
+            <p><strong>Date:</strong> {{ availability.date }}</p>
+            <p><strong>Working time:</strong> {{ availability.openingTime }} - {{ availability.closingTime }}</p>
+          </div>
+
+          @if (availableSlots.length === 0) {
+            <p class="state-message">No whole-hour slots are available for this date.</p>
+          } @else {
+            <div class="slot-grid">
+              @for (slot of availableSlots; track trackBySlot($index, slot)) {
+                <button
+                  type="button"
+                  class="slot-button"
+                  [class.selected]="isSlotSelected(slot)"
+                  (click)="toggleSlot(slot)">
+                  {{ slot.startTime }} - {{ slot.endTime }}
+                </button>
+              }
+            </div>
+          }
+        }
+      </section>
+    </div>
+
+    <section class="panel summary-panel">
+      <h2>Appointment Summary</h2>
+      @if (selectedSlots.length === 0) {
+        <p class="muted">Select one or more continuous whole-hour slots.</p>
+      } @else {
+        <p><strong>Trainer:</strong> {{ trainer.firstName }} {{ trainer.lastName }}</p>
+        <p><strong>Facility:</strong> {{ trainer.facility.name }}, {{ trainer.facility.city }}</p>
+        <p><strong>Date:</strong> {{ availability?.date }}</p>
+        <p><strong>Interval:</strong> {{ selectedStartTime }} - {{ selectedEndTime }}</p>
+        <p><strong>Duration:</strong> {{ selectedDurationHours }} hour(s)</p>
+        <p><strong>Total:</strong> {{ selectedDurationHours * trainer.hourlyPrice }}</p>
+      }
+
+      <button type="button" (click)="submit()" [disabled]="!canSubmit">
+        {{ isSubmitting ? 'Booking...' : 'Book training' }}
+      </button>
+    </section>
+  }
+</section>

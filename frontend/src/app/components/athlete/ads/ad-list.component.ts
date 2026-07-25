@@ -74,7 +74,7 @@ export class AdListComponent {
             : currentAd,
         );
         this.applyingIds.delete(ad.id);
-        this.actionMessage = 'Apply request sent successfully.';
+        this.actionMessage = 'Request sent successfully.';
       },
       error: (error) => {
         this.applyingIds.delete(ad.id);

@@ -101,3 +101,32 @@ export interface CreateEmployeeResourceRequest {
 export interface UpdateEmployeeResourceRequest extends CreateEmployeeResourceRequest {
   active: boolean;
 }
+
+export interface EmployeeTrainer {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  sports: EmployeeFavoriteSport[];
+  workingHours: EmployeeOpeningHour[];
+  biography?: string;
+  pricePerHour: number;
+  active: boolean;
+  createdAt: string;
+}
+
+export interface CreateEmployeeTrainerRequest {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  sports: string[];
+  workingHours: EmployeeOpeningHour[];
+  biography: string;
+  pricePerHour: number;
+}
+
+export interface UpdateEmployeeTrainerRequest extends CreateEmployeeTrainerRequest {
+  active: boolean;
+}

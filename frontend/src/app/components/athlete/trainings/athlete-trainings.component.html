@@ -1,0 +1,71 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>My Trainings</h1>
+      <p>Review scheduled, completed, cancelled, and no-show training appointments.</p>
+    </div>
+    <nav class="page-links">
+      <a routerLink="/athlete">Dashboard</a>
+      <a routerLink="/athlete/trainers">Find Trainers</a>
+    </nav>
+  </header>
+
+  @if (successMessage) {
+    <p class="state-message success">{{ successMessage }}</p>
+  }
+
+  @if (isLoading) {
+    <p class="state-message">Loading training history...</p>
+  } @else if (errorMessage) {
+    <p class="state-message error">{{ errorMessage }}</p>
+  } @else if (appointments.length === 0) {
+    <p class="state-message">No training appointments found.</p>
+  } @else {
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Trainer</th>
+            <th>Facility</th>
+            <th>City</th>
+            <th>Sport</th>
+            <th>Start</th>
+            <th>End</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (appointment of appointments; track appointment.id) {
+            <tr>
+              <td>{{ appointment.trainerName }}</td>
+              <td>{{ appointment.facilityName }}</td>
+              <td>{{ appointment.city }}</td>
+              <td>{{ appointment.sportName }}</td>
+              <td>{{ appointment.startTime | date: 'medium' }}</td>
+              <td>{{ appointment.endTime | date: 'medium' }}</td>
+              <td>
+                <span class="status-badge" [class.cancelled]="appointment.status === 'cancelled'">
+                  {{ appointment.status }}
+                </span>
+              </td>
+              <td>
+                @if (appointment.canCancel) {
+                  <button
+                    type="button"
+                    class="cancel-button"
+                    (click)="cancelAppointment(appointment)"
+                    [disabled]="isCancelling(appointment.id)">
+                    {{ isCancelling(appointment.id) ? 'Cancelling...' : 'Cancel' }}
+                  </button>
+                } @else {
+                  <span class="muted">-</span>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

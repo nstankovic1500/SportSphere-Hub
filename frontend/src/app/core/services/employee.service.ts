@@ -6,17 +6,21 @@ import type {
   ApiResponse,
   EmployeeCreatedFacilityApiResponse,
   EmployeeCreatedResourceApiResponse,
+  EmployeeCreatedTrainerApiResponse,
   EmployeeFacilityApiResponse,
   EmployeeFacilitiesApiResponse,
   EmployeeProfileApiResponse,
   EmployeeResourcesApiResponse,
+  EmployeeTrainersApiResponse,
 } from '../models/api-response.model';
 import type {
   CreateEmployeeFacilityRequest,
   CreateEmployeeResourceRequest,
+  CreateEmployeeTrainerRequest,
   UpdateEmployeeFacilityRequest,
   UpdateEmployeeProfileRequest,
   UpdateEmployeeResourceRequest,
+  UpdateEmployeeTrainerRequest,
 } from '../models/employee.model';
 
 @Injectable({
@@ -83,6 +87,32 @@ export class EmployeeService {
   deleteResource(resourceId: string) {
     return this.http.delete<ApiResponse<Record<string, never>>>(
       `${environment.apiUrl}/employees/resources/${resourceId}`,
+    );
+  }
+
+  getTrainers(facilityId: string) {
+    return this.http.get<EmployeeTrainersApiResponse>(
+      `${environment.apiUrl}/employees/facilities/${facilityId}/trainers`,
+    );
+  }
+
+  createTrainer(facilityId: string, payload: CreateEmployeeTrainerRequest) {
+    return this.http.post<EmployeeCreatedTrainerApiResponse>(
+      `${environment.apiUrl}/employees/facilities/${facilityId}/trainers`,
+      payload,
+    );
+  }
+
+  updateTrainer(trainerId: string, payload: UpdateEmployeeTrainerRequest) {
+    return this.http.patch<EmployeeCreatedTrainerApiResponse>(
+      `${environment.apiUrl}/employees/trainers/${trainerId}`,
+      payload,
+    );
+  }
+
+  deleteTrainer(trainerId: string) {
+    return this.http.delete<ApiResponse<Record<string, never>>>(
+      `${environment.apiUrl}/employees/trainers/${trainerId}`,
     );
   }
 }
