@@ -2,6 +2,7 @@ import { Types } from 'mongoose';
 
 import { Facility, FacilityStatus, type IFacility, type IOpeningHour } from '../../models/Facility';
 import { Appointment, AppointmentStatus, type IAppointment } from '../../models/Appointment';
+import { Promotion, DiscountType, type IPromotion } from '../../models/Promotion';
 import { Reservation, ReservationStatus, type IReservation } from '../../models/Reservation';
 import { Resource, ResourceType, type IResource } from '../../models/Resource';
 import { Sport, type ISport } from '../../models/Sport';
@@ -15,13 +16,16 @@ import type {
 } from './attendance.types';
 import type {
   CreateEmployeeFacilityBody,
+  CreateEmployeePromotionBody,
   CreateEmployeeResourceBody,
   CreateEmployeeTrainerBody,
   EmployeeFacility,
   EmployeeProfile,
+  EmployeePromotion,
   EmployeeResource,
   EmployeeTrainer,
   UpdateEmployeeFacilityBody,
+  UpdateEmployeePromotionBody,
   UpdateEmployeeProfileBody,
   UpdateEmployeeResourceBody,
   UpdateEmployeeTrainerBody,
@@ -47,6 +51,11 @@ type PopulatedResource = IResource & {
 type PopulatedTrainer = ITrainer & {
   _id: Types.ObjectId;
   sports: PopulatedSport[];
+};
+
+type PopulatedPromotion = IPromotion & {
+  _id: Types.ObjectId;
+  sportId: PopulatedSport;
 };
 
 type AttendanceAthlete = {
@@ -178,6 +187,39 @@ const toEmployeeTrainer = (trainer: PopulatedTrainer): EmployeeTrainer => {
     createdAt: trainer.createdAt ?? new Date(),
   };
 };
+
+const getPromotionState = (promotion: IPromotion) => {
+  const now = new Date().getTime();
+
+  if (!promotion.active) {
+    return 'inactive' as const;
+  }
+
+  if (promotion.endDate.getTime() < now) {
+    return 'expired' as const;
+  }
+
+  if (promotion.startDate.getTime() > now) {
+    return 'upcoming' as const;
+  }
+
+  return 'active' as const;
+};
+
+const toEmployeePromotion = (promotion: PopulatedPromotion): EmployeePromotion => ({
+  id: promotion._id.toString(),
+  name: promotion.name,
+  sport: {
+    id: promotion.sportId._id.toString(),
+    name: promotion.sportId.name,
+  },
+  startDate: promotion.startDate,
+  endDate: promotion.endDate,
+  discountType: promotion.discountType,
+  discountValue: promotion.discountValue,
+  active: promotion.active,
+  state: getPromotionState(promotion),
+});
 
 const getEmployee = async (employeeId: string) => {
   const user = (await User.findById(employeeId)
@@ -506,6 +548,54 @@ const validateAllowedNoShows = (value: unknown) => {
   return allowedNoShows;
 };
 
+const validatePromotionDiscountType = (value: unknown) => {
+  const discountType = String(value ?? '').trim() as DiscountType;
+
+  if (!Object.values(DiscountType).includes(discountType)) {
+    throw new AppError('discountType must be percentage or fixed', 400);
+  }
+
+  return discountType;
+};
+
+const validatePromotionDiscountValue = (value: unknown, discountType: DiscountType) => {
+  const discountValue = Number(value);
+
+  if (Number.isNaN(discountValue)) {
+    throw new AppError('discountValue must be a valid number', 400);
+  }
+
+  if (discountType === DiscountType.Percentage) {
+    if (discountValue < 1 || discountValue > 100) {
+      throw new AppError('percentage discount must be from 1 to 100', 400);
+    }
+
+    return discountValue;
+  }
+
+  if (discountValue <= 0) {
+    throw new AppError('fixed discount must be greater than 0', 400);
+  }
+
+  return discountValue;
+};
+
+const validatePromotionDate = (value: unknown, fieldName: string) => {
+  const dateValue = typeof value === 'string' ? value.trim() : '';
+
+  if (!dateValue) {
+    throw new AppError(`${fieldName} is required`, 400);
+  }
+
+  const parsedDate = new Date(dateValue);
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    throw new AppError(`${fieldName} must be a valid date`, 400);
+  }
+
+  return parsedDate;
+};
+
 const validateResourceType = (value: unknown) => {
   const type = String(value ?? '').trim() as ResourceType;
 
@@ -583,6 +673,45 @@ const validateFacilitySport = async (
   return {
     sportId: sport._id,
     sportName: sport.name,
+  };
+};
+
+const getPromotionByEmployee = async (employeeId: string, promotionId: string) => {
+  validateObjectId(promotionId, 'promotion id');
+
+  const promotion = await Promotion.findById(promotionId);
+
+  if (!promotion) {
+    throw new AppError('Promotion not found', 404);
+  }
+
+  await getFacilityByEmployee(employeeId, promotion.facilityId.toString());
+
+  return promotion;
+};
+
+const validatePromotionPayload = async (
+  facility: IFacility,
+  body: CreateEmployeePromotionBody | UpdateEmployeePromotionBody,
+) => {
+  const name = requireTrimmedText(body.name, 'name');
+  const { sportId } = await validateFacilitySport(facility, body.sportId);
+  const startDate = validatePromotionDate(body.startDate, 'startDate');
+  const endDate = validatePromotionDate(body.endDate, 'endDate');
+  const discountType = validatePromotionDiscountType(body.discountType);
+  const discountValue = validatePromotionDiscountValue(body.discountValue, discountType);
+
+  if (endDate.getTime() <= startDate.getTime()) {
+    throw new AppError('endDate must be after startDate', 400);
+  }
+
+  return {
+    name,
+    sportId,
+    startDate,
+    endDate,
+    discountType,
+    discountValue,
   };
 };
 
@@ -1163,6 +1292,105 @@ const deleteTrainer = async (employeeId: string, trainerId: string) => {
   };
 };
 
+const getFacilityPromotions = async (employeeId: string, facilityId: string) => {
+  const facility = await getFacilityByEmployee(employeeId, facilityId);
+
+  const promotions = (await Promotion.find({
+    facilityId: facility._id,
+  })
+    .populate({
+      path: 'sportId',
+      select: 'name',
+    })
+    .sort({ startDate: -1 })
+    .lean()) as unknown as PopulatedPromotion[];
+
+  return {
+    promotions: promotions.map((promotion) => toEmployeePromotion(promotion)),
+  };
+};
+
+const createPromotion = async (
+  employeeId: string,
+  facilityId: string,
+  body: CreateEmployeePromotionBody,
+) => {
+  const facility = await getFacilityByEmployee(employeeId, facilityId);
+  const payload = await validatePromotionPayload(facility, body);
+
+  const createdPromotion = await Promotion.create({
+    facilityId: facility._id,
+    name: payload.name,
+    sportId: payload.sportId,
+    startDate: payload.startDate,
+    endDate: payload.endDate,
+    discountType: payload.discountType,
+    discountValue: payload.discountValue,
+    active: true,
+  });
+
+  const promotion = (await Promotion.findById(createdPromotion._id)
+    .populate({
+      path: 'sportId',
+      select: 'name',
+    })
+    .lean()) as unknown as PopulatedPromotion | null;
+
+  if (!promotion) {
+    throw new AppError('Promotion not found', 404);
+  }
+
+  return {
+    promotion: toEmployeePromotion(promotion),
+  };
+};
+
+const updatePromotion = async (
+  employeeId: string,
+  promotionId: string,
+  body: UpdateEmployeePromotionBody,
+) => {
+  const promotion = await getPromotionByEmployee(employeeId, promotionId);
+  const facility = await getFacilityByEmployee(employeeId, promotion.facilityId.toString());
+  const payload = await validatePromotionPayload(facility, body);
+  const active = typeof body.active === 'boolean' ? body.active : promotion.active;
+
+  promotion.name = payload.name;
+  promotion.sportId = payload.sportId;
+  promotion.startDate = payload.startDate;
+  promotion.endDate = payload.endDate;
+  promotion.discountType = payload.discountType;
+  promotion.discountValue = payload.discountValue;
+  promotion.active = active;
+
+  await promotion.save();
+
+  const updatedPromotion = (await Promotion.findById(promotion._id)
+    .populate({
+      path: 'sportId',
+      select: 'name',
+    })
+    .lean()) as unknown as PopulatedPromotion | null;
+
+  if (!updatedPromotion) {
+    throw new AppError('Promotion not found', 404);
+  }
+
+  return {
+    promotion: toEmployeePromotion(updatedPromotion),
+  };
+};
+
+const deletePromotion = async (employeeId: string, promotionId: string) => {
+  const promotion = await getPromotionByEmployee(employeeId, promotionId);
+
+  await Promotion.deleteOne({ _id: promotion._id });
+
+  return {
+    message: 'Promotion deleted successfully',
+  };
+};
+
 const getAttendance = async (
   employeeId: string,
   facilityId: string,
@@ -1367,7 +1595,9 @@ const markTrainingAttendance = async (
 };
 
 export {
+  createPromotion,
   getAttendance,
+  getFacilityPromotions,
   markReservationAttendance,
   markTrainingAttendance,
   createFacility,
@@ -1375,8 +1605,10 @@ export {
   createTrainer,
   deleteResource,
   deleteTrainer,
+  deletePromotion,
   getFacilities,
   getFacility,
+  updatePromotion,
   getFacilityResources,
   getFacilityTrainers,
   getProfile,

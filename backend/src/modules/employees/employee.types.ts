@@ -1,4 +1,5 @@
 import type { FacilityStatus, IGeoPoint, IOpeningHour } from '../../models/Facility';
+import type { DiscountType } from '../../models/Promotion';
 import type { ResourceType } from '../../models/Resource';
 import type { UserRole, UserStatus } from '../../models/User';
 
@@ -150,16 +151,50 @@ interface UpdateEmployeeTrainerBody {
   active?: boolean;
 }
 
+interface EmployeePromotion {
+  id: string;
+  name: string;
+  sport: EmployeeFavoriteSport;
+  startDate: Date;
+  endDate: Date;
+  discountType: DiscountType;
+  discountValue: number;
+  active: boolean;
+  state: 'upcoming' | 'active' | 'expired' | 'inactive';
+}
+
+interface CreateEmployeePromotionBody {
+  name?: string;
+  sportId?: string;
+  startDate?: string;
+  endDate?: string;
+  discountType?: DiscountType;
+  discountValue?: number;
+}
+
+interface UpdateEmployeePromotionBody {
+  name?: string;
+  sportId?: string;
+  startDate?: string;
+  endDate?: string;
+  discountType?: DiscountType;
+  discountValue?: number;
+  active?: boolean;
+}
+
 export type {
   CreateEmployeeFacilityBody,
+  CreateEmployeePromotionBody,
   CreateEmployeeResourceBody,
   CreateEmployeeTrainerBody,
   EmployeeFacility,
   EmployeeFavoriteSport,
   EmployeeProfile,
+  EmployeePromotion,
   EmployeeResource,
   EmployeeTrainer,
   UpdateEmployeeFacilityBody,
+  UpdateEmployeePromotionBody,
   UpdateEmployeeProfileBody,
   UpdateEmployeeResourceBody,
   UpdateEmployeeTrainerBody,

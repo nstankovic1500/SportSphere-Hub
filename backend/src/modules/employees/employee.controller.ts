@@ -7,28 +7,34 @@ import { ReservationStatus } from '../../models/Reservation';
 import type { AttendanceQuery } from './attendance.types';
 import type {
   CreateEmployeeFacilityBody,
+  CreateEmployeePromotionBody,
   CreateEmployeeResourceBody,
   CreateEmployeeTrainerBody,
   UpdateEmployeeFacilityBody,
+  UpdateEmployeePromotionBody,
   UpdateEmployeeProfileBody,
   UpdateEmployeeResourceBody,
   UpdateEmployeeTrainerBody,
 } from './employee.types';
 import {
   createFacility as createFacilityService,
+  createPromotion as createPromotionService,
   createResource as createResourceService,
   createTrainer as createTrainerService,
+  deletePromotion as deletePromotionService,
   deleteResource as deleteResourceService,
   deleteTrainer as deleteTrainerService,
   getAttendance as getAttendanceService,
   getFacilities as getFacilitiesService,
   getFacility as getFacilityService,
+  getFacilityPromotions as getFacilityPromotionsService,
   getFacilityResources as getFacilityResourcesService,
   getFacilityTrainers as getFacilityTrainersService,
   markReservationAttendance as markReservationAttendanceService,
   markTrainingAttendance as markTrainingAttendanceService,
   getProfile as getProfileService,
   updateFacility as updateFacilityService,
+  updatePromotion as updatePromotionService,
   updateProfile as updateProfileService,
   updateResource as updateResourceService,
   updateTrainer as updateTrainerService,
@@ -88,10 +94,33 @@ const getAttendance = asyncHandler(async (req: AuthenticatedRequest, res: Respon
   });
 });
 
+const getFacilityPromotions = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const employeeId = String(req.auth?.userId);
+  const facilityId = String(req.params.facilityId);
+  const data = await getFacilityPromotionsService(employeeId, facilityId);
+
+  res.status(200).json({
+    success: true,
+    data,
+  });
+});
+
 const createFacility = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const employeeId = String(req.auth?.userId);
   const body = req.body as CreateEmployeeFacilityBody;
   const data = await createFacilityService(employeeId, body);
+
+  res.status(201).json({
+    success: true,
+    data,
+  });
+});
+
+const createPromotion = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const employeeId = String(req.auth?.userId);
+  const facilityId = String(req.params.facilityId);
+  const body = req.body as CreateEmployeePromotionBody;
+  const data = await createPromotionService(employeeId, facilityId, body);
 
   res.status(201).json({
     success: true,
@@ -104,6 +133,18 @@ const updateFacility = asyncHandler(async (req: AuthenticatedRequest, res: Respo
   const facilityId = String(req.params.facilityId);
   const body = req.body as UpdateEmployeeFacilityBody;
   const data = await updateFacilityService(employeeId, facilityId, body);
+
+  res.status(200).json({
+    success: true,
+    data,
+  });
+});
+
+const updatePromotion = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const employeeId = String(req.auth?.userId);
+  const promotionId = String(req.params.promotionId);
+  const body = req.body as UpdateEmployeePromotionBody;
+  const data = await updatePromotionService(employeeId, promotionId, body);
 
   res.status(200).json({
     success: true,
@@ -150,6 +191,18 @@ const deleteResource = asyncHandler(async (req: AuthenticatedRequest, res: Respo
   const employeeId = String(req.auth?.userId);
   const resourceId = String(req.params.resourceId);
   const data = await deleteResourceService(employeeId, resourceId);
+
+  res.status(200).json({
+    success: true,
+    message: data.message,
+    data: {},
+  });
+});
+
+const deletePromotion = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const employeeId = String(req.auth?.userId);
+  const promotionId = String(req.params.promotionId);
+  const data = await deletePromotionService(employeeId, promotionId);
 
   res.status(200).json({
     success: true,
@@ -267,13 +320,16 @@ const markTrainingNoShow = asyncHandler(async (req: AuthenticatedRequest, res: R
 
 export {
   createFacility,
+  createPromotion,
   createResource,
   createTrainer,
+  deletePromotion,
   deleteResource,
   deleteTrainer,
   getAttendance,
   getFacilities,
   getFacility,
+  getFacilityPromotions,
   getFacilityResources,
   getFacilityTrainers,
   getProfile,
@@ -282,6 +338,7 @@ export {
   markTrainingCompleted,
   markTrainingNoShow,
   updateFacility,
+  updatePromotion,
   updateProfile,
   updateResource,
   updateTrainer,
