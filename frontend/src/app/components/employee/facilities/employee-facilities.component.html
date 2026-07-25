@@ -1,0 +1,60 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>My Facilities</h1>
+      <p>Review the facilities assigned to your employee account.</p>
+    </div>
+    <div class="header-links">
+      <a routerLink="/employee">Back to dashboard</a>
+      <a routerLink="/employee/profile">Profile</a>
+      <button type="button">Create Facility</button>
+    </div>
+  </header>
+
+  @if (isLoading) {
+    <p class="state-message">Loading facilities...</p>
+  } @else if (errorMessage) {
+    <p class="state-message error">{{ errorMessage }}</p>
+  } @else if (facilities.length === 0) {
+    <section class="panel">
+      <p class="state-message">No facilities are assigned to your account.</p>
+    </section>
+  } @else {
+    <section class="panel">
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>City</th>
+              <th>Country</th>
+              <th>Address</th>
+              <th>Status</th>
+              <th>Active</th>
+              <th>Hourly Price</th>
+              <th>Sports</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (facility of facilities; track facility.id) {
+              <tr>
+                <td>{{ facility.name }}</td>
+                <td>{{ facility.city }}</td>
+                <td>{{ facility.country }}</td>
+                <td>{{ facility.address }}</td>
+                <td>{{ facility.status }}</td>
+                <td>{{ facility.active ? 'Yes' : 'No' }}</td>
+                <td>{{ facility.hourlyPrice }}</td>
+                <td>{{ getSportsLabel(facility) }}</td>
+                <td>
+                  <button type="button" class="secondary-button">Details</button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  }
+</section>

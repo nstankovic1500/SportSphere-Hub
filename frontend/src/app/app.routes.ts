@@ -16,6 +16,8 @@ import { FacilitiesComponent } from './components/public/facilities/facilities.c
 import { HomeComponent } from './components/public/home/home.component';
 import { AthleteComponent } from './components/athlete/athlete.component';
 import { EmployeeComponent } from './components/employee/employee.component';
+import { EmployeeProfileComponent } from './components/employee/profile/employee-profile.component';
+import { EmployeeFacilitiesComponent } from './components/employee/facilities/employee-facilities.component';
 
 export const routes: Routes = [
   {
@@ -93,6 +95,22 @@ export const routes: Routes = [
   {
     path: 'employee',
     component: EmployeeComponent,
+    canActivate: [authGuard],
+    data: {
+      roles: ['employee'],
+    },
+  },
+  {
+    path: 'employee/profile',
+    component: EmployeeProfileComponent,
+    canActivate: [authGuard],
+    data: {
+      roles: ['employee'],
+    },
+  },
+  {
+    path: 'employee/facilities',
+    component: EmployeeFacilitiesComponent,
     canActivate: [authGuard],
     data: {
       roles: ['employee'],

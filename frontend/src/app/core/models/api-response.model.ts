@@ -17,6 +17,10 @@ import type {
   AdRequestsResponseData,
   ApplyToAdResponseData,
 } from './ad.model';
+import type {
+  EmployeeFacility,
+  EmployeeProfile,
+} from './employee.model';
 
 export interface ApiResponse<T> {
   success: boolean;
@@ -52,3 +56,5 @@ export type AdListApiResponse = ApiResponse<AdListResponseData>;
 export type AdCreateApiResponse = ApiResponse<AdCreateResponseData>;
 export type AdRequestsApiResponse = ApiResponse<AdRequestsResponseData>;
 export type ApplyToAdApiResponse = ApiResponse<ApplyToAdResponseData>;
+export type EmployeeProfileApiResponse = ApiResponse<{ employee: EmployeeProfile }>;
+export type EmployeeFacilitiesApiResponse = ApiResponse<{ facilities: EmployeeFacility[] }>;
