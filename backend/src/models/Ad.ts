@@ -65,7 +65,7 @@ const AdSchema = new Schema<IAd>(
     createdAt: { type: Date, required: true, default: Date.now },
   },
   {
-    collection: 'Ads',
+    collection: 'ads',
   },
 );
 

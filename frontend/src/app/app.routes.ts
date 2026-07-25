@@ -8,6 +8,9 @@ import { AdminComponent } from './components/admin/admin.component';
 import { RegistrationRequestsComponent } from './components/admin/registration-requests/registration-requests.component';
 import { AthleteProfileComponent } from './components/athlete/profile/athlete-profile.component';
 import { ReservationComponent } from './components/athlete/reservation/reservation.component';
+import { AdListComponent } from './components/athlete/ads/ad-list.component';
+import { CreateAdComponent } from './components/athlete/ads/create-ad.component';
+import { AdRequestsComponent } from './components/athlete/ads/ad-requests.component';
 import { FacilityDetailsComponent } from './components/public/facility-details/facility-details.component';
 import { FacilitiesComponent } from './components/public/facilities/facilities.component';
 import { HomeComponent } from './components/public/home/home.component';
@@ -50,6 +53,30 @@ export const routes: Routes = [
   {
     path: 'athlete/profile',
     component: AthleteProfileComponent,
+    canActivate: [authGuard],
+    data: {
+      roles: ['athlete'],
+    },
+  },
+  {
+    path: 'athlete/ads',
+    component: AdListComponent,
+    canActivate: [authGuard],
+    data: {
+      roles: ['athlete'],
+    },
+  },
+  {
+    path: 'athlete/ads/new',
+    component: CreateAdComponent,
+    canActivate: [authGuard],
+    data: {
+      roles: ['athlete'],
+    },
+  },
+  {
+    path: 'athlete/ads/:id/requests',
+    component: AdRequestsComponent,
     canActivate: [authGuard],
     data: {
       roles: ['athlete'],

@@ -1,0 +1,127 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>Ads</h1>
+      <p>Browse active ads, filter by sport, city, and date, or manage your own ads.</p>
+    </div>
+    <div class="header-links">
+      <a routerLink="/athlete">Back to dashboard</a>
+      <a routerLink="/athlete/ads/new">Create ad</a>
+    </div>
+  </header>
+
+  <section class="panel">
+    <form class="filters" [formGroup]="filterForm" (ngSubmit)="applyFilters()">
+      <div class="filter-grid">
+        <div class="field">
+          <label for="sportId">Sport</label>
+          <select id="sportId" formControlName="sportId">
+            <option value="">All sports</option>
+            @for (sport of sports; track sport.id) {
+              <option [value]="sport.id">{{ sport.name }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="city">City</label>
+          <select id="city" formControlName="city">
+            <option value="">All cities</option>
+            @for (city of cities; track city) {
+              <option [value]="city">{{ city }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="date">Date</label>
+          <input id="date" type="date" formControlName="date" />
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" [disabled]="isFiltering">
+          {{ isFiltering ? 'Applying...' : 'Apply filters' }}
+        </button>
+        <button type="button" class="secondary-button" [disabled]="isFiltering" (click)="resetFilters()">
+          Reset
+        </button>
+      </div>
+    </form>
+  </section>
+
+  @if (actionMessage) {
+    <p class="message success">{{ actionMessage }}</p>
+  }
+
+  @if (errorMessage) {
+    <p class="message error">{{ errorMessage }}</p>
+  }
+
+  @if (isLoading) {
+    <p class="state-message">Loading ads...</p>
+  } @else if (ads.length === 0) {
+    <section class="panel">
+      <p class="state-message">No active ads match the selected filters.</p>
+    </section>
+  } @else {
+    <section class="panel">
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Sport</th>
+              <th>City</th>
+              <th>Date</th>
+              <th>Time</th>
+              <th>Author</th>
+              <th>Missing players</th>
+              <th>Accepted players</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (ad of ads; track trackByAdId($index, ad)) {
+              <tr>
+                <td>{{ ad.sport.name }}</td>
+                <td>{{ ad.city }}</td>
+                <td>{{ ad.date | date: 'mediumDate' }}</td>
+                <td>{{ ad.startTime }} - {{ ad.endTime }}</td>
+                <td>{{ ad.authorName }}</td>
+                <td>{{ ad.missingPlayers }}</td>
+                <td>{{ ad.acceptedPlayers }}</td>
+                <td>
+                  @if (ad.isOwner) {
+                    <div class="action-group">
+                      <a class="inline-link" [routerLink]="['/athlete/ads', ad.id, 'requests']">
+                        Manage requests
+                      </a>
+                      <button
+                        type="button"
+                        class="secondary-button"
+                        [disabled]="!(ad.status === 'active') || isClosing(ad.id)"
+                        (click)="closeAd(ad)"
+                      >
+                        {{ isClosing(ad.id) ? 'Closing...' : 'Close' }}
+                      </button>
+                    </div>
+                  } @else if (ad.hasRequested) {
+                    <span class="status-badge pending">Apply sent</span>
+                  } @else {
+                    <button
+                      type="button"
+                      [disabled]="isApplying(ad.id)"
+                      (click)="applyToAd(ad)"
+                    >
+                      {{ isApplying(ad.id) ? 'Sending...' : 'Apply' }}
+                    </button>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  }
+</section>

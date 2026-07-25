@@ -1,0 +1,110 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>Create Ad</h1>
+      <p>Create a new ad and invite other athletes to apply for your team.</p>
+    </div>
+    <div class="header-links">
+      <a routerLink="/athlete">Back to dashboard</a>
+      <a routerLink="/athlete/ads">Back to ads</a>
+    </div>
+  </header>
+
+  @if (isLoading) {
+    <p class="state-message">Loading form options...</p>
+  } @else {
+    <section class="panel">
+      @if (successMessage) {
+        <p class="message success">{{ successMessage }}</p>
+      }
+
+      @if (errorMessage) {
+        <p class="message error">{{ errorMessage }}</p>
+      }
+
+      <form class="form-grid" [formGroup]="adForm" (ngSubmit)="submit()">
+        <div class="field">
+          <label for="sportId">Sport</label>
+          <select id="sportId" formControlName="sportId">
+            <option value="">Select a sport</option>
+            @for (sport of sports; track sport.id) {
+              <option [value]="sport.id">{{ sport.name }}</option>
+            }
+          </select>
+          @if (sportId.touched && sportId.hasError('required')) {
+            <small class="field-error">Sport is required.</small>
+          }
+        </div>
+
+        <div class="field">
+          <label for="city">City</label>
+          <select id="city" formControlName="city">
+            <option value="">Select a city</option>
+            @for (currentCity of cities; track currentCity) {
+              <option [value]="currentCity">{{ currentCity }}</option>
+            }
+          </select>
+          @if (city.touched && city.hasError('required')) {
+            <small class="field-error">City is required.</small>
+          }
+        </div>
+
+        <div class="field">
+          <label for="date">Date</label>
+          <input id="date" type="date" formControlName="date" />
+          @if (date.touched && date.hasError('required')) {
+            <small class="field-error">Date is required.</small>
+          }
+          @if (date.touched && date.hasError('futureDate')) {
+            <small class="field-error">Date must be in the future.</small>
+          }
+          @if (date.touched && date.hasError('invalidDate')) {
+            <small class="field-error">Date must be in YYYY-MM-DD format.</small>
+          }
+        </div>
+
+        <div class="field">
+          <label for="startTime">Start time</label>
+          <input id="startTime" type="time" formControlName="startTime" />
+          @if (startTime.touched && startTime.hasError('required')) {
+            <small class="field-error">Start time is required.</small>
+          }
+          @if (startTime.touched && startTime.hasError('pattern')) {
+            <small class="field-error">Start time must be in HH:mm format.</small>
+          }
+        </div>
+
+        <div class="field">
+          <label for="endTime">End time</label>
+          <input id="endTime" type="time" formControlName="endTime" />
+          @if (endTime.touched && endTime.hasError('required')) {
+            <small class="field-error">End time is required.</small>
+          }
+          @if (endTime.touched && endTime.hasError('pattern')) {
+            <small class="field-error">End time must be in HH:mm format.</small>
+          }
+          @if (adForm.touched && adForm.hasError('invalidTimeRange')) {
+            <small class="field-error">End time must be after start time.</small>
+          }
+        </div>
+
+        <div class="field">
+          <label for="missingPlayers">Missing players</label>
+          <input id="missingPlayers" type="number" min="1" step="1" formControlName="missingPlayers" />
+          @if (missingPlayers.touched && missingPlayers.hasError('required')) {
+            <small class="field-error">Missing players is required.</small>
+          }
+          @if (missingPlayers.touched && (missingPlayers.hasError('min') || missingPlayers.hasError('pattern'))) {
+            <small class="field-error">Missing players must be an integer of at least 1.</small>
+          }
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" [disabled]="adForm.invalid || isSubmitting">
+            {{ isSubmitting ? 'Creating...' : 'Create ad' }}
+          </button>
+        </div>
+      </form>
+    </section>
+  }
+</section>

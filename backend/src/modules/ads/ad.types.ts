@@ -33,16 +33,32 @@ interface AdListItem {
   hasRequested: boolean;
 }
 
-interface JoinRequestItem {
+interface ApplyRequestItem {
   id: string;
   athleteName: string;
   status: 'pending' | 'accepted' | 'rejected';
   createdAt: Date;
 }
 
+interface AdRequestsData {
+  ad: {
+    id: string;
+    sportName: string;
+    city: string;
+    date: Date;
+    startTime: string;
+    endTime: string;
+    missingPlayers: number;
+    acceptedPlayers: number;
+    status: 'active' | 'completed' | 'closed';
+  };
+  requests: ApplyRequestItem[];
+}
+
 export type {
   AdListItem,
   AdsQuery,
   AdBody,
-  JoinRequestItem,
+  AdRequestsData,
+  ApplyRequestItem,
 };

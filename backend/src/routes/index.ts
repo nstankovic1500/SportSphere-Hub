@@ -25,7 +25,7 @@ router.use('/admin', adminRouter);
 router.use('/ads', adRouter);
 router.use('/athletes', athleteRouter);
 router.use('/facilities', reviewRouter);
-router.use('/join-requests', applyRequestRouter);
+router.use('/apply-requests', applyRequestRouter);
 router.use('/public', publicRouter);
 router.use('/sports', sportRouter);
 

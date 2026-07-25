@@ -1,1 +1,129 @@
 /* You can add global styles to this file, and also import other style files */
+
+:root {
+  color-scheme: dark;
+  --bg-app: #23262b;
+  --bg-surface: #2d3138;
+  --bg-surface-soft: #383d45;
+  --bg-surface-muted: #444a53;
+  --border-color: #565d67;
+  --text-primary: #f1f3f5;
+  --text-secondary: #c8cdd3;
+  --text-muted: #a4acb5;
+  --button-primary: #5a6068;
+  --button-primary-hover: #686f78;
+  --button-secondary: #464b53;
+  --button-secondary-hover: #545a63;
+}
+
+html,
+body {
+  min-height: 100%;
+  background: var(--bg-app);
+}
+
+body {
+  margin: 0;
+  color: var(--text-primary);
+}
+
+a {
+  color: var(--text-primary);
+}
+
+h1,
+h2,
+h3,
+p,
+span,
+small,
+label,
+td,
+th,
+div {
+  color: var(--text-primary);
+}
+
+input,
+select,
+textarea {
+  background: var(--bg-surface-soft) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-muted);
+}
+
+button {
+  background: var(--button-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+button:hover {
+  background: var(--button-primary-hover) !important;
+}
+
+button.secondary-button,
+a.secondary-button,
+.secondary-button {
+  background: var(--button-secondary) !important;
+  color: var(--text-primary) !important;
+}
+
+button.secondary-button:hover,
+a.secondary-button:hover,
+.secondary-button:hover {
+  background: var(--button-secondary-hover) !important;
+}
+
+.page,
+.public-page {
+  color: var(--text-primary);
+}
+
+.panel,
+.summary-card,
+table,
+.message,
+.state-message,
+.dashboard-link {
+  background: var(--bg-surface) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+th,
+td,
+label,
+p,
+span,
+small,
+h1,
+h2,
+h3 {
+  color: inherit;
+}
+
+th,
+.summary-label,
+.helper-text {
+  color: var(--text-secondary) !important;
+}
+
+.field-error,
+.message.error,
+.state-message.error {
+  color: #f0d0d0 !important;
+}
+
+.message.success {
+  color: #dde4dd !important;
+}
+
+table th,
+table td {
+  border-color: var(--border-color) !important;
+}

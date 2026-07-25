@@ -11,6 +11,12 @@ import type {
   FacilityReviewsResponseData,
   HomeResponseData,
 } from './public.model';
+import type {
+  AdCreateResponseData,
+  AdListResponseData,
+  AdRequestsResponseData,
+  ApplyToAdResponseData,
+} from './ad.model';
 
 export interface ApiResponse<T> {
   success: boolean;
@@ -42,3 +48,7 @@ export type PublicCitiesApiResponse = ApiResponse<CitiesResponseData>;
 export type PublicFacilitiesApiResponse = ApiResponse<FacilitiesResponseData>;
 export type PublicFacilityDetailsApiResponse = ApiResponse<FacilityDetailsResponseData>;
 export type PublicFacilityReviewsApiResponse = ApiResponse<FacilityReviewsResponseData>;
+export type AdListApiResponse = ApiResponse<AdListResponseData>;
+export type AdCreateApiResponse = ApiResponse<AdCreateResponseData>;
+export type AdRequestsApiResponse = ApiResponse<AdRequestsResponseData>;
+export type ApplyToAdApiResponse = ApiResponse<ApplyToAdResponseData>;

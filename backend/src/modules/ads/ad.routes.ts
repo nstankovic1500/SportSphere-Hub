@@ -22,7 +22,7 @@ adRouter.use(roleMiddleware(UserRole.Athlete));
 adRouter.get('/', getAdsController);
 adRouter.post('/', createAdController);
 adRouter.patch('/:id/close', closeAdController);
-adRouter.post('/:id/join', applyToAdController);
+adRouter.post('/:id/apply', applyToAdController);
 adRouter.get('/:id/requests', getAdRequestsController);
 
 applyRequestRouter.use(authMiddleware);

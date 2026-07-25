@@ -1,0 +1,109 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>Ad Requests</h1>
+      @if (ad) {
+        <p>
+          {{ ad.sportName }} in {{ ad.city }} on {{ ad.date | date: 'mediumDate' }},
+          {{ ad.startTime }} - {{ ad.endTime }}
+        </p>
+      } @else {
+        <p>Review pending, accepted, and rejected apply requests for your ad.</p>
+      }
+    </div>
+    <div class="header-links">
+      <a routerLink="/athlete">Back to dashboard</a>
+      <a routerLink="/athlete/ads">Back to ads</a>
+    </div>
+  </header>
+
+  @if (actionMessage) {
+    <p class="message success">{{ actionMessage }}</p>
+  }
+
+  @if (errorMessage && !isLoading) {
+    <p class="message error">{{ errorMessage }}</p>
+  }
+
+  @if (ad) {
+    <section class="summary-grid">
+      <article class="summary-card">
+        <span class="summary-label">Missing players</span>
+        <strong>{{ ad.missingPlayers }}</strong>
+      </article>
+      <article class="summary-card">
+        <span class="summary-label">Accepted players</span>
+        <strong>{{ ad.acceptedPlayers }}</strong>
+      </article>
+      <article class="summary-card">
+        <span class="summary-label">Status</span>
+        <strong>{{ ad.status }}</strong>
+      </article>
+    </section>
+  }
+
+  @if (isCompleted) {
+    <p class="message success">This ad is completed because the team is full.</p>
+  }
+
+  @if (isLoading) {
+    <p class="state-message">Loading ad requests...</p>
+  } @else if (!ad) {
+    <p class="state-message error">Ad details are unavailable.</p>
+  } @else if (requests.length === 0) {
+    <section class="panel">
+      <p class="state-message">No apply requests found for this ad.</p>
+    </section>
+  } @else {
+    <section class="panel">
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Athlete</th>
+              <th>Status</th>
+              <th>Sent at</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (request of requests; track request.id) {
+              <tr>
+                <td>{{ request.athleteName }}</td>
+                <td>
+                  <span class="status-badge" [class.pending]="request.status === 'pending'" [class.accepted]="request.status === 'accepted'" [class.rejected]="request.status === 'rejected'">
+                    {{ request.status }}
+                  </span>
+                </td>
+                <td>{{ request.createdAt | date: 'medium' }}</td>
+                <td>
+                  @if (request.status === 'pending' && !isCompleted) {
+                    <div class="action-group">
+                      <button
+                        type="button"
+                        [disabled]="isProcessing(request.id)"
+                        (click)="approveRequest(request)"
+                      >
+                        {{ isProcessing(request.id) ? 'Processing...' : 'Approve' }}
+                      </button>
+                      <button
+                        type="button"
+                        class="secondary-button"
+                        [disabled]="isProcessing(request.id)"
+                        (click)="rejectRequest(request)"
+                      >
+                        Reject
+                      </button>
+                    </div>
+                  } @else {
+                    <span>-</span>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  }
+</section>

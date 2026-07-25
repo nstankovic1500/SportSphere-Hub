@@ -6,9 +6,10 @@ import { Sport } from '../../models/Sport';
 import { AppError } from '../../utils/AppError';
 import type {
   AdListItem,
+  AdRequestsData,
   AdsQuery,
   AdBody,
-  JoinRequestItem,
+  ApplyRequestItem,
 } from './ad.types';
 
 type PopulatedAd = IAd & {
@@ -79,12 +80,12 @@ const ensureAdExists = async (id: string) => {
 };
 
 const ensureApplyRequestExists = async (id: string) => {
-  validateObjectId(id, 'join request id');
+  validateObjectId(id, 'apply request id');
 
   const applyRequest = await Request.findById(id);
 
   if (!applyRequest) {
-    throw new AppError('Join request not found', 404);
+    throw new AppError('Apply request not found', 404);
   }
 
   return applyRequest;
@@ -118,7 +119,7 @@ const toAdListItem = (
   };
 };
 
-const toApplyRequestItem = (applyRequest: PopulatedApplyRequest): JoinRequestItem => {
+const toApplyRequestItem = (applyRequest: PopulatedApplyRequest): ApplyRequestItem => {
   return {
     id: applyRequest._id.toString(),
     athleteName: `${applyRequest.athleteId.firstName} ${applyRequest.athleteId.lastName}`.trim(),
@@ -258,7 +259,7 @@ const applyToAd = async (athleteId: string, adId: string) => {
   const ad = await ensureAdExists(adId);
 
   if (ad.authorId.toString() === athleteId) {
-    throw new AppError('You cannot join your own ad', 400);
+    throw new AppError('You cannot apply to your own ad', 400);
   }
 
   if (!(ad.status === AdStatus.Active)) {
@@ -271,7 +272,7 @@ const applyToAd = async (athleteId: string, adId: string) => {
   });
 
   if (existingRequest) {
-    throw new AppError('You have already sent a join request for this ad', 400);
+    throw new AppError('You have already sent an apply request for this ad', 400);
   }
 
   const applyRequest = await Request.create({
@@ -289,11 +290,28 @@ const applyToAd = async (athleteId: string, adId: string) => {
   };
 };
 
-const getAdRequests = async (athleteId: string, adId: string) => {
+const getAdRequests = async (athleteId: string, adId: string): Promise<AdRequestsData> => {
   const ad = await ensureAdExists(adId);
 
   if (!(ad.authorId.toString() === athleteId)) {
     throw new AppError('You do not have permission to access this ad', 403);
+  }
+
+  const populatedAd = (await Ad.findById(adId)
+    .populate({
+      path: 'sportId',
+      select: 'name',
+    })
+    .lean()) as unknown as (IAd & {
+    _id: Types.ObjectId;
+    sportId: {
+      _id: Types.ObjectId;
+      name: string;
+    };
+  }) | null;
+
+  if (!populatedAd) {
+    throw new AppError('Ad not found', 404);
   }
 
   const requests = (await Request.find({
@@ -307,6 +325,17 @@ const getAdRequests = async (athleteId: string, adId: string) => {
     .lean()) as unknown as PopulatedApplyRequest[];
 
   return {
+    ad: {
+      id: populatedAd._id.toString(),
+      sportName: populatedAd.sportId.name,
+      city: populatedAd.city,
+      date: populatedAd.date,
+      startTime: populatedAd.startTime,
+      endTime: populatedAd.endTime,
+      missingPlayers: populatedAd.missingPlayers,
+      acceptedPlayers: populatedAd.acceptedPlayers,
+      status: populatedAd.status,
+    },
     requests: requests.map((request) => toApplyRequestItem(request)),
   };
 };
@@ -320,11 +349,11 @@ const acceptApplyRequest = async (athleteId: string, applyRequestId: string) => 
   }
 
   if (!(applyRequest.status === RequestStatus.Pending)) {
-    throw new AppError('Only pending join requests can be accepted', 400);
+    throw new AppError('Only pending apply requests can be accepted', 400);
   }
 
   if (!(ad.status === AdStatus.Active)) {
-    throw new AppError('Only active ads can accept join requests', 400);
+    throw new AppError('Only active ads can accept apply requests', 400);
   }
 
   if (ad.acceptedPlayers >= ad.missingPlayers) {
@@ -358,7 +387,7 @@ const rejectApplyRequest = async (athleteId: string, applyRequestId: string) => 
   }
 
   if (!(applyRequest.status === RequestStatus.Pending)) {
-    throw new AppError('Only pending join requests can be rejected', 400);
+    throw new AppError('Only pending apply requests can be rejected', 400);
   }
 
   applyRequest.status = RequestStatus.Rejected;
