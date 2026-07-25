@@ -18,6 +18,12 @@
   align-items: center;
 }
 
+.link-button {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
 .page-header h1,
 .page-header p {
   margin: 0;

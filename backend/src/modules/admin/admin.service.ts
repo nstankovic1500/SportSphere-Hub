@@ -90,6 +90,7 @@ const toFacilityRequest = (facility: FacilityRequestWithRefs): PendingFacilityRe
     status: facility.status,
     active: facility.active,
     hourlyPrice: facility.hourlyPrice,
+    allowedNoShows: facility.allowedNoShows,
     images: facility.images ?? [],
     sports: sports.map((sport) => ({
       id: sport._id.toString(),
@@ -102,6 +103,11 @@ const toFacilityRequest = (facility: FacilityRequestWithRefs): PendingFacilityRe
       username: employee.username,
       email: employee.email,
       companyName: employee.employeeData?.companyName ?? '',
+    })),
+    openingHours: (facility.openingHours ?? []).map((openingHour) => ({
+      day: openingHour.day,
+      open: openingHour.open,
+      close: openingHour.close,
     })),
     createdAt: facility.createdAt ?? new Date(),
   };

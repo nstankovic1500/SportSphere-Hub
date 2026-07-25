@@ -43,10 +43,31 @@ export interface EmployeeFacility {
   city: string;
   country: string;
   address: string;
+  description?: string;
   status: 'pending' | 'approved' | 'rejected';
   active: boolean;
   hourlyPrice: number;
   images: string[];
   sports: EmployeeFavoriteSport[];
   createdAt: string;
+}
+
+export interface EmployeeOpeningHour {
+  day: number;
+  open: string;
+  close: string;
+}
+
+export interface CreateEmployeeFacilityRequest {
+  name: string;
+  city: string;
+  country: string;
+  address: string;
+  description: string;
+  longitude: number;
+  latitude: number;
+  sports: string[];
+  openingHours: EmployeeOpeningHour[];
+  hourlyPrice: number;
+  allowedNoShows: number;
 }

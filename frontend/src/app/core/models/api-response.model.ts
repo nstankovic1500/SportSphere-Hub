@@ -1,7 +1,9 @@
 import type { User } from './user.model';
 import type { Sport } from './sport.model';
 import type {
+  FacilityRequestsResponseData,
   RegistrationRequestsResponseData,
+  ResolvedFacilityRequestResponseData,
   ResolvedRegistrationResponseData,
 } from './admin.model';
 import type {
@@ -18,6 +20,7 @@ import type {
   ApplyToAdResponseData,
 } from './ad.model';
 import type {
+  CreateEmployeeFacilityRequest,
   EmployeeFacility,
   EmployeeProfile,
 } from './employee.model';
@@ -46,6 +49,10 @@ export type AdminRegistrationRequestsResponse =
 
 export type AdminResolvedRegistrationResponse =
   ApiResponse<ResolvedRegistrationResponseData>;
+export type AdminFacilityRequestsResponse =
+  ApiResponse<FacilityRequestsResponseData>;
+export type AdminResolvedFacilityRequestResponse =
+  ApiResponse<ResolvedFacilityRequestResponseData>;
 
 export type PublicHomeApiResponse = ApiResponse<HomeResponseData>;
 export type PublicCitiesApiResponse = ApiResponse<CitiesResponseData>;
@@ -58,3 +65,4 @@ export type AdRequestsApiResponse = ApiResponse<AdRequestsResponseData>;
 export type ApplyToAdApiResponse = ApiResponse<ApplyToAdResponseData>;
 export type EmployeeProfileApiResponse = ApiResponse<{ employee: EmployeeProfile }>;
 export type EmployeeFacilitiesApiResponse = ApiResponse<{ facilities: EmployeeFacility[] }>;
+export type EmployeeCreatedFacilityApiResponse = ApiResponse<{ facility: EmployeeFacility }>;

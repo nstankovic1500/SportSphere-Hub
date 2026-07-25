@@ -1,0 +1,104 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>Facility Requests</h1>
+      <p>Review pending facility requests submitted by employees.</p>
+    </div>
+    <div class="header-links">
+      <a routerLink="/admin">Back to dashboard</a>
+      <a routerLink="/admin/registration-requests">Registration Requests</a>
+    </div>
+  </header>
+
+  @if (successMessage) {
+    <p class="message success">{{ successMessage }}</p>
+  }
+
+  @if (isLoading) {
+    <p class="state-message">Loading facility requests...</p>
+  } @else if (errorMessage) {
+    <p class="state-message error">{{ errorMessage }}</p>
+  } @else if (requests.length === 0) {
+    <section class="panel">
+      <p class="state-message">No pending facility requests found.</p>
+    </section>
+  } @else {
+    <section class="panel">
+      <div class="request-grid">
+        @for (request of requests; track request.id) {
+          <article class="request-card">
+            <div class="card-header">
+              <div>
+                <h2>{{ request.name }}</h2>
+                <p>{{ request.city }}, {{ request.country }}</p>
+              </div>
+              <span class="status-badge">Pending</span>
+            </div>
+
+            <div class="details-grid">
+              <div class="detail-item">
+                <span class="detail-label">Address</span>
+                <span>{{ request.address }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Company</span>
+                <span>{{ getCompaniesLabel(request) }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Employee</span>
+                <span>{{ getEmployeesLabel(request) }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Sports</span>
+                <span>{{ getSportsLabel(request) }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Hourly Price</span>
+                <span>{{ request.hourlyPrice }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Allowed No-Shows</span>
+                <span>{{ request.allowedNoShows }}</span>
+              </div>
+              <div class="detail-item detail-item-wide">
+                <span class="detail-label">Opening Hours</span>
+                <span>{{ getOpeningHoursLabel(request) }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Created At</span>
+                <span>{{ request.createdAt | date: 'medium' }}</span>
+              </div>
+            </div>
+
+            <div class="action-group">
+              <button
+                type="button"
+                class="approve-button"
+                title="Approve request"
+                aria-label="Approve request"
+                [disabled]="isProcessing(request.id)"
+                (click)="approve(request)"
+              >
+                @if (isProcessing(request.id)) {
+                  <span>Processing...</span>
+                } @else {
+                  <span>Approve</span>
+                }
+              </button>
+              <button
+                type="button"
+                class="secondary-button"
+                title="Reject request"
+                aria-label="Reject request"
+                [disabled]="isProcessing(request.id)"
+                (click)="reject(request)"
+              >
+                <span>Reject</span>
+              </button>
+            </div>
+          </article>
+        }
+      </div>
+    </section>
+  }
+</section>

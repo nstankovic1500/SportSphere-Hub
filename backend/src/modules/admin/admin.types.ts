@@ -35,6 +35,7 @@ interface PendingFacilityRequest {
   status: FacilityStatus;
   active: boolean;
   hourlyPrice: number;
+  allowedNoShows: number;
   images: string[];
   sports: Array<{
     id: string;
@@ -47,6 +48,11 @@ interface PendingFacilityRequest {
     username: string;
     email: string;
     companyName: string;
+  }>;
+  openingHours: Array<{
+    day: number;
+    open: string;
+    close: string;
   }>;
   createdAt: Date;
 }

@@ -3,6 +3,8 @@ import { Injectable, inject } from '@angular/core';
 
 import { environment } from '../../../environments/environment';
 import type {
+  AdminFacilityRequestsResponse,
+  AdminResolvedFacilityRequestResponse,
   AdminRegistrationRequestsResponse,
   AdminResolvedRegistrationResponse,
 } from '../models/api-response.model';
@@ -29,6 +31,26 @@ export class AdminService {
   rejectRegistration(userId: string) {
     return this.http.patch<AdminResolvedRegistrationResponse>(
       `${environment.apiUrl}/admin/registrationRequests/${userId}/reject`,
+      {},
+    );
+  }
+
+  getFacilityRequests() {
+    return this.http.get<AdminFacilityRequestsResponse>(
+      `${environment.apiUrl}/admin/facility-requests`,
+    );
+  }
+
+  approveFacilityRequest(facilityId: string) {
+    return this.http.patch<AdminResolvedFacilityRequestResponse>(
+      `${environment.apiUrl}/admin/facility-requests/${facilityId}/approve`,
+      {},
+    );
+  }
+
+  rejectFacilityRequest(facilityId: string) {
+    return this.http.patch<AdminResolvedFacilityRequestResponse>(
+      `${environment.apiUrl}/admin/facility-requests/${facilityId}/reject`,
       {},
     );
   }

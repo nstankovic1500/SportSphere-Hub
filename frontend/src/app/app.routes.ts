@@ -6,6 +6,7 @@ import { LoginComponent } from './components/auth/login/login.component';
 import { RegisterComponent } from './components/auth/register/register.component';
 import { AdminComponent } from './components/admin/admin.component';
 import { RegistrationRequestsComponent } from './components/admin/registration-requests/registration-requests.component';
+import { FacilityRequestsComponent } from './components/admin/facility-requests/facility-requests.component';
 import { AthleteProfileComponent } from './components/athlete/profile/athlete-profile.component';
 import { ReservationComponent } from './components/athlete/reservation/reservation.component';
 import { AdListComponent } from './components/athlete/ads/ad-list.component';
@@ -18,6 +19,7 @@ import { AthleteComponent } from './components/athlete/athlete.component';
 import { EmployeeComponent } from './components/employee/employee.component';
 import { EmployeeProfileComponent } from './components/employee/profile/employee-profile.component';
 import { EmployeeFacilitiesComponent } from './components/employee/facilities/employee-facilities.component';
+import { CreateFacilityComponent } from './components/employee/facilities/create-facility.component';
 
 export const routes: Routes = [
   {
@@ -117,6 +119,14 @@ export const routes: Routes = [
     },
   },
   {
+    path: 'employee/facilities/new',
+    component: CreateFacilityComponent,
+    canActivate: [authGuard],
+    data: {
+      roles: ['employee'],
+    },
+  },
+  {
     path: 'admin',
     component: AdminComponent,
     canActivate: [authGuard],
@@ -127,6 +137,14 @@ export const routes: Routes = [
   {
     path: 'admin/registration-requests',
     component: RegistrationRequestsComponent,
+    canActivate: [authGuard],
+    data: {
+      roles: ['admin'],
+    },
+  },
+  {
+    path: 'admin/facility-requests',
+    component: FacilityRequestsComponent,
     canActivate: [authGuard],
     data: {
       roles: ['admin'],
