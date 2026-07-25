@@ -1,13 +1,18 @@
 import { Types } from 'mongoose';
 
 import { Facility, FacilityStatus, type IFacility, type IOpeningHour } from '../../models/Facility';
-import { Appointment, AppointmentStatus } from '../../models/Appointment';
-import { Reservation, ReservationStatus } from '../../models/Reservation';
+import { Appointment, AppointmentStatus, type IAppointment } from '../../models/Appointment';
+import { Reservation, ReservationStatus, type IReservation } from '../../models/Reservation';
 import { Resource, ResourceType, type IResource } from '../../models/Resource';
 import { Sport, type ISport } from '../../models/Sport';
 import { Trainer, type ITrainer } from '../../models/Trainer';
 import { User, UserRole, type IUser } from '../../models/User';
 import { AppError } from '../../utils/AppError';
+import type {
+  AttendanceItem,
+  AttendanceQuery,
+  AttendanceUpdateResult,
+} from './attendance.types';
 import type {
   CreateEmployeeFacilityBody,
   CreateEmployeeResourceBody,
@@ -44,8 +49,36 @@ type PopulatedTrainer = ITrainer & {
   sports: PopulatedSport[];
 };
 
+type AttendanceAthlete = {
+  _id: Types.ObjectId;
+  firstName: string;
+  lastName: string;
+};
+
+type AttendanceReservation = IReservation & {
+  _id: Types.ObjectId;
+  athleteId: AttendanceAthlete;
+  resourceId: {
+    _id: Types.ObjectId;
+    name: string;
+  } | null;
+  sportId: PopulatedSport | null;
+};
+
+type AttendanceAppointment = IAppointment & {
+  _id: Types.ObjectId;
+  athleteId: AttendanceAthlete;
+  trainerId: {
+    _id: Types.ObjectId;
+    firstName: string;
+    lastName: string;
+  } | null;
+  sportId: PopulatedSport | null;
+};
+
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const timePattern = /^([01]\d|2[0-3]):([0-5]\d)$/;
+const ATTENDANCE_PERIOD = 10 * 60 * 1000;
 
 const validateObjectId = (value: string, fieldName: string) => {
   if (!Types.ObjectId.isValid(value)) {
@@ -203,6 +236,118 @@ const getFacilityByEmployeeWithSports = async (employeeId: string, facilityId: s
   }
 
   return facility;
+};
+
+const parseDateOnly = (date: string) => {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    throw new AppError('date must be in YYYY-MM-DD format', 400);
+  }
+
+  const parsedDate = new Date(`${date}T00:00:00.000Z`);
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    throw new AppError('date must be in YYYY-MM-DD format', 400);
+  }
+
+  return parsedDate;
+};
+
+const attencanceRecordEnabled = (
+  startTime: Date,
+  status: ReservationStatus | AppointmentStatus,
+) => {
+  const now = new Date().getTime();
+  const start = startTime.getTime();
+  const allowedStatuses = new Set([
+    ReservationStatus.Pending,
+    ReservationStatus.Confirmed,
+    AppointmentStatus.Scheduled,
+  ]);
+
+  return allowedStatuses.has(status) && now >= start && now <= start + ATTENDANCE_PERIOD;
+};
+
+const toAthleteName = (athlete: AttendanceAthlete) =>
+  `${athlete.firstName} ${athlete.lastName}`.trim();
+
+const toAttendanceReservationItem = (reservation: AttendanceReservation): AttendanceItem => ({
+  id: reservation._id.toString(),
+  type: 'reservation',
+  athleteId: reservation.athleteId._id.toString(),
+  athleteName: toAthleteName(reservation.athleteId),
+  resourceName: reservation.resourceId?.name ?? null,
+  trainerName: null,
+  sportName: reservation.sportId?.name ?? '',
+  startTime: reservation.startTime,
+  endTime: reservation.endTime,
+  status: reservation.status,
+  attencanceRecordEnabled: attencanceRecordEnabled(reservation.startTime, reservation.status),
+});
+
+const toAttendanceAppointmentItem = (appointment: AttendanceAppointment): AttendanceItem => ({
+  id: appointment._id.toString(),
+  type: 'training',
+  athleteId: appointment.athleteId._id.toString(),
+  athleteName: toAthleteName(appointment.athleteId),
+  resourceName: null,
+  trainerName: appointment.trainerId
+    ? `${appointment.trainerId.firstName} ${appointment.trainerId.lastName}`.trim()
+    : null,
+  sportName: appointment.sportId?.name ?? '',
+  startTime: appointment.startTime,
+  endTime: appointment.endTime,
+  status: appointment.status,
+  attencanceRecordEnabled: attencanceRecordEnabled(appointment.startTime, appointment.status),
+});
+
+const ensureAttendanceWindow = (startTime: Date) => {
+  const now = new Date().getTime();
+  const start = startTime.getTime();
+
+  if (now < start || now > start + ATTENDANCE_PERIOD) {
+    throw new AppError('Attendance can only be recorded from startTime until 10 minutes after startTime', 400);
+  }
+};
+
+const evaluateNoShowBlocking = async (
+  athleteId: Types.ObjectId,
+  facility: IFacility & { _id: Types.ObjectId },
+) => {
+  const [reservationNoShows, appointmentNoShows, athlete] = await Promise.all([
+    Reservation.countDocuments({
+      athleteId,
+      facilityId: facility._id,
+      status: ReservationStatus.NoShow,
+    }),
+    Appointment.countDocuments({
+      athleteId,
+      facilityId: facility._id,
+      status: AppointmentStatus.NoShow,
+    }),
+    User.findById(athleteId),
+  ]);
+
+  if (!athlete) {
+    throw new AppError('Athlete not found', 404);
+  }
+
+  const totalNoShows = reservationNoShows + appointmentNoShows;
+  const allowedNoShows = facility.allowedNoShows;
+  let athleteBlockedInFacility = (athlete.blockedFacilities ?? []).some(
+    (blockedFacilityId) => blockedFacilityId.toString() === facility._id.toString(),
+  );
+
+  if (totalNoShows >= allowedNoShows && !athleteBlockedInFacility) {
+    athlete.blockedFacilities = [...(athlete.blockedFacilities ?? []), facility._id];
+    await athlete.save();
+    athleteBlockedInFacility = true;
+  }
+
+  return {
+    totalNoShows,
+    allowedNoShows,
+    athleteBlockedInFacility,
+  };
 };
 
 const getResourceByEmployee = async (employeeId: string, resourceId: string) => {
@@ -1017,7 +1162,213 @@ const deleteTrainer = async (employeeId: string, trainerId: string) => {
   };
 };
 
+const getAttendance = async (
+  employeeId: string,
+  facilityId: string,
+  query: AttendanceQuery,
+) => {
+  const facility = await getFacilityByEmployee(employeeId, facilityId);
+  const attendanceType = query.type?.trim() || 'all';
+
+  if (!['all', 'reservations', 'trainings'].includes(attendanceType)) {
+    throw new AppError('type must be one of reservations or trainings', 400);
+  }
+
+  const filters: {
+    startTime?: {
+      $gte: Date;
+      $lt: Date;
+    };
+  } = {};
+
+  if (query.date?.trim()) {
+    const parsedDate = parseDateOnly(query.date.trim());
+    const nextDate = new Date(parsedDate);
+    nextDate.setUTCDate(nextDate.getUTCDate() + 1);
+    filters.startTime = {
+      $gte: parsedDate,
+      $lt: nextDate,
+    };
+  }
+
+  const reservationsPromise =
+    attendanceType === 'trainings'
+      ? Promise.resolve([] as AttendanceReservation[])
+      : Reservation.find({
+          facilityId: facility._id,
+          ...filters,
+        })
+          .populate({
+            path: 'athleteId',
+            select: 'firstName lastName',
+          })
+          .populate({
+            path: 'resourceId',
+            select: 'name',
+          })
+          .populate({
+            path: 'sportId',
+            select: 'name',
+          })
+          .lean() as unknown as Promise<AttendanceReservation[]>;
+
+  const appointmentsPromise =
+    attendanceType === 'reservations'
+      ? Promise.resolve([] as AttendanceAppointment[])
+      : Appointment.find({
+          facilityId: facility._id,
+          ...filters,
+        })
+          .populate({
+            path: 'athleteId',
+            select: 'firstName lastName',
+          })
+          .populate({
+            path: 'trainerId',
+            select: 'firstName lastName',
+          })
+          .populate({
+            path: 'sportId',
+            select: 'name',
+          })
+          .lean() as unknown as Promise<AttendanceAppointment[]>;
+
+  const [reservations, appointments] = await Promise.all([
+    reservationsPromise,
+    appointmentsPromise,
+  ]);
+
+  const items = [
+    ...reservations.map((reservation) => toAttendanceReservationItem(reservation)),
+    ...appointments.map((appointment) => toAttendanceAppointmentItem(appointment)),
+  ].sort((first, second) => first.startTime.getTime() - second.startTime.getTime());
+
+  return {
+    items,
+  };
+};
+
+const markReservationAttendance = async (
+  employeeId: string,
+  reservationId: string,
+  nextStatus: ReservationStatus.Attended | ReservationStatus.NoShow,
+) => {
+  validateObjectId(reservationId, 'reservation id');
+
+  const reservation = await Reservation.findById(reservationId);
+
+  if (!reservation) {
+    throw new AppError('Reservation not found', 404);
+  }
+
+  const facility = (await getFacilityByEmployee(
+    employeeId,
+    reservation.facilityId.toString(),
+  )) as IFacility & { _id: Types.ObjectId };
+
+  if (
+    !(reservation.status === ReservationStatus.Pending) &&
+    !(reservation.status === ReservationStatus.Confirmed)
+  ) {
+    throw new AppError('Only pending or confirmed reservations can be updated', 400);
+  }
+
+  ensureAttendanceWindow(reservation.startTime);
+
+  reservation.status = nextStatus;
+  await reservation.save();
+
+  const updatedReservation = (await Reservation.findById(reservation._id)
+    .populate({
+      path: 'athleteId',
+      select: 'firstName lastName',
+    })
+    .populate({
+      path: 'resourceId',
+      select: 'name',
+    })
+    .populate({
+      path: 'sportId',
+      select: 'name',
+    })
+    .lean()) as unknown as AttendanceReservation | null;
+
+  if (!updatedReservation) {
+    throw new AppError('Reservation not found', 404);
+  }
+
+  const result: AttendanceUpdateResult = {
+    item: toAttendanceReservationItem(updatedReservation),
+  };
+
+  if (nextStatus === ReservationStatus.NoShow) {
+    Object.assign(result, await evaluateNoShowBlocking(reservation.athleteId, facility));
+  }
+
+  return result;
+};
+
+const markTrainingAttendance = async (
+  employeeId: string,
+  appointmentId: string,
+  nextStatus: AppointmentStatus.Completed | AppointmentStatus.NoShow,
+) => {
+  validateObjectId(appointmentId, 'appointment id');
+
+  const appointment = await Appointment.findById(appointmentId);
+
+  if (!appointment) {
+    throw new AppError('Training appointment not found', 404);
+  }
+
+  const facility = (await getFacilityByEmployee(
+    employeeId,
+    appointment.facilityId.toString(),
+  )) as IFacility & { _id: Types.ObjectId };
+
+  if (!(appointment.status === AppointmentStatus.Scheduled)) {
+    throw new AppError('Only scheduled training appointments can be updated', 400);
+  }
+
+  ensureAttendanceWindow(appointment.startTime);
+
+  appointment.status = nextStatus;
+  await appointment.save();
+
+  const updatedAppointment = (await Appointment.findById(appointment._id)
+    .populate({
+      path: 'athleteId',
+      select: 'firstName lastName',
+    })
+    .populate({
+      path: 'trainerId',
+      select: 'firstName lastName',
+    })
+    .populate({
+      path: 'sportId',
+      select: 'name',
+    })
+    .lean()) as unknown as AttendanceAppointment | null;
+
+  if (!updatedAppointment) {
+    throw new AppError('Training appointment not found', 404);
+  }
+
+  const result: AttendanceUpdateResult = {
+    item: toAttendanceAppointmentItem(updatedAppointment),
+  };
+
+  if (nextStatus === AppointmentStatus.NoShow) {
+    Object.assign(result, await evaluateNoShowBlocking(appointment.athleteId, facility));
+  }
+
+  return result;
+};
+
 export {
+  getAttendance,
+  markReservationAttendance,
+  markTrainingAttendance,
   createFacility,
   createResource,
   createTrainer,

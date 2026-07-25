@@ -2,6 +2,9 @@ import type { Response } from 'express';
 
 import type { AuthenticatedRequest } from '../auth/auth.types';
 import { asyncHandler } from '../../utils/asyncHandler';
+import { AppointmentStatus } from '../../models/Appointment';
+import { ReservationStatus } from '../../models/Reservation';
+import type { AttendanceQuery } from './attendance.types';
 import type {
   CreateEmployeeFacilityBody,
   CreateEmployeeResourceBody,
@@ -17,10 +20,13 @@ import {
   createTrainer as createTrainerService,
   deleteResource as deleteResourceService,
   deleteTrainer as deleteTrainerService,
+  getAttendance as getAttendanceService,
   getFacilities as getFacilitiesService,
   getFacility as getFacilityService,
   getFacilityResources as getFacilityResourcesService,
   getFacilityTrainers as getFacilityTrainersService,
+  markReservationAttendance as markReservationAttendanceService,
+  markTrainingAttendance as markTrainingAttendanceService,
   getProfile as getProfileService,
   updateFacility as updateFacilityService,
   updateProfile as updateProfileService,
@@ -63,6 +69,18 @@ const getFacility = asyncHandler(async (req: AuthenticatedRequest, res: Response
   const employeeId = String(req.auth?.userId);
   const facilityId = String(req.params.facilityId);
   const data = await getFacilityService(employeeId, facilityId);
+
+  res.status(200).json({
+    success: true,
+    data,
+  });
+});
+
+const getAttendance = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const employeeId = String(req.auth?.userId);
+  const facilityId = String(req.params.facilityId);
+  const query = req.query as AttendanceQuery;
+  const data = await getAttendanceService(employeeId, facilityId, query);
 
   res.status(200).json({
     success: true,
@@ -140,6 +158,36 @@ const deleteResource = asyncHandler(async (req: AuthenticatedRequest, res: Respo
   });
 });
 
+const markReservationAttended = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const employeeId = String(req.auth?.userId);
+  const reservationId = String(req.params.reservationId);
+  const data = await markReservationAttendanceService(
+    employeeId,
+    reservationId,
+    ReservationStatus.Attended,
+  );
+
+  res.status(200).json({
+    success: true,
+    data,
+  });
+});
+
+const markReservationNoShow = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const employeeId = String(req.auth?.userId);
+  const reservationId = String(req.params.reservationId);
+  const data = await markReservationAttendanceService(
+    employeeId,
+    reservationId,
+    ReservationStatus.NoShow,
+  );
+
+  res.status(200).json({
+    success: true,
+    data,
+  });
+});
+
 const getFacilityTrainers = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const employeeId = String(req.auth?.userId);
   const facilityId = String(req.params.facilityId);
@@ -187,17 +235,52 @@ const deleteTrainer = asyncHandler(async (req: AuthenticatedRequest, res: Respon
   });
 });
 
+const markTrainingCompleted = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const employeeId = String(req.auth?.userId);
+  const appointmentId = String(req.params.appointmentId);
+  const data = await markTrainingAttendanceService(
+    employeeId,
+    appointmentId,
+    AppointmentStatus.Completed,
+  );
+
+  res.status(200).json({
+    success: true,
+    data,
+  });
+});
+
+const markTrainingNoShow = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const employeeId = String(req.auth?.userId);
+  const appointmentId = String(req.params.appointmentId);
+  const data = await markTrainingAttendanceService(
+    employeeId,
+    appointmentId,
+    AppointmentStatus.NoShow,
+  );
+
+  res.status(200).json({
+    success: true,
+    data,
+  });
+});
+
 export {
   createFacility,
   createResource,
   createTrainer,
   deleteResource,
   deleteTrainer,
+  getAttendance,
   getFacilities,
   getFacility,
   getFacilityResources,
   getFacilityTrainers,
   getProfile,
+  markReservationAttended,
+  markReservationNoShow,
+  markTrainingCompleted,
+  markTrainingNoShow,
   updateFacility,
   updateProfile,
   updateResource,
