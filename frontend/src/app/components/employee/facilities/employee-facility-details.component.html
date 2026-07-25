@@ -1,0 +1,38 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>Facility Details</h1>
+      <p>Review all information for this facility.</p>
+    </div>
+    <div class="header-links">
+      <a routerLink="/employee/facilities">Back to facilities</a>
+      @if (facility) {
+        <a [routerLink]="['/employee/facilities', facility.id, 'edit']">Edit Facility</a>
+        <a [routerLink]="['/employee/facilities', facility.id, 'resources']">Manage Resources</a>
+      }
+    </div>
+  </header>
+
+  @if (isLoading) {
+    <p class="state-message">Loading facility details...</p>
+  } @else if (errorMessage || !facility) {
+    <p class="state-message error">{{ errorMessage || 'Facility not found.' }}</p>
+  } @else {
+    <section class="panel">
+      <div class="details-grid">
+        <div class="detail-item"><span class="detail-label">Name</span><span>{{ facility.name }}</span></div>
+        <div class="detail-item"><span class="detail-label">City</span><span>{{ facility.city }}</span></div>
+        <div class="detail-item"><span class="detail-label">Country</span><span>{{ facility.country }}</span></div>
+        <div class="detail-item"><span class="detail-label">Address</span><span>{{ facility.address }}</span></div>
+        <div class="detail-item detail-item-wide"><span class="detail-label">Description</span><span>{{ facility.description }}</span></div>
+        <div class="detail-item"><span class="detail-label">Status</span><span>{{ facility.status }}</span></div>
+        <div class="detail-item"><span class="detail-label">Active</span><span>{{ facility.active ? 'Yes' : 'No' }}</span></div>
+        <div class="detail-item"><span class="detail-label">Hourly Price</span><span>{{ facility.hourlyPrice }}</span></div>
+        <div class="detail-item"><span class="detail-label">Max Missed Reservations</span><span>{{ facility.allowedNoShows }}</span></div>
+        <div class="detail-item detail-item-wide"><span class="detail-label">Sports</span><span>{{ getSportsLabel() }}</span></div>
+        <div class="detail-item detail-item-wide"><span class="detail-label">Opening Hours</span><span>{{ getOpeningHoursLabel() }}</span></div>
+        <div class="detail-item detail-item-wide"><span class="detail-label">Location</span><span>{{ facility.location?.coordinates?.[1] }}, {{ facility.location?.coordinates?.[0] }}</span></div>
+      </div>
+    </section>
+  }
+</section>

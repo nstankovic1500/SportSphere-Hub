@@ -1,0 +1,72 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>Edit Facility</h1>
+      <p>Update the selected facility information.</p>
+    </div>
+    <div class="header-links">
+      <a [routerLink]="['/employee/facilities', facilityId]">Back to details</a>
+      <a routerLink="/employee/facilities">My facilities</a>
+    </div>
+  </header>
+
+  @if (isLoading) {
+    <p class="state-message">Loading facility form...</p>
+  } @else {
+    <section class="panel">
+      @if (successMessage) { <p class="message success">{{ successMessage }}</p> }
+      @if (errorMessage) { <p class="message error">{{ errorMessage }}</p> }
+
+      <form [formGroup]="facilityForm" (ngSubmit)="submit()">
+        <div class="form-grid">
+          <div class="field"><label for="name">Name</label><input id="name" type="text" formControlName="name" /></div>
+          <div class="field"><label for="city">City</label><input id="city" type="text" formControlName="city" /></div>
+          <div class="field"><label for="country">Country</label><input id="country" type="text" formControlName="country" /></div>
+          <div class="field"><label for="address">Address</label><input id="address" type="text" formControlName="address" /></div>
+          <div class="field wide-field"><label for="description">Description</label><textarea id="description" formControlName="description" rows="4"></textarea></div>
+          <div class="field"><label for="longitude">Longitude</label><input id="longitude" type="number" step="any" formControlName="longitude" /></div>
+          <div class="field"><label for="latitude">Latitude</label><input id="latitude" type="number" step="any" formControlName="latitude" /></div>
+          <div class="field"><label for="hourlyPrice">Hourly Price</label><input id="hourlyPrice" type="number" min="0" step="0.01" formControlName="hourlyPrice" /></div>
+          <div class="field"><label for="allowedNoShows">Max Missed Reservations</label><input id="allowedNoShows" type="number" min="0" step="1" formControlName="allowedNoShows" /></div>
+        </div>
+
+        <div class="field">
+          <label>Sports</label>
+          <div class="sports-grid">
+            @for (sport of sports; track sport.id) {
+              <label class="sport-option">
+                <input type="checkbox" [checked]="isSportSelected(sport.id)" (change)="onSportChange(sport.id, $any($event.target).checked)" />
+                <span>{{ sport.name }}</span>
+              </label>
+            }
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="section-header">
+            <label>Opening Hours</label>
+            <button type="button" class="secondary-button" (click)="addOpeningHour()">Add Row</button>
+          </div>
+          <div formArrayName="openingHours" class="opening-hours-list">
+            @for (row of openingHourRows; track $index) {
+              <div class="opening-hour-row" [formGroupName]="$index">
+                <select formControlName="day">
+                  @for (weekday of weekdays; track weekday.value) {
+                    <option [value]="weekday.value">{{ weekday.label }}</option>
+                  }
+                </select>
+                <input type="time" formControlName="open" />
+                <input type="time" formControlName="close" />
+                <button type="button" class="secondary-button" (click)="removeOpeningHour($index)" [disabled]="openingHourRows.length === 1">Remove</button>
+              </div>
+            }
+          </div>
+        </div>
+
+        <button type="submit" [disabled]="facilityForm.invalid || isSubmitting">
+          {{ isSubmitting ? 'Saving...' : 'Save Changes' }}
+        </button>
+      </form>
+    </section>
+  }
+</section>

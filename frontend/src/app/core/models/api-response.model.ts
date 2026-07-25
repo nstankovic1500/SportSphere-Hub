@@ -21,8 +21,10 @@ import type {
 } from './ad.model';
 import type {
   CreateEmployeeFacilityRequest,
+  CreateEmployeeResourceRequest,
   EmployeeFacility,
   EmployeeProfile,
+  EmployeeResource,
 } from './employee.model';
 
 export interface ApiResponse<T> {
@@ -66,3 +68,6 @@ export type ApplyToAdApiResponse = ApiResponse<ApplyToAdResponseData>;
 export type EmployeeProfileApiResponse = ApiResponse<{ employee: EmployeeProfile }>;
 export type EmployeeFacilitiesApiResponse = ApiResponse<{ facilities: EmployeeFacility[] }>;
 export type EmployeeCreatedFacilityApiResponse = ApiResponse<{ facility: EmployeeFacility }>;
+export type EmployeeFacilityApiResponse = ApiResponse<{ facility: EmployeeFacility }>;
+export type EmployeeResourcesApiResponse = ApiResponse<{ resources: EmployeeResource[] }>;
+export type EmployeeCreatedResourceApiResponse = ApiResponse<{ resource: EmployeeResource }>;

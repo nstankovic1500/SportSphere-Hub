@@ -48,7 +48,7 @@
                 <td>{{ facility.hourlyPrice }}</td>
                 <td>{{ getSportsLabel(facility) }}</td>
                 <td>
-                  <button type="button" class="secondary-button">Details</button>
+                  <a class="secondary-button link-button" [routerLink]="['/employee/facilities', facility.id]">Details</a>
                 </td>
               </tr>
             }

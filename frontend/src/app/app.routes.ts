@@ -20,6 +20,10 @@ import { EmployeeComponent } from './components/employee/employee.component';
 import { EmployeeProfileComponent } from './components/employee/profile/employee-profile.component';
 import { EmployeeFacilitiesComponent } from './components/employee/facilities/employee-facilities.component';
 import { CreateFacilityComponent } from './components/employee/facilities/create-facility.component';
+import { EmployeeFacilityDetailsComponent } from './components/employee/facilities/employee-facility-details.component';
+import { EditFacilityComponent } from './components/employee/facilities/edit-facility.component';
+import { EmployeeResourcesComponent } from './components/employee/resources/employee-resources.component';
+import { EmployeeResourceFormComponent } from './components/employee/resources/employee-resource-form.component';
 
 export const routes: Routes = [
   {
@@ -121,6 +125,46 @@ export const routes: Routes = [
   {
     path: 'employee/facilities/new',
     component: CreateFacilityComponent,
+    canActivate: [authGuard],
+    data: {
+      roles: ['employee'],
+    },
+  },
+  {
+    path: 'employee/facilities/:facilityId',
+    component: EmployeeFacilityDetailsComponent,
+    canActivate: [authGuard],
+    data: {
+      roles: ['employee'],
+    },
+  },
+  {
+    path: 'employee/facilities/:facilityId/edit',
+    component: EditFacilityComponent,
+    canActivate: [authGuard],
+    data: {
+      roles: ['employee'],
+    },
+  },
+  {
+    path: 'employee/facilities/:facilityId/resources',
+    component: EmployeeResourcesComponent,
+    canActivate: [authGuard],
+    data: {
+      roles: ['employee'],
+    },
+  },
+  {
+    path: 'employee/facilities/:facilityId/resources/new',
+    component: EmployeeResourceFormComponent,
+    canActivate: [authGuard],
+    data: {
+      roles: ['employee'],
+    },
+  },
+  {
+    path: 'employee/facilities/:facilityId/resources/:resourceId/edit',
+    component: EmployeeResourceFormComponent,
     canActivate: [authGuard],
     data: {
       roles: ['employee'],

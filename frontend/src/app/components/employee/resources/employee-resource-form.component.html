@@ -1,0 +1,56 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>{{ isEditMode ? 'Edit Resource' : 'Create Resource' }}</h1>
+      <p>{{ isEditMode ? 'Update the selected resource.' : 'Add a new resource to this facility.' }}</p>
+    </div>
+    <div class="header-links">
+      <a [routerLink]="['/employee/facilities', facilityId, 'resources']">Back to resources</a>
+      <a [routerLink]="['/employee/facilities', facilityId]">Facility details</a>
+    </div>
+  </header>
+
+  @if (isLoading) {
+    <p class="state-message">Loading resource form...</p>
+  } @else {
+    <section class="panel">
+      @if (successMessage) { <p class="message success">{{ successMessage }}</p> }
+      @if (errorMessage) { <p class="message error">{{ errorMessage }}</p> }
+
+      <form [formGroup]="resourceForm" (ngSubmit)="submit()">
+        <div class="form-grid">
+          <div class="field"><label for="name">Name</label><input id="name" type="text" formControlName="name" /></div>
+          <div class="field">
+            <label for="type">Type</label>
+            <select id="type" formControlName="type">
+              <option value="outdoor">Outdoor</option>
+              <option value="indoor">Indoor</option>
+              <option value="team_hall">Team hall</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="sportId">Sport</label>
+            <select id="sportId" formControlName="sportId">
+              <option value="">Select sport</option>
+              @for (sport of supportedSports; track sport.id) {
+                <option [value]="sport.id">{{ sport.name }}</option>
+              }
+            </select>
+          </div>
+          <div class="field"><label for="capacity">Capacity</label><input id="capacity" type="number" min="1" step="1" formControlName="capacity" /></div>
+          <div class="field wide-field"><label for="equipmentDescription">Equipment Description</label><textarea id="equipmentDescription" rows="4" formControlName="equipmentDescription"></textarea></div>
+          @if (isEditMode) {
+            <label class="checkbox-field">
+              <input type="checkbox" formControlName="active" />
+              <span>Active</span>
+            </label>
+          }
+        </div>
+
+        <button type="submit" [disabled]="resourceForm.invalid || isSubmitting">
+          {{ isSubmitting ? 'Saving...' : (isEditMode ? 'Save Changes' : 'Create Resource') }}
+        </button>
+      </form>
+    </section>
+  }
+</section>

@@ -43,11 +43,17 @@ export interface EmployeeFacility {
   city: string;
   country: string;
   address: string;
-  description?: string;
+  description: string;
+  location?: {
+    type: 'Point';
+    coordinates: [number, number];
+  };
   status: 'pending' | 'approved' | 'rejected';
   active: boolean;
   hourlyPrice: number;
+  allowedNoShows?: number;
   images: string[];
+  openingHours?: EmployeeOpeningHour[];
   sports: EmployeeFavoriteSport[];
   createdAt: string;
 }
@@ -70,4 +76,28 @@ export interface CreateEmployeeFacilityRequest {
   openingHours: EmployeeOpeningHour[];
   hourlyPrice: number;
   allowedNoShows: number;
+}
+
+export interface UpdateEmployeeFacilityRequest extends CreateEmployeeFacilityRequest {}
+
+export interface EmployeeResource {
+  id: string;
+  name: string;
+  type: 'outdoor' | 'indoor' | 'team_hall';
+  sport: EmployeeFavoriteSport;
+  capacity: number;
+  equipmentDescription: string;
+  active: boolean;
+}
+
+export interface CreateEmployeeResourceRequest {
+  name: string;
+  type: 'outdoor' | 'indoor' | 'team_hall';
+  sportId: string;
+  capacity: number;
+  equipmentDescription: string;
+}
+
+export interface UpdateEmployeeResourceRequest extends CreateEmployeeResourceRequest {
+  active: boolean;
 }
