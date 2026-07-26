@@ -1,0 +1,99 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>Facility Calendar</h1>
+      <p>Choose an object and an individual court or hall from the dropdown lists, then drag reservations and trainings inside closed halls where moving is allowed.</p>
+    </div>
+    <div class="header-links">
+      <a [routerLink]="['/employee/facilities', filterForm.controls.facilityId.value || facility?.id]">Back to facility</a>
+      <a [routerLink]="['/employee/facilities', filterForm.controls.facilityId.value || facility?.id, 'attendance']">Attendance</a>
+      <a [routerLink]="['/employee/facilities', filterForm.controls.facilityId.value || facility?.id, 'resources']">Resources</a>
+    </div>
+  </header>
+
+  <section class="panel filters-panel">
+    <form [formGroup]="filterForm" class="filters">
+      <label>
+        <span>Facility</span>
+        <select formControlName="facilityId">
+          <option value="">Select facility</option>
+          @for (facilityOption of facilities; track facilityOption.id) {
+            <option [value]="facilityOption.id">
+              {{ facilityOption.name }} - {{ facilityOption.city }}
+            </option>
+          }
+        </select>
+      </label>
+
+      <label>
+        <span>Resource</span>
+        <select formControlName="resourceId">
+          <option value="">Select resource</option>
+          @for (resource of resources; track resource.id) {
+            <option [value]="resource.id">
+              {{ resource.name }} - {{ resource.sport.name }} ({{ resource.type }})
+            </option>
+          }
+        </select>
+      </label>
+
+      <label>
+        <span>Type</span>
+        <select formControlName="type">
+          <option value="all">All</option>
+          <option value="reservations">Reservations</option>
+          <option value="trainings">Trainings</option>
+        </select>
+      </label>
+    </form>
+  </section>
+
+  @if (successMessage) {
+    <p class="state-message success">{{ successMessage }}</p>
+  }
+
+  @if (errorMessage) {
+    <p class="state-message error">{{ errorMessage }}</p>
+  }
+
+  @if (isLoadingFacilities || isLoadingFacility || isLoadingResources) {
+    <p class="state-message">Loading facility calendar...</p>
+  } @else if (facilities.length === 0) {
+    <p class="state-message">No facilities found for this employee.</p>
+  } @else if (resources.length === 0) {
+    <p class="state-message">No active resources found for this facility.</p>
+  } @else {
+    <section class="panel summary-panel">
+      <div class="summary-grid">
+        <div>
+          <span class="summary-label">Facility</span>
+          <strong>{{ selectedFacilityName }}</strong>
+        </div>
+        <div>
+          <span class="summary-label">Selected Resource</span>
+          <strong>{{ selectedCalendarResourceName || 'Choose a resource' }}</strong>
+        </div>
+        <div>
+          <span class="summary-label">Sport</span>
+          <strong>{{ selectedCalendarResourceSport || '-' }}</strong>
+        </div>
+      </div>
+    </section>
+
+    @if (isLoadingCalendar) {
+      <p class="state-message">Loading calendar events...</p>
+    }
+
+    <section class="panel calendar-panel">
+      <full-calendar #calendar [options]="calendarOptions"></full-calendar>
+    </section>
+
+    <section class="panel legend-panel">
+      <div class="legend">
+        <span class="legend-item"><span class="legend-color reservation"></span> Reservation</span>
+        <span class="legend-item"><span class="legend-color training"></span> Training</span>
+      </div>
+      <p class="legend-note">If the backend rejects a move, the event returns to its original slot automatically.</p>
+    </section>
+  }
+</section>

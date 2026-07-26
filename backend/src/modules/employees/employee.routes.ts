@@ -14,6 +14,7 @@ import {
   deleteResource,
   deleteTrainer,
   getAttendance,
+  getFacilityCalendar,
   getFacilities,
   getFacility,
   getFacilityOrders,
@@ -26,6 +27,8 @@ import {
   markReservationNoShow,
   markTrainingCompleted,
   markTrainingNoShow,
+  moveReservation,
+  moveTrainingAppointment,
   updateFacility,
   updateOrderStatus,
   updateProduct,
@@ -47,6 +50,7 @@ employeeRouter.post('/facilities', createFacility);
 employeeRouter.get('/facilities/:facilityId', getFacility);
 employeeRouter.patch('/facilities/:facilityId', updateFacility);
 employeeRouter.get('/facilities/:facilityId/attendance', getAttendance);
+employeeRouter.get('/facilities/:facilityId/calendar', getFacilityCalendar);
 employeeRouter.get('/facilities/:facilityId/orders', getFacilityOrders);
 employeeRouter.get('/facilities/:facilityId/products', getFacilityProducts);
 employeeRouter.post('/facilities/:facilityId/products', createProduct);
@@ -63,10 +67,12 @@ employeeRouter.patch('/promotions/:promotionId', updatePromotion);
 employeeRouter.delete('/promotions/:promotionId', deletePromotion);
 employeeRouter.patch('/resources/:resourceId', updateResource);
 employeeRouter.delete('/resources/:resourceId', deleteResource);
+employeeRouter.patch('/reservations/:reservationId/move', moveReservation);
 employeeRouter.patch('/reservations/:reservationId/attended', markReservationAttended);
 employeeRouter.patch('/reservations/:reservationId/no-show', markReservationNoShow);
 employeeRouter.patch('/trainers/:trainerId', updateTrainer);
 employeeRouter.delete('/trainers/:trainerId', deleteTrainer);
+employeeRouter.patch('/training-appointments/:appointmentId/move', moveTrainingAppointment);
 employeeRouter.patch('/training-appointments/:appointmentId/completed', markTrainingCompleted);
 employeeRouter.patch('/training-appointments/:appointmentId/no-show', markTrainingNoShow);
 

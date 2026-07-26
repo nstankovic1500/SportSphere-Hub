@@ -75,6 +75,7 @@ interface TrainingAppointment {
   trainerName: string;
   facilityName: string;
   city: string;
+  resourceName: string;
   sportName: string;
   startTime: Date;
   endTime: Date;
@@ -84,6 +85,7 @@ interface TrainingAppointment {
 
 interface CreateTrainingAppointmentBody {
   trainerId?: string;
+  resourceId?: string;
   sportId?: string;
   startTime?: string;
   endTime?: string;

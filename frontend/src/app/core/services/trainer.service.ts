@@ -39,12 +39,13 @@ export class TrainerService {
     );
   }
 
-  getTrainerAvailability(trainerId: string, date: string) {
+  getTrainerAvailability(trainerId: string, date: string, resourceId: string) {
     return this.http.get<ApiResponse<{ availability: TrainerAvailability }>>(
       `${environment.apiUrl}/trainers/${trainerId}/availability`,
       {
         params: {
           date,
+          resourceId,
         },
       },
     );

@@ -29,6 +29,7 @@ import { CreateFacilityComponent } from './components/employee/facilities/create
 import { EmployeeFacilityDetailsComponent } from './components/employee/facilities/employee-facility-details.component';
 import { EditFacilityComponent } from './components/employee/facilities/edit-facility.component';
 import { EmployeeAttendanceComponent } from './components/employee/attendance/employee-attendance.component';
+import { EmployeeCalendarComponent } from './components/employee/calendar/employee-calendar.component';
 import { EmployeeResourcesComponent } from './components/employee/resources/employee-resources.component';
 import { EmployeeResourceFormComponent } from './components/employee/resources/employee-resource-form.component';
 import { EmployeePromotionsComponent } from './components/employee/promotions/employee-promotions.component';
@@ -211,6 +212,14 @@ export const routes: Routes = [
   {
     path: 'employee/facilities/:facilityId/attendance',
     component: EmployeeAttendanceComponent,
+    canActivate: [authGuard],
+    data: {
+      roles: ['employee'],
+    },
+  },
+  {
+    path: 'employee/facilities/:facilityId/calendar',
+    component: EmployeeCalendarComponent,
     canActivate: [authGuard],
     data: {
       roles: ['employee'],

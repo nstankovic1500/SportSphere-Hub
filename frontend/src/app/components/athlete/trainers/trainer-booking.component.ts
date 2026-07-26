@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import type { TrainerAvailability, TrainerDetails } from '../../../core/models/trainer.model';
+import { AuthService } from '../../../core/services/auth.service';
 import { TrainerService } from '../../../core/services/trainer.service';
 
 interface BookingSlot {
@@ -21,11 +22,14 @@ interface BookingSlot {
 export class TrainerBookingComponent {
   private readonly formBuilder = inject(FormBuilder);
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
   private readonly trainerService = inject(TrainerService);
 
   readonly trainerId = this.route.snapshot.paramMap.get('trainerId') ?? '';
   readonly bookingForm = this.formBuilder.nonNullable.group({
     sportId: [''],
+    resourceId: ['', Validators.required],
     date: ['', Validators.required],
   });
 
@@ -48,6 +52,10 @@ export class TrainerBookingComponent {
     return this.bookingForm.controls.date;
   }
 
+  get resourceId() {
+    return this.bookingForm.controls.resourceId;
+  }
+
   get sportId() {
     return this.bookingForm.controls.sportId;
   }
@@ -62,6 +70,7 @@ export class TrainerBookingComponent {
       && this.selectedSlots.length > 0
       && !this.isSubmitting
       && !this.isLoadingAvailability
+      && !!this.resourceId.value
       && (!this.requiresSportSelection || !!this.sportId.value);
   }
 
@@ -83,9 +92,25 @@ export class TrainerBookingComponent {
     return this.trainer?.sports.map((sport) => sport.name).join(', ') ?? '';
   }
 
+  get isBlockedInTrainerFacility() {
+    return !!this.trainer
+      && (this.authService.getCurrentUser()?.blockedFacilities ?? []).includes(this.trainer.facility.id);
+  }
+
+  get availableResources() {
+    const resources = this.trainer?.resources ?? [];
+
+    if (!this.sportId.value) {
+      return resources;
+    }
+
+    return resources.filter((resource) => resource.sport.id === this.sportId.value);
+  }
+
   loadAvailability() {
-    if (!this.date.value) {
+    if (!this.date.value || !this.resourceId.value) {
       this.date.markAsTouched();
+      this.resourceId.markAsTouched();
       return;
     }
 
@@ -95,7 +120,11 @@ export class TrainerBookingComponent {
     this.selectedSlots = [];
     this.availableSlots = [];
 
-    this.trainerService.getTrainerAvailability(this.trainerId, this.date.value).subscribe({
+    this.trainerService.getTrainerAvailability(
+      this.trainerId,
+      this.date.value,
+      this.resourceId.value,
+    ).subscribe({
       next: (response) => {
         this.availability = response.data.availability;
         this.availableSlots = this.buildAvailableSlots(this.availability);
@@ -153,6 +182,7 @@ export class TrainerBookingComponent {
     this.trainerService.createTrainingAppointment({
       trainerId: this.trainer.id,
       sportId: this.trainer.sports.length > 1 ? this.sportId.value : this.trainer.sports[0]?.id,
+      resourceId: this.resourceId.value,
       startTime: this.makeLocalDateTimeIso(this.availability.date, this.selectedStartTime),
       endTime: this.makeLocalDateTimeIso(this.availability.date, this.selectedEndTime),
     }).subscribe({
@@ -177,13 +207,60 @@ export class TrainerBookingComponent {
     this.trainerService.getTrainer(this.trainerId).subscribe({
       next: (response) => {
         this.trainer = response.data.trainer;
+
+        if (this.isBlockedInTrainerFacility) {
+          this.errorMessage =
+            'You are blocked in this facility and cannot create new reservations or training appointments.';
+          this.isLoadingTrainer = false;
+
+          window.setTimeout(() => {
+            void this.router.navigate(['/athlete/trainers']);
+          }, 1200);
+
+          return;
+        }
+
         this.isLoadingTrainer = false;
 
         if (this.trainer.sports.length === 1) {
           this.sportId.setValue(this.trainer.sports[0].id);
         }
 
+        if (this.trainer.resources.length > 0) {
+          const initialResource = this.trainer.resources.find(
+            (resource) => !this.sportId.value || resource.sport.id === this.sportId.value,
+          );
+
+          if (initialResource) {
+            this.resourceId.setValue(initialResource.id);
+          }
+        }
+
         this.date.valueChanges.subscribe(() => {
+          this.availability = null;
+          this.availableSlots = [];
+          this.selectedSlots = [];
+          this.errorMessage = '';
+          this.successMessage = '';
+        });
+
+        this.sportId.valueChanges.subscribe((sportId) => {
+          const validResources = (this.trainer?.resources ?? []).filter(
+            (resource) => !sportId || resource.sport.id === sportId,
+          );
+
+          if (!validResources.some((resource) => resource.id === this.resourceId.value)) {
+            this.resourceId.setValue(validResources[0]?.id ?? '');
+          }
+
+          this.availability = null;
+          this.availableSlots = [];
+          this.selectedSlots = [];
+          this.errorMessage = '';
+          this.successMessage = '';
+        });
+
+        this.resourceId.valueChanges.subscribe(() => {
           this.availability = null;
           this.availableSlots = [];
           this.selectedSlots = [];

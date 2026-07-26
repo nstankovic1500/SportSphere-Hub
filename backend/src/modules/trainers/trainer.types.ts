@@ -2,6 +2,7 @@ import type { Request } from 'express';
 
 import type { FacilityStatus, IOpeningHour } from '../../models/Facility';
 import type { AppointmentStatus } from '../../models/Appointment';
+import type { ResourceType } from '../../models/Resource';
 import type { UserRole } from '../../models/User';
 
 interface TrainerListQuery {
@@ -38,7 +39,18 @@ interface PublicTrainerDetails extends PublicTrainerListItem {
   email: string;
   biography: string;
   workingHours: IOpeningHour[];
+  resources: Array<{
+    id: string;
+    name: string;
+    type: ResourceType;
+    sport: TrainerSportSummary;
+  }>;
   createdAt: Date;
+}
+
+interface TrainerAvailabilityQuery {
+  date?: string;
+  resourceId?: string;
 }
 
 interface TrainerAvailability {
@@ -48,6 +60,13 @@ interface TrainerAvailability {
     lastName: string;
     facilityId: string;
     facilityName: string;
+  };
+  resource: {
+    id: string;
+    name: string;
+    type: ResourceType;
+    sportId: string;
+    sportName: string;
   };
   date: string;
   openingTime: string;
@@ -60,6 +79,7 @@ interface TrainerAvailability {
 
 interface CreateTrainingAppointmentBody {
   trainerId?: string;
+  resourceId?: string;
   sportId?: string;
   startTime?: string;
   endTime?: string;
@@ -70,6 +90,7 @@ interface TrainingAppointment {
   trainerName: string;
   facilityName: string;
   city: string;
+  resourceName: string;
   sportName: string;
   startTime: Date;
   endTime: Date;
@@ -93,6 +114,7 @@ export type {
   PublicTrainerDetails,
   PublicTrainerListItem,
   TrainerAvailability,
+  TrainerAvailabilityQuery,
   TrainerFacilitySummary,
   TrainerListQuery,
   TrainerSportSummary,

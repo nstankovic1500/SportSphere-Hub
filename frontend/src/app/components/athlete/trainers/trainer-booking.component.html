@@ -42,6 +42,16 @@
           }
 
           <label>
+            <span>Resource</span>
+            <select formControlName="resourceId">
+              <option value="">Select a resource</option>
+              @for (resource of availableResources; track resource.id) {
+                <option [value]="resource.id">{{ resource.name }} - {{ resource.sport.name }}</option>
+              }
+            </select>
+          </label>
+
+          <label>
             <span>Date</span>
             <input type="date" formControlName="date" />
           </label>
@@ -91,6 +101,7 @@
       } @else {
         <p><strong>Trainer:</strong> {{ trainer.firstName }} {{ trainer.lastName }}</p>
         <p><strong>Facility:</strong> {{ trainer.facility.name }}, {{ trainer.facility.city }}</p>
+        <p><strong>Resource:</strong> {{ availability?.resource?.name }}</p>
         <p><strong>Date:</strong> {{ availability?.date }}</p>
         <p><strong>Interval:</strong> {{ selectedStartTime }} - {{ selectedEndTime }}</p>
         <p><strong>Duration:</strong> {{ selectedDurationHours }} hour(s)</p>

@@ -31,6 +31,12 @@ export interface TrainerDetails extends TrainerListItem {
     open: string;
     close: string;
   }>;
+  resources: Array<{
+    id: string;
+    name: string;
+    type: 'outdoor' | 'indoor' | 'team_hall';
+    sport: TrainerSportSummary;
+  }>;
   createdAt: string;
 }
 
@@ -47,6 +53,13 @@ export interface TrainerAvailability {
     facilityId: string;
     facilityName: string;
   };
+  resource: {
+    id: string;
+    name: string;
+    type: 'outdoor' | 'indoor' | 'team_hall';
+    sportId: string;
+    sportName: string;
+  };
   date: string;
   openingTime: string;
   closingTime: string;
@@ -60,6 +73,7 @@ export interface TrainerFilters {
 
 export interface CreateTrainingAppointmentRequest {
   trainerId: string;
+  resourceId: string;
   sportId?: string;
   startTime: string;
   endTime: string;
@@ -70,6 +84,7 @@ export interface AthleteTrainingAppointment {
   trainerName: string;
   facilityName: string;
   city: string;
+  resourceName: string;
   sportName: string;
   startTime: string;
   endTime: string;

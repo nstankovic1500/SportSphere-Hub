@@ -2,13 +2,17 @@ import { Types } from 'mongoose';
 
 import { Appointment, AppointmentStatus } from '../../models/Appointment';
 import { FacilityStatus, type IOpeningHour } from '../../models/Facility';
+import { Reservation, ReservationStatus } from '../../models/Reservation';
+import { Resource, type IResource } from '../../models/Resource';
 import { Sport, type ISport } from '../../models/Sport';
 import { Trainer, type ITrainer } from '../../models/Trainer';
+import { User } from '../../models/User';
 import { AppError } from '../../utils/AppError';
 import type {
   PublicTrainerDetails,
   PublicTrainerListItem,
   TrainerAvailability,
+  TrainerAvailabilityQuery,
   TrainerListQuery,
 } from './trainer.types';
 
@@ -29,6 +33,11 @@ type PopulatedTrainer = Omit<ITrainer, 'sports' | 'facilityId'> & {
   _id: Types.ObjectId;
   sports: PopulatedSport[];
   facilityId: TrainerFacility;
+};
+
+type TrainerResource = IResource & {
+  _id: Types.ObjectId;
+  sportId: PopulatedSport;
 };
 
 const approvedActiveFacilityFilter = {
@@ -90,6 +99,7 @@ const toTrainerDetails = (trainer: PopulatedTrainer): PublicTrainerDetails => {
     email: trainer.email,
     biography: trainer.biography,
     workingHours: trainer.workingHours ?? [],
+    resources: [],
     createdAt: trainer.createdAt ?? new Date(),
   };
 };
@@ -179,18 +189,75 @@ const getTrainers = async (query: TrainerListQuery) => {
 
 const getTrainer = async (trainerId: string) => {
   const trainer = await getActiveTrainer(trainerId);
+  const resources = (await Resource.find({
+    facilityId: trainer.facilityId._id,
+    active: true,
+    sportId: {
+      $in: (trainer.sports ?? []).map((sport) => sport._id),
+    },
+  })
+    .populate({
+      path: 'sportId',
+      select: 'name',
+    })
+    .sort({ name: 1 })
+    .lean()) as unknown as TrainerResource[];
 
   return {
-    trainer: toTrainerDetails(trainer),
+    trainer: {
+      ...toTrainerDetails(trainer),
+      resources: resources.map((resource) => ({
+        id: resource._id.toString(),
+        name: resource.name,
+        type: resource.type,
+        sport: {
+          id: resource.sportId._id.toString(),
+          name: resource.sportId.name,
+        },
+      })),
+    },
   };
 };
 
 const getTrainerAvailability = async (
+  athleteId: string,
   trainerId: string,
-  date: string,
+  query: TrainerAvailabilityQuery,
 ): Promise<{ availability: TrainerAvailability }> => {
+  const date = String(query.date ?? '');
+  const resourceId = String(query.resourceId ?? '').trim();
   const parsedDate = parseDateOnly(date);
   const trainer = await getActiveTrainer(trainerId);
+  const blockedAthlete = await User.exists({
+    _id: athleteId,
+    blockedFacilities: trainer.facilityId._id,
+  });
+
+  if (blockedAthlete) {
+    throw new AppError('You are blocked in this facility and cannot book this trainer.', 403);
+  }
+
+  if (!Types.ObjectId.isValid(resourceId)) {
+    throw new AppError('Invalid resourceId', 400);
+  }
+  const resource = (await Resource.findOne({
+    _id: new Types.ObjectId(resourceId),
+    facilityId: trainer.facilityId._id,
+    active: true,
+    sportId: {
+      $in: (trainer.sports ?? []).map((sport) => sport._id),
+    },
+  })
+    .populate({
+      path: 'sportId',
+      select: 'name',
+    })
+    .lean()) as unknown as TrainerResource | null;
+
+  if (!resource) {
+    throw new AppError('Resource not found', 404);
+  }
+
   const sourceOpeningHours =
     trainer.workingHours && trainer.workingHours.length > 0
       ? trainer.workingHours
@@ -200,15 +267,46 @@ const getTrainerAvailability = async (
   const dayStart = new Date(`${date}T00:00:00.000Z`);
   const dayEnd = new Date(`${date}T23:59:59.999Z`);
 
-  const appointments = await Appointment.find({
-    trainerId: trainer._id,
-    status: { $ne: AppointmentStatus.Cancelled },
-    startTime: { $lt: dayEnd },
-    endTime: { $gt: dayStart },
-  })
-    .sort({ startTime: 1 })
-    .select('startTime endTime')
-    .lean();
+  const [appointmentsForTrainer, appointmentsForResource, reservationsForResource] = await Promise.all([
+    Appointment.find({
+      trainerId: trainer._id,
+      status: { $ne: AppointmentStatus.Cancelled },
+      startTime: { $lt: dayEnd },
+      endTime: { $gt: dayStart },
+    })
+      .sort({ startTime: 1 })
+      .select('startTime endTime')
+      .lean(),
+    Appointment.find({
+      resourceId: resource._id,
+      status: { $ne: AppointmentStatus.Cancelled },
+      startTime: { $lt: dayEnd },
+      endTime: { $gt: dayStart },
+    })
+      .sort({ startTime: 1 })
+      .select('startTime endTime')
+      .lean(),
+    Reservation.find({
+      resourceId: resource._id,
+      status: { $ne: ReservationStatus.Cancelled },
+      startTime: { $lt: dayEnd },
+      endTime: { $gt: dayStart },
+    })
+      .sort({ startTime: 1 })
+      .select('startTime endTime')
+      .lean(),
+  ]);
+
+  const occupiedIntervals = [
+    ...appointmentsForTrainer,
+    ...appointmentsForResource,
+    ...reservationsForResource,
+  ]
+    .sort((first, second) => first.startTime.getTime() - second.startTime.getTime())
+    .map((interval) => ({
+      startTime: interval.startTime,
+      endTime: interval.endTime,
+    }));
 
   return {
     availability: {
@@ -219,13 +317,17 @@ const getTrainerAvailability = async (
         facilityId: trainer.facilityId._id.toString(),
         facilityName: trainer.facilityId.name,
       },
+      resource: {
+        id: resource._id.toString(),
+        name: resource.name,
+        type: resource.type,
+        sportId: resource.sportId._id.toString(),
+        sportName: resource.sportId.name,
+      },
       date,
       openingTime: openingHours.open,
       closingTime: openingHours.close,
-      occupiedIntervals: appointments.map((appointment) => ({
-        startTime: appointment.startTime,
-        endTime: appointment.endTime,
-      })),
+      occupiedIntervals,
     },
   };
 };

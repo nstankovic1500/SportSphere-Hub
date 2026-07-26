@@ -100,6 +100,10 @@ type PopulatedAppointment = IAppointment & {
     name: string;
     city: string;
   };
+  resourceId: {
+    _id: Types.ObjectId;
+    name: string;
+  };
   sportId: {
     _id: Types.ObjectId;
     name: string;
@@ -161,6 +165,10 @@ const populateAppointmentRefs = (query: any) => {
     .populate({
       path: 'facilityId',
       select: 'name city',
+    })
+    .populate({
+      path: 'resourceId',
+      select: 'name',
     })
     .populate({
       path: 'sportId',
@@ -354,6 +362,7 @@ const toTrainingAppointment = (
     trainerName: `${appointment.trainerId.firstName} ${appointment.trainerId.lastName}`.trim(),
     facilityName: appointment.facilityId.name,
     city: appointment.facilityId.city,
+    resourceName: appointment.resourceId.name,
     sportName: appointment.sportId.name,
     startTime: appointment.startTime,
     endTime: appointment.endTime,
@@ -777,6 +786,16 @@ const getResourceAvailability = async (
     .select('startTime endTime')
     .lean();
 
+  const appointments = await Appointment.find({
+    resourceId: resource._id,
+    status: { $ne: AppointmentStatus.Cancelled },
+    startTime: { $lt: dayEnd },
+    endTime: { $gt: dayStart },
+  })
+    .sort({ startTime: 1 })
+    .select('startTime endTime')
+    .lean();
+
   return {
     availability: {
       resource: {
@@ -790,10 +809,12 @@ const getResourceAvailability = async (
       date,
       openingTime: openingHours.open,
       closingTime: openingHours.close,
-      occupiedIntervals: reservations.map((reservation) => ({
-        startTime: reservation.startTime,
-        endTime: reservation.endTime,
-      })),
+      occupiedIntervals: [...reservations, ...appointments]
+        .sort((first, second) => first.startTime.getTime() - second.startTime.getTime())
+        .map((interval) => ({
+          startTime: interval.startTime,
+          endTime: interval.endTime,
+        })),
     },
   };
 };
@@ -861,6 +882,17 @@ const createReservation = async (
     throw new AppError('Reservation overlaps with an existing reservation', 400);
   }
 
+  const overlappingAppointment = await Appointment.findOne({
+    resourceId: resource._id,
+    status: { $ne: AppointmentStatus.Cancelled },
+    startTime: { $lt: endTime },
+    endTime: { $gt: startTime },
+  }).select('_id');
+
+  if (overlappingAppointment) {
+    throw new AppError('Reservation overlaps with an existing training appointment on this resource', 400);
+  }
+
   const createdReservation = await Reservation.create({
     athleteId: athlete._id,
     facilityId: resource.facilityId._id,
@@ -890,6 +922,7 @@ const createTrainingAppointment = async (
   body: CreateTrainingAppointmentBody,
 ) => {
   const trainerId = String(body.trainerId ?? '').trim();
+  const resourceId = String(body.resourceId ?? '').trim();
   const startTime = parseDateTime(body.startTime, 'startTime');
   const endTime = parseDateTime(body.endTime, 'endTime');
 
@@ -900,7 +933,12 @@ const createTrainingAppointment = async (
   }
 
   const trainer = await getTrainerWithFacility(trainerId);
+  const resource = await getActiveResourceWithFacility(resourceId);
   await ensureAthleteNotBlockedInFacility(athlete._id, trainer.facilityId._id);
+
+  if (resource.facilityId._id.toString() !== trainer.facilityId._id.toString()) {
+    throw new AppError('resource must belong to the trainer facility', 400);
+  }
 
   if (startTime.getTime() <= new Date().getTime()) {
     throw new AppError('Training appointment must be in the future', 400);
@@ -951,6 +989,10 @@ const createTrainingAppointment = async (
     }
   }
 
+  if (resource.sportId._id.toString() !== selectedSport._id.toString()) {
+    throw new AppError('resource must support the selected sport', 400);
+  }
+
   const openingHours = getOpeningHoursForDate(
     trainer.workingHours && trainer.workingHours.length > 0
       ? trainer.workingHours
@@ -965,6 +1007,28 @@ const createTrainingAppointment = async (
     endTime.getTime() > closingDateTime.getTime()
   ) {
     throw new AppError('Training appointment must fit inside trainer working hours', 400);
+  }
+
+  const overlappingReservation = await Reservation.findOne({
+    resourceId: resource._id,
+    status: { $ne: ReservationStatus.Cancelled },
+    startTime: { $lt: endTime },
+    endTime: { $gt: startTime },
+  }).select('_id');
+
+  if (overlappingReservation) {
+    throw new AppError('Training appointment overlaps with an existing reservation on this resource', 400);
+  }
+
+  const overlappingAppointmentOnResource = await Appointment.findOne({
+    resourceId: resource._id,
+    status: { $ne: AppointmentStatus.Cancelled },
+    startTime: { $lt: endTime },
+    endTime: { $gt: startTime },
+  }).select('_id');
+
+  if (overlappingAppointmentOnResource) {
+    throw new AppError('Training appointment overlaps with an existing appointment on this resource', 400);
   }
 
   const overlappingAppointment = await Appointment.findOne({
@@ -982,6 +1046,7 @@ const createTrainingAppointment = async (
     trainerId: trainer._id,
     athleteId: athlete._id,
     facilityId: trainer.facilityId._id,
+    resourceId: resource._id,
     sportId: selectedSport._id,
     startTime,
     endTime,

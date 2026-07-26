@@ -1,7 +1,11 @@
 import type { Request, Response } from 'express';
 
 import { asyncHandler } from '../../utils/asyncHandler';
-import type { AuthenticatedAthleteRequest, TrainerListQuery } from './trainer.types';
+import type {
+  AuthenticatedAthleteRequest,
+  TrainerAvailabilityQuery,
+  TrainerListQuery,
+} from './trainer.types';
 import {
   getTrainer as getTrainerService,
   getTrainerAvailability as getTrainerAvailabilityService,
@@ -28,9 +32,13 @@ const getTrainer = asyncHandler(async (req: Request, res: Response) => {
 });
 
 const getTrainerAvailability = asyncHandler(async (req: AuthenticatedAthleteRequest, res: Response) => {
+  const athleteId = String(req.auth?.userId);
   const trainerId = String(req.params.trainerId);
-  const date = String(req.query.date ?? '');
-  const data = await getTrainerAvailabilityService(trainerId, date);
+  const data = await getTrainerAvailabilityService(
+    athleteId,
+    trainerId,
+    req.query as TrainerAvailabilityQuery,
+  );
 
   res.status(200).json({
     success: true,

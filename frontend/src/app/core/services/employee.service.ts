@@ -16,6 +16,8 @@ import type {
   EmployeeCreatedTrainerApiResponse,
   EmployeeAttendanceApiResponse,
   EmployeeAttendanceUpdateApiResponse,
+  EmployeeCalendarApiResponse,
+  EmployeeCalendarMoveApiResponse,
   EmployeeFacilityApiResponse,
   EmployeeFacilitiesApiResponse,
   EmployeeProfileApiResponse,
@@ -30,8 +32,10 @@ import type {
   CreateEmployeeResourceRequest,
   CreateEmployeeTrainerRequest,
   EmployeeAttendanceType,
+  EmployeeCalendarQuery,
   UpdateEmployeePromotionRequest,
   UpdateEmployeeFacilityRequest,
+  MoveEmployeeScheduleRequest,
   UpdateEmployeeOrderStatusRequest,
   UpdateEmployeeProfileRequest,
   UpdateEmployeeResourceRequest,
@@ -85,6 +89,19 @@ export class EmployeeService {
 
     return this.http.get<EmployeeAttendanceApiResponse>(
       `${environment.apiUrl}/employees/facilities/${facilityId}/attendance`,
+      { params },
+    );
+  }
+
+  getCalendar(facilityId: string, query: EmployeeCalendarQuery) {
+    const params = new HttpParams()
+      .set('resourceId', query.resourceId)
+      .set('start', query.start)
+      .set('end', query.end)
+      .set('type', query.type ?? 'all');
+
+    return this.http.get<EmployeeCalendarApiResponse>(
+      `${environment.apiUrl}/employees/facilities/${facilityId}/calendar`,
       { params },
     );
   }
@@ -208,6 +225,13 @@ export class EmployeeService {
     );
   }
 
+  moveReservation(reservationId: string, payload: MoveEmployeeScheduleRequest) {
+    return this.http.patch<EmployeeCalendarMoveApiResponse>(
+      `${environment.apiUrl}/employees/reservations/${reservationId}/move`,
+      payload,
+    );
+  }
+
   getTrainers(facilityId: string) {
     return this.http.get<EmployeeTrainersApiResponse>(
       `${environment.apiUrl}/employees/facilities/${facilityId}/trainers`,
@@ -245,6 +269,13 @@ export class EmployeeService {
     return this.http.patch<EmployeeAttendanceUpdateApiResponse>(
       `${environment.apiUrl}/employees/training-appointments/${appointmentId}/no-show`,
       {},
+    );
+  }
+
+  moveTrainingAppointment(appointmentId: string, payload: MoveEmployeeScheduleRequest) {
+    return this.http.patch<EmployeeCalendarMoveApiResponse>(
+      `${environment.apiUrl}/employees/training-appointments/${appointmentId}/move`,
+      payload,
     );
   }
 }

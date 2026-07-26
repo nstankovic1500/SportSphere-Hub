@@ -6,6 +6,10 @@ import { AppointmentStatus } from '../../models/Appointment';
 import { ReservationStatus } from '../../models/Reservation';
 import type { AttendanceQuery } from './attendance.types';
 import type {
+  EmployeeCalendarQuery,
+  MoveReservationBody,
+} from './employee-calendar.types';
+import type {
   CreateEmployeeFacilityBody,
   EmployeeProductBody,
   CreateEmployeePromotionBody,
@@ -29,6 +33,7 @@ import {
   deleteResource as deleteResourceService,
   deleteTrainer as deleteTrainerService,
   getAttendance as getAttendanceService,
+  getFacilityCalendar as getFacilityCalendarService,
   getFacilities as getFacilitiesService,
   getFacility as getFacilityService,
   getFacilityOrders as getFacilityOrdersService,
@@ -38,6 +43,8 @@ import {
   getFacilityTrainers as getFacilityTrainersService,
   markReservationAttendance as markReservationAttendanceService,
   markTrainingAttendance as markTrainingAttendanceService,
+  moveReservation as moveReservationService,
+  moveTrainingAppointment as moveTrainingAppointmentService,
   getProfile as getProfileService,
   updateFacility as updateFacilityService,
   updateOrderStatus as updateOrderStatusService,
@@ -95,6 +102,18 @@ const getAttendance = asyncHandler(async (req: AuthenticatedRequest, res: Respon
   const facilityId = String(req.params.facilityId);
   const query = req.query as AttendanceQuery;
   const data = await getAttendanceService(employeeId, facilityId, query);
+
+  res.status(200).json({
+    success: true,
+    data,
+  });
+});
+
+const getFacilityCalendar = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const employeeId = String(req.auth?.userId);
+  const facilityId = String(req.params.facilityId);
+  const query = req.query as EmployeeCalendarQuery;
+  const data = await getFacilityCalendarService(employeeId, facilityId, query);
 
   res.status(200).json({
     success: true,
@@ -248,6 +267,30 @@ const updateResource = asyncHandler(async (req: AuthenticatedRequest, res: Respo
   const resourceId = String(req.params.resourceId);
   const body = req.body as UpdateEmployeeResourceBody;
   const data = await updateResourceService(employeeId, resourceId, body);
+
+  res.status(200).json({
+    success: true,
+    data,
+  });
+});
+
+const moveReservation = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const employeeId = String(req.auth?.userId);
+  const reservationId = String(req.params.reservationId);
+  const body = req.body as MoveReservationBody;
+  const data = await moveReservationService(employeeId, reservationId, body);
+
+  res.status(200).json({
+    success: true,
+    data,
+  });
+});
+
+const moveTrainingAppointment = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const employeeId = String(req.auth?.userId);
+  const appointmentId = String(req.params.appointmentId);
+  const body = req.body as MoveReservationBody;
+  const data = await moveTrainingAppointmentService(employeeId, appointmentId, body);
 
   res.status(200).json({
     success: true,
@@ -409,6 +452,7 @@ export {
   deleteResource,
   deleteTrainer,
   getAttendance,
+  getFacilityCalendar,
   getFacilities,
   getFacility,
   getFacilityOrders,
@@ -421,6 +465,8 @@ export {
   markReservationNoShow,
   markTrainingCompleted,
   markTrainingNoShow,
+  moveReservation,
+  moveTrainingAppointment,
   updateFacility,
   updateOrderStatus,
   updateProduct,

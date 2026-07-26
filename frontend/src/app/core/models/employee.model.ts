@@ -165,6 +165,52 @@ export interface EmployeeAttendanceUpdateResponse {
   athleteBlockedInFacility?: boolean;
 }
 
+export interface EmployeeCalendarResource {
+  id: string;
+  name: string;
+  type: 'outdoor' | 'indoor' | 'team_hall';
+  sportName: string;
+}
+
+export interface EmployeeCalendarEvent {
+  id: string;
+  itemType: 'reservation' | 'training';
+  title: string;
+  start: string;
+  end: string;
+  status: string;
+  athleteName: string;
+  trainerName: string | null;
+  sportName: string;
+  editable: boolean;
+}
+
+export interface EmployeeCalendarResponse {
+  facility: {
+    id: string;
+    name: string;
+  };
+  resource: EmployeeCalendarResource;
+  openingHours: EmployeeOpeningHour[];
+  events: EmployeeCalendarEvent[];
+}
+
+export interface EmployeeCalendarMoveResponse {
+  event: EmployeeCalendarEvent;
+}
+
+export interface EmployeeCalendarQuery {
+  resourceId: string;
+  start: string;
+  end: string;
+  type?: EmployeeAttendanceType;
+}
+
+export interface MoveEmployeeScheduleRequest {
+  startTime: string;
+  endTime: string;
+}
+
 export interface EmployeePromotion {
   id: string;
   name: string;
