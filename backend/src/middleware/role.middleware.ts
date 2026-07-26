@@ -7,12 +7,12 @@ import { AppError } from '../utils/AppError';
 const roleMiddleware = (...Roles: UserRole[]) => {
   return (req: AuthenticatedRequest, _res: Response, next: NextFunction): void => {
     if (!req.auth) {
-      next(new AppError('Authentication required', 401));
+      next(new AppError('Potrebna je autentikacija', 401));
       return;
     }
 
     if (!Roles.includes(req.auth.role)) {
-      next(new AppError('You do not have permission to access this resource', 403));
+      next(new AppError('Nemate dozvolu za pristup ovom resursu', 403));
       return;
     }
 

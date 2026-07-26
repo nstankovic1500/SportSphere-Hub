@@ -137,7 +137,7 @@ export class CreateAdComponent {
     this.adService.createAd(payload).subscribe({
       next: () => {
         this.isSubmitting = false;
-        this.successMessage = 'Ad created successfully.';
+        this.successMessage = 'Oglas je uspešno kreiran.';
         this.adForm.reset({
           sportId: '',
           city: '',
@@ -153,7 +153,7 @@ export class CreateAdComponent {
       },
       error: (error) => {
         this.isSubmitting = false;
-        this.errorMessage = error.error?.message ?? 'Unable to create ad.';
+        this.errorMessage = error.error?.message ?? 'Nije moguće kreirati oglas.';
       },
     });
   }
@@ -169,7 +169,7 @@ export class CreateAdComponent {
         this.isLoading = false;
       },
       error: (error) => {
-        this.errorMessage = error.error?.message ?? 'Unable to load ad form options.';
+        this.errorMessage = error.error?.message ?? 'Nije moguće učitati opcije za oglas.';
         this.isLoading = false;
       },
     });

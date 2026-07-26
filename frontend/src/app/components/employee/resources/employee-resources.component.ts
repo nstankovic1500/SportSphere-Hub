@@ -26,7 +26,7 @@ export class EmployeeResourcesComponent {
   constructor() { this.loadResources(); }
 
   deleteResource(resource: EmployeeResource) {
-    if (!window.confirm(`Delete resource ${resource.name}?`)) { return; }
+    if (!window.confirm(`Obrisati resurs ${resource.name}?`)) { return; }
 
     this.errorMessage = '';
     this.successMessage = '';
@@ -36,7 +36,7 @@ export class EmployeeResourcesComponent {
       next: () => {
         this.resources = this.resources.filter((currentResource) => !(currentResource.id === resource.id));
         this.deletingIds.delete(resource.id);
-        this.successMessage = 'Resource deleted successfully.';
+        this.successMessage = 'Resurs je uspešno obrisan.';
       },
       error: (error) => {
         this.deletingIds.delete(resource.id);

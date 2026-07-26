@@ -50,13 +50,13 @@ export class TrainerFormComponent {
   successMessage = '';
 
   readonly weekdays = [
-    { value: 0, label: 'Sunday' },
-    { value: 1, label: 'Monday' },
-    { value: 2, label: 'Tuesday' },
-    { value: 3, label: 'Wednesday' },
-    { value: 4, label: 'Thursday' },
-    { value: 5, label: 'Friday' },
-    { value: 6, label: 'Saturday' },
+    { value: 0, label: 'Nedelja' },
+    { value: 1, label: 'Ponedeljak' },
+    { value: 2, label: 'Utorak' },
+    { value: 3, label: 'Sreda' },
+    { value: 4, label: 'Četvrtak' },
+    { value: 5, label: 'Petak' },
+    { value: 6, label: 'Subota' },
   ];
 
   constructor() {

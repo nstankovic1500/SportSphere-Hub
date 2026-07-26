@@ -1,0 +1,10 @@
+.page { padding: 24px; }
+.page-header { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; margin-bottom: 24px; }
+.header-links { display: flex; gap: 16px; flex-wrap: wrap; }
+.panel { padding: 20px; border-radius: 18px; border: 1px solid #d0d7de; background: #ffffff; }
+.sport-form { display: flex; gap: 12px; flex-wrap: wrap; }
+.sport-form input { min-width: 240px; padding: 10px 12px; border: 1px solid #d0d7de; border-radius: 12px; font: inherit; }
+.sports-list { margin: 0; padding-left: 20px; display: grid; gap: 10px; }
+.message, .state-message { margin: 0 0 16px; padding: 12px 14px; border-radius: 12px; }
+button { padding: 10px 14px; border-radius: 12px; border: 0; cursor: pointer; }
+@media (max-width: 768px) { .page { padding: 16px; } .page-header { flex-direction: column; } }

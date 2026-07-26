@@ -1,0 +1,42 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>Sportovi</h1>
+      <p>Dodavanje novih vrsta sportova u sistem.</p>
+    </div>
+    <div class="header-links">
+      <a routerLink="/admin">Nazad na početnu stranu</a>
+    </div>
+  </header>
+
+  @if (successMessage) {
+    <p class="message success">{{ successMessage }}</p>
+  }
+
+  @if (errorMessage) {
+    <p class="message error">{{ errorMessage }}</p>
+  }
+
+  <section class="panel">
+    <form [formGroup]="sportForm" (ngSubmit)="createSport()" class="sport-form">
+      <input type="text" formControlName="name" placeholder="Naziv sporta" />
+      <button type="submit" [disabled]="sportForm.invalid || isSubmitting">
+        {{ isSubmitting ? 'Dodavanje...' : 'Dodaj sport' }}
+      </button>
+    </form>
+  </section>
+
+  @if (isLoading) {
+    <p class="state-message">Učitavanje sportova...</p>
+  } @else if (sports.length === 0) {
+    <p class="state-message">Nema sportova za prikaz.</p>
+  } @else {
+    <section class="panel">
+      <ul class="sports-list">
+        @for (sport of sports; track sport.id) {
+          <li>{{ sport.name }} <span>({{ sport.active ? 'aktivan' : 'neaktivan' }})</span></li>
+        }
+      </ul>
+    </section>
+  }
+</section>

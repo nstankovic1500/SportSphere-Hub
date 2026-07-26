@@ -65,6 +65,10 @@ type PopulatedResource = IResource & {
 type PopulatedTrainer = ITrainer & {
   _id: Types.ObjectId;
   sports: PopulatedSport[];
+  facilityId?: Types.ObjectId | {
+    _id: Types.ObjectId;
+    hourlyPrice?: number;
+  };
 };
 
 type PopulatedPromotion = IPromotion & {
@@ -241,6 +245,19 @@ const toEmployeeResource = (resource: PopulatedResource): EmployeeResource => {
 
 const toEmployeeTrainer = (trainer: PopulatedTrainer): EmployeeTrainer => {
   const sports = (trainer.sports ?? []) as PopulatedSport[];
+  const rawTrainer = trainer as PopulatedTrainer & {
+    hourlyPrice?: number;
+  };
+  const populatedFacility = trainer.facilityId as
+    | {
+        _id: Types.ObjectId;
+        hourlyPrice?: number;
+      }
+    | undefined;
+  const facilityHourlyPrice =
+    populatedFacility && typeof populatedFacility.hourlyPrice === 'number'
+      ? populatedFacility.hourlyPrice
+      : undefined;
 
   return {
     id: trainer._id.toString(),
@@ -254,7 +271,14 @@ const toEmployeeTrainer = (trainer: PopulatedTrainer): EmployeeTrainer => {
     })),
     workingHours: trainer.workingHours ?? [],
     biography: trainer.biography,
-    pricePerHour: trainer.pricePerHour,
+    pricePerHour:
+      typeof trainer.pricePerHour === 'number'
+        ? trainer.pricePerHour
+        : typeof rawTrainer.hourlyPrice === 'number'
+          ? rawTrainer.hourlyPrice
+          : typeof facilityHourlyPrice === 'number'
+            ? facilityHourlyPrice
+            : 0,
     active: trainer.active,
     createdAt: trainer.createdAt ?? new Date(),
   };
@@ -355,6 +379,62 @@ const buildEmployeeOrderProductMap = async (orders: EmployeeOrderDocument[]) => 
   return new Map(
     products.map((product) => [product._id!.toString(), product as EmployeeOrderProduct]),
   );
+};
+
+const hydrateLegacyOrderItems = async (
+  order: {
+    items: Array<{
+      productId: Types.ObjectId;
+      name?: string;
+      priceAtPurchase?: number;
+      quantity: number;
+    }>;
+    markModified?: (path: string) => void;
+  },
+) => {
+  const missingProductIds = [
+    ...new Set(
+      (order.items ?? [])
+        .filter(
+          (item) =>
+            !item.name ||
+            !item.name.trim() ||
+            typeof item.priceAtPurchase !== 'number' ||
+            Number.isNaN(item.priceAtPurchase),
+        )
+        .map((item) => item.productId?.toString?.() ?? '')
+        .filter(Boolean),
+    ),
+  ];
+
+  if (missingProductIds.length === 0) {
+    return;
+  }
+
+  const products = await Product.find({
+    _id: { $in: missingProductIds.map((productId) => new Types.ObjectId(productId)) },
+  })
+    .select('name price')
+    .lean();
+  const productMap = new Map(products.map((product) => [product._id!.toString(), product]));
+
+  for (const item of order.items ?? []) {
+    const product = productMap.get(item.productId?.toString?.() ?? '');
+
+    if (!product) {
+      continue;
+    }
+
+    if (!item.name || !item.name.trim()) {
+      item.name = product.name;
+    }
+
+    if (typeof item.priceAtPurchase !== 'number' || Number.isNaN(item.priceAtPurchase)) {
+      item.priceAtPurchase = product.price;
+    }
+  }
+
+  order.markModified?.('items');
 };
 
 const getEmployee = async (employeeId: string) => {
@@ -1042,7 +1122,10 @@ const validateProductPayload = async (
   const price = validateProductPrice(body.price);
   const stock = validateProductStock(body.stock);
   const category = requireTrimmedText(body.category, 'category');
-  const image = typeof body.image === 'string' ? body.image.trim() : '';
+  const image =
+    typeof body.image === 'string' && body.image.trim().length > 0
+      ? body.image.trim()
+      : (currentProduct?.image ?? '');
   const active = typeof body.active === 'boolean' ? body.active : true;
 
   const existingProduct = await Product.findOne({
@@ -2515,6 +2598,7 @@ const updateOrderStatus = async (
   }
 
   await getFacilityByEmployee(employeeId, order.facilityId.toString());
+  await hydrateLegacyOrderItems(order);
 
   order.status = status;
   await order.save();

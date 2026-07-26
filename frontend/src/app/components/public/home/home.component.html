@@ -4,7 +4,7 @@
       <p class="eyebrow">SportSphere Hub</p>
       <h1>Otkrijte odobrene sportske objekte na jednom mestu.</h1>
       <p class="hero-copy">
-        Browse venues, explore current promotions, and inspect facility details before signing in.
+        Rezervišite teren, pronađite trenere, pratite promocije i istražite moderne sportske objekte pre prijave.
       </p>
     </div>
 
@@ -69,7 +69,7 @@
               <h3>{{ promotion.name }}</h3>
               <p>{{ promotion.facilityName }}</p>
               <p>
-                {{ promotion.discountType === 'percentage' ? promotion.discountValue + '% off' : promotion.discountValue + ' off' }}
+                {{ promotion.discountType === 'percentage' ? promotion.discountValue + '% popusta' : promotion.discountValue + ' RSD popusta' }}
               </p>
               <p>
                 {{ promotion.startDate | date: 'mediumDate' }} -

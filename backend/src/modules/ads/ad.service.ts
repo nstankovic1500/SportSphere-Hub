@@ -94,9 +94,10 @@ const ensureApplyRequestExists = async (id: string) => {
 const toAdListItem = (
   ad: PopulatedAd,
   athleteId: string,
-  requestedAdIds: Set<string>,
+  requestStatusMap: Map<string, RequestStatus>,
 ): AdListItem => {
   const adId = ad._id.toString();
+  const requestStatus = requestStatusMap.get(adId) ?? null;
 
   return {
     id: adId,
@@ -115,7 +116,8 @@ const toAdListItem = (
     status: ad.status,
     createdAt: ad.createdAt ?? new Date(),
     isOwner: ad.authorId._id.toString() === athleteId,
-    hasRequested: requestedAdIds.has(adId),
+    hasRequested: requestStatus !== null,
+    requestStatus,
   };
 };
 
@@ -129,10 +131,8 @@ const toApplyRequestItem = (applyRequest: PopulatedApplyRequest): ApplyRequestIt
 };
 
 const getAds = async (athleteId: string, query: AdsQuery) => {
-  const today = getTodayDateOnly();
   const filters: Record<string, unknown> = {
     status: AdStatus.Active,
-    date: { $gte: today },
   };
 
   if (query.sportId) {
@@ -164,12 +164,14 @@ const getAds = async (athleteId: string, query: AdsQuery) => {
   const requests = await Request.find({
     adId: { $in: adIds },
     athleteId: new Types.ObjectId(athleteId),
-  }).select('adId');
+  }).select('adId status');
 
-  const requestedAdIds = new Set(requests.map((request) => request.adId.toString()));
+  const requestStatusMap = new Map(
+    requests.map((request) => [request.adId.toString(), request.status as RequestStatus]),
+  );
 
   return {
-    ads: ads.map((ad) => toAdListItem(ad, athleteId, requestedAdIds)),
+    ads: ads.map((ad) => toAdListItem(ad, athleteId, requestStatusMap)),
   };
 };
 

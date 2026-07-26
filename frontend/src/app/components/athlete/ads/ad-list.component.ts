@@ -70,11 +70,11 @@ export class AdListComponent {
       next: () => {
         this.ads = this.ads.map((currentAd) =>
           currentAd.id === ad.id
-            ? { ...currentAd, hasRequested: true }
+            ? { ...currentAd, hasRequested: true, requestStatus: 'pending' }
             : currentAd,
         );
         this.applyingIds.delete(ad.id);
-        this.actionMessage = 'Request sent successfully.';
+        this.actionMessage = 'Zahtev je uspešno poslat.';
       },
       error: (error) => {
         this.applyingIds.delete(ad.id);
@@ -96,7 +96,7 @@ export class AdListComponent {
       next: () => {
         this.ads = this.ads.filter((currentAd) => !(currentAd.id === ad.id));
         this.closingIds.delete(ad.id);
-        this.actionMessage = 'Ad closed successfully.';
+        this.actionMessage = 'Oglas je uspešno zatvoren.';
       },
       error: (error) => {
         this.closingIds.delete(ad.id);

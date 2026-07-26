@@ -37,6 +37,7 @@ export class EmployeeFacilityDetailsComponent {
   imagePreviews: string[] = [];
 
   constructor() {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
     this.loadFacility();
   }
 

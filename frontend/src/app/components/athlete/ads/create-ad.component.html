@@ -1,17 +1,17 @@
 <section class="page">
   <header class="page-header">
     <div>
-      <h1>Create Ad</h1>
-      <p>Create a new ad and invite other athletes to apply for your team.</p>
+      <h1>Kreiranje oglasa</h1>
+      <p>Napravite novi oglas i pozovite druge sportiste da se prijave za vaš tim.</p>
     </div>
     <div class="header-links">
-      <a routerLink="/athlete">Nazad na kontrolnu tablu</a>
-      <a routerLink="/athlete/ads">Back to ads</a>
+      <a routerLink="/athlete">Nazad na početnu stranu</a>
+      <a routerLink="/athlete/ads">Nazad na oglase</a>
     </div>
   </header>
 
   @if (isLoading) {
-    <p class="state-message">Loading form options...</p>
+    <p class="state-message">Učitavanje opcija forme...</p>
   } @else {
     <section class="panel">
       @if (successMessage) {
@@ -26,26 +26,26 @@
         <div class="field">
           <label for="sportId">Sport</label>
           <select id="sportId" formControlName="sportId">
-            <option value="">Select a sport</option>
+            <option value="">Izaberite sport</option>
             @for (sport of sports; track sport.id) {
               <option [value]="sport.id">{{ sport.name }}</option>
             }
           </select>
           @if (sportId.touched && sportId.hasError('required')) {
-            <small class="field-error">Sport is required.</small>
+            <small class="field-error">Sport je obavezan.</small>
           }
         </div>
 
         <div class="field">
           <label for="city">Grad</label>
           <select id="city" formControlName="city">
-            <option value="">Select a city</option>
+            <option value="">Izaberite grad</option>
             @for (currentCity of cities; track currentCity) {
               <option [value]="currentCity">{{ currentCity }}</option>
             }
           </select>
           @if (city.touched && city.hasError('required')) {
-            <small class="field-error">City is required.</small>
+            <small class="field-error">Grad je obavezan.</small>
           }
         </div>
 
@@ -53,55 +53,55 @@
           <label for="date">Datum</label>
           <input id="date" type="date" formControlName="date" />
           @if (date.touched && date.hasError('required')) {
-            <small class="field-error">Date is required.</small>
+            <small class="field-error">Datum je obavezan.</small>
           }
           @if (date.touched && date.hasError('futureDate')) {
-            <small class="field-error">Date must be in the future.</small>
+            <small class="field-error">Datum mora biti u budućnosti.</small>
           }
           @if (date.touched && date.hasError('invalidDate')) {
-            <small class="field-error">Date must be in YYYY-MM-DD format.</small>
+            <small class="field-error">Datum mora biti u formatu YYYY-MM-DD.</small>
           }
         </div>
 
         <div class="field">
-          <label for="startTime">Start time</label>
+          <label for="startTime">Vreme početka</label>
           <input id="startTime" type="time" formControlName="startTime" />
           @if (startTime.touched && startTime.hasError('required')) {
-            <small class="field-error">Start time is required.</small>
+            <small class="field-error">Vreme početka je obavezno.</small>
           }
           @if (startTime.touched && startTime.hasError('pattern')) {
-            <small class="field-error">Start time must be in HH:mm format.</small>
+            <small class="field-error">Vreme početka mora biti u formatu HH:mm.</small>
           }
         </div>
 
         <div class="field">
-          <label for="endTime">End time</label>
+          <label for="endTime">Vreme završetka</label>
           <input id="endTime" type="time" formControlName="endTime" />
           @if (endTime.touched && endTime.hasError('required')) {
-            <small class="field-error">End time is required.</small>
+            <small class="field-error">Vreme završetka je obavezno.</small>
           }
           @if (endTime.touched && endTime.hasError('pattern')) {
-            <small class="field-error">End time must be in HH:mm format.</small>
+            <small class="field-error">Vreme završetka mora biti u formatu HH:mm.</small>
           }
           @if (adForm.touched && adForm.hasError('invalidTimeRange')) {
-            <small class="field-error">End time must be after start time.</small>
+            <small class="field-error">Vreme završetka mora biti nakon vremena početka.</small>
           }
         </div>
 
         <div class="field">
-          <label for="missingPlayers">Missing players</label>
+          <label for="missingPlayers">Broj igrača koji nedostaju</label>
           <input id="missingPlayers" type="number" min="1" step="1" formControlName="missingPlayers" />
           @if (missingPlayers.touched && missingPlayers.hasError('required')) {
-            <small class="field-error">Missing players is required.</small>
+            <small class="field-error">Ovo polje je obavezno.</small>
           }
           @if (missingPlayers.touched && (missingPlayers.hasError('min') || missingPlayers.hasError('pattern'))) {
-            <small class="field-error">Missing players must be an integer of at least 1.</small>
+            <small class="field-error">Broj igrača mora biti ceo broj najmanje 1.</small>
           }
         </div>
 
         <div class="form-actions">
           <button type="submit" [disabled]="adForm.invalid || isSubmitting">
-            {{ isSubmitting ? 'Creating...' : 'Create ad' }}
+            {{ isSubmitting ? 'Kreiranje...' : 'Kreiraj oglas' }}
           </button>
         </div>
       </form>

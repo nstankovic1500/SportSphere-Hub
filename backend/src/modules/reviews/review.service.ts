@@ -120,7 +120,7 @@ const createReview = async (
   });
 
   if (qualifyingReservationsCount === 0) {
-    throw new AppError('You can review a facility only after a qualifying reservation', 403);
+    throw new AppError('Možete oceniti objekat tek nakon odgovarajuće rezervacije', 403);
   }
 
   const existingReviewsCount = await Review.countDocuments({

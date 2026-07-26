@@ -5,6 +5,7 @@
       <p>Izaberite objekat i pojedinačni teren ili halu iz padajućih lista, a zatim prevucite rezervacije i treninge unutar zatvorenih hala gde je pomeranje dozvoljeno.</p>
     </div>
     <div class="header-links">
+      <a routerLink="/employee">Početna strana</a>
       <a [routerLink]="['/employee/facilities', filterForm.controls.facilityId.value || facility?.id]">Nazad na objekat</a>
       <a [routerLink]="['/employee/facilities', filterForm.controls.facilityId.value || facility?.id, 'attendance']">Prisustvo</a>
       <a [routerLink]="['/employee/facilities', filterForm.controls.facilityId.value || facility?.id, 'resources']">Resursi</a>
@@ -71,7 +72,7 @@
         </div>
         <div>
           <span class="summary-label">Izabrani resurs</span>
-          <strong>{{ selectedCalendarResourceName || 'Choose a resource' }}</strong>
+          <strong>{{ selectedCalendarResourceName || 'Izaberite resurs' }}</strong>
         </div>
         <div>
           <span class="summary-label">Sport</span>
@@ -90,8 +91,8 @@
 
     <section class="panel legend-panel">
       <div class="legend">
-        <span class="legend-item"><span class="legend-color reservation"></span> Reservation</span>
-        <span class="legend-item"><span class="legend-color training"></span> Training</span>
+        <span class="legend-item"><span class="legend-color reservation"></span> Rezervacija</span>
+        <span class="legend-item"><span class="legend-color training"></span> Trening</span>
       </div>
       <p class="legend-note">Ako backend odbije pomeranje, događaj se automatski vraća na prvobitni termin.</p>
     </section>

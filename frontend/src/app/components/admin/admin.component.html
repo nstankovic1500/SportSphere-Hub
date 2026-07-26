@@ -1,12 +1,32 @@
-<section class="page">
-  <h1>Administratorska kontrolna tabla</h1>
-  <p>Welcome, {{ user?.firstName }}</p>
-  <p>Role: {{ user?.role }}</p>
-  <a class="dashboard-link" routerLink="/admin/registration-requests">
-    View registration requests
-  </a>
-  <a class="dashboard-link" routerLink="/admin/facility-requests">
-    Facility Requests
-  </a>
-  <button type="button" (click)="logout()">Odjava</button>
+<section class="page dashboard-page">
+  <header class="dashboard-hero dashboard-hero--admin">
+    <div class="dashboard-hero__content">
+      <span class="dashboard-eyebrow">SportSphere</span>
+      <h1>Početna strana administratora</h1>
+      <p>Centralizovan pregled korisnika, zahteva, trenera i sportova uz moderan operativni panel.</p>
+    </div>
+    <button type="button" class="secondary-button" (click)="logout()">Odjava</button>
+  </header>
+
+  <nav class="dashboard-nav" aria-label="Glavna navigacija administratora">
+    <a class="dashboard-link active" routerLink="/admin">Početna strana</a>
+    <a class="dashboard-link" routerLink="/admin/registration-requests">Zahtevi za registraciju</a>
+    <a class="dashboard-link" routerLink="/admin/facility-requests">Zahtevi za objekte</a>
+    <a class="dashboard-link" routerLink="/admin/users">Korisnici</a>
+    <a class="dashboard-link" routerLink="/admin/trainers">Treneri</a>
+    <a class="dashboard-link" routerLink="/admin/sports">Sportovi</a>
+  </nav>
+
+  <section class="stats-grid">
+    <article class="stat-card">
+      <span class="stat-label">Administrator</span>
+      <strong>{{ user?.firstName }} {{ user?.lastName }}</strong>
+      <p>Kontrola nad korisnicima, objektima i sportovima u sistemu.</p>
+    </article>
+    <article class="stat-card">
+      <span class="stat-label">Uloga</span>
+      <strong>Administrator</strong>
+      <p>Pregled i odobravanje svih ključnih zahteva u aplikaciji.</p>
+    </article>
+  </section>
 </section>

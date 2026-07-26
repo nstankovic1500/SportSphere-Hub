@@ -2,7 +2,11 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 
-import type { EmployeeFacility, EmployeeOrder, UpdateEmployeeOrderStatusRequest } from '../../../core/models/employee.model';
+import type {
+  EmployeeFacility,
+  EmployeeOrder,
+  UpdateEmployeeOrderStatusRequest,
+} from '../../../core/models/employee.model';
 import { EmployeeService } from '../../../core/services/employee.service';
 
 @Component({
@@ -40,8 +44,33 @@ export class EmployeeOrdersComponent {
     return orderId.slice(-8).toUpperCase();
   }
 
-  getStatusLabel(status: EmployeeOrder['status']) {
+  private normalizeStatus(status: string): EmployeeOrder['status'] {
     switch (status) {
+      case 'ordered':
+        return 'pending';
+      case 'accepted':
+        return 'processing';
+      case 'collected':
+        return 'completed';
+      case 'processing':
+      case 'completed':
+      case 'cancelled':
+      case 'pending':
+        return status;
+      default:
+        return 'pending';
+    }
+  }
+
+  private normalizeOrder(order: EmployeeOrder): EmployeeOrder {
+    return {
+      ...order,
+      status: this.normalizeStatus(order.status),
+    };
+  }
+
+  getStatusLabel(status: EmployeeOrder['status']) {
+    switch (this.normalizeStatus(status)) {
       case 'pending':
         return 'Na čekanju';
       case 'processing':
@@ -72,16 +101,17 @@ export class EmployeeOrdersComponent {
 
   getAvailableActions(order: EmployeeOrder) {
     const actions: Array<'pending' | 'processing' | 'completed' | 'cancelled'> = [];
+    const normalizedStatus = this.normalizeStatus(order.status);
 
-    if (order.status === 'pending') {
+    if (normalizedStatus === 'pending') {
       actions.push('processing');
     }
 
-    if (order.status === 'processing') {
+    if (normalizedStatus === 'processing') {
       actions.push('completed');
     }
 
-    if (order.status !== 'completed' && order.status !== 'cancelled') {
+    if (normalizedStatus !== 'completed' && normalizedStatus !== 'cancelled') {
       actions.push('cancelled');
     }
 
@@ -93,7 +123,7 @@ export class EmployeeOrdersComponent {
       return;
     }
 
-    if (status === 'cancelled' && !window.confirm(`Otkazati porudžbinu ${this.getShortReference(order.id)}?`)) {
+    if (status === 'cancelled' && !window.confirm(`Otkaži porudžbinu ${this.getShortReference(order.id)}?`)) {
       return;
     }
 
@@ -104,7 +134,7 @@ export class EmployeeOrdersComponent {
     this.employeeService.updateOrderStatus(order.id, { status }).subscribe({
       next: (response) => {
         this.orders = this.orders.map((currentOrder) =>
-          currentOrder.id === order.id ? response.data.order : currentOrder,
+          currentOrder.id === order.id ? this.normalizeOrder(response.data.order) : currentOrder,
         );
         this.updatingIds.delete(order.id);
         this.successMessage = `Porudžbina ${this.getShortReference(order.id)} je uspešno ažurirana.`;
@@ -132,7 +162,7 @@ export class EmployeeOrdersComponent {
 
     this.employeeService.getOrders(this.facilityId).subscribe({
       next: (response) => {
-        this.orders = response.data.orders;
+        this.orders = response.data.orders.map((order) => this.normalizeOrder(order));
         this.isLoading = false;
       },
       error: (error) => {

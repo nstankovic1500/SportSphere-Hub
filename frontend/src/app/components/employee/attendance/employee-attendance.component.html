@@ -5,8 +5,9 @@
       <p>Pregledajte prisustvo za {{ selectedFacilityName }} i evidentirajte dolaske u dozvoljenom vremenskom prozoru.</p>
     </div>
     <div class="header-links">
+      <a routerLink="/employee">Početna strana</a>
       <a [routerLink]="['/employee/facilities', facilityId]">Nazad na objekat</a>
-      <a routerLink="/employee/facilities">Moji objekti</a>
+      <a routerLink="/employee/profile">Profil</a>
     </div>
   </header>
 
@@ -65,8 +66,8 @@
                 <td>{{ item.athleteName }}</td>
                 <td>{{ getActorName(item) }}</td>
                 <td>{{ item.sportName }}</td>
-                <td>{{ item.startTime | date: 'medium' }}</td>
-                <td>{{ item.endTime | date: 'medium' }}</td>
+                <td>{{ item.startTime | date: 'medium':'UTC' }}</td>
+                <td>{{ item.endTime | date: 'medium':'UTC' }}</td>
                 <td>
                   <span class="status-badge" [class.closed]="!item.canRecordAttendance">
                     {{ getStatusLabel(item) }}

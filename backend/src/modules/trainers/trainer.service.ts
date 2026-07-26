@@ -26,6 +26,7 @@ type TrainerFacility = {
   city: string;
   status: FacilityStatus;
   active: boolean;
+  hourlyPrice?: number;
   openingHours?: IOpeningHour[];
 };
 
@@ -71,6 +72,12 @@ const getOpeningHoursForDate = (openingHours: IOpeningHour[] | undefined, date: 
 };
 
 const toTrainerListItem = (trainer: PopulatedTrainer): PublicTrainerListItem => {
+  const rawTrainer = trainer as PopulatedTrainer & {
+    hourlyPrice?: number;
+    ratingAverage?: number;
+    ratingCount?: number;
+  };
+
   return {
     id: trainer._id.toString(),
     firstName: trainer.firstName,
@@ -85,9 +92,22 @@ const toTrainerListItem = (trainer: PopulatedTrainer): PublicTrainerListItem => 
       name: sport.name,
     })),
     specialization: trainer.biography,
-    hourlyPrice: trainer.pricePerHour,
-    ratingAverage: 0,
-    ratingCount: 0,
+    hourlyPrice:
+      typeof trainer.pricePerHour === 'number'
+        ? trainer.pricePerHour
+        : typeof rawTrainer.hourlyPrice === 'number'
+          ? rawTrainer.hourlyPrice
+        : typeof trainer.facilityId.hourlyPrice === 'number'
+          ? trainer.facilityId.hourlyPrice
+          : 0,
+    ratingAverage:
+      typeof rawTrainer.ratingAverage === 'number'
+        ? rawTrainer.ratingAverage
+        : 0,
+    ratingCount:
+      typeof rawTrainer.ratingCount === 'number'
+        ? rawTrainer.ratingCount
+        : 0,
     active: trainer.active,
   };
 };
@@ -169,7 +189,7 @@ const getTrainers = async (query: TrainerListQuery) => {
   const trainers = (await Trainer.find(filter)
     .populate({
       path: 'facilityId',
-      select: 'name city status active',
+      select: 'name city status active hourlyPrice',
       match: approvedActiveFacilityFilter,
     })
     .populate({

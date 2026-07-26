@@ -2,9 +2,10 @@
   <header class="page-header">
     <div>
       <h1>Proizvodi</h1>
-      <p>Manage products for the selected facility.</p>
+      <p>Upravljajte proizvodima za izabrani objekat.</p>
     </div>
     <div class="header-links">
+      <a routerLink="/employee">Početna strana</a>
       <a [routerLink]="['/employee/facilities', facilityId]">Nazad na objekat</a>
       <a [routerLink]="['/employee/facilities', facilityId, 'products', 'new']">Kreiraj proizvod</a>
     </div>
@@ -17,11 +18,11 @@
   <section class="panel filter-panel">
     <form [formGroup]="filterForm" class="filter-form">
       <div class="field">
-        <label for="active">Active Filter</label>
+        <label for="active">Filter aktivnosti</label>
         <select id="active" formControlName="active">
           <option value="all">Sve</option>
-          <option value="true">Active only</option>
-          <option value="false">Inactive only</option>
+          <option value="true">Samo aktivni</option>
+          <option value="false">Samo neaktivni</option>
         </select>
       </div>
     </form>
@@ -64,13 +65,13 @@
                 <td>{{ product.stock }}</td>
                 <td>{{ getActiveLabel(product) }}</td>
                 <td class="actions-cell">
-                  <a [routerLink]="['/employee/facilities', facilityId, 'products', product.id, 'edit']">Edit</a>
+                  <a [routerLink]="['/employee/facilities', facilityId, 'products', product.id, 'edit']">Izmeni</a>
                   <button
                     type="button"
                     class="secondary-button"
                     [disabled]="isDeleting(product.id)"
                     (click)="deleteProduct(product)">
-                    {{ isDeleting(product.id) ? 'Deleting...' : 'Delete' }}
+                    {{ isDeleting(product.id) ? 'Brisanje...' : 'Obriši' }}
                   </button>
                 </td>
               </tr>

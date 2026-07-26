@@ -44,7 +44,7 @@ const createUploader = (folderName: 'profiles' | 'facilities' | 'products') =>
     },
     fileFilter: (_req, file, callback) => {
       if (!ALLOWED_MIME_TYPES.has(file.mimetype)) {
-        callback(new AppError('Only jpeg, png and webp image formats are allowed', 400));
+        callback(new AppError('Dozvoljeni su samo jpeg, png i webp formati slika', 400));
         return;
       }
 

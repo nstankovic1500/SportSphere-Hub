@@ -1,8 +1,10 @@
 import { Types } from 'mongoose';
 
+import { Appointment, AppointmentStatus } from '../../models/Appointment';
 import { Facility, FacilityStatus, type IFacility } from '../../models/Facility';
 import { Promotion, type DiscountType } from '../../models/Promotion';
 import { Product, type IProduct } from '../../models/Product';
+import { Reservation, ReservationStatus } from '../../models/Reservation';
 import { Resource, type ResourceType } from '../../models/Resource';
 import { Review, ReviewReaction } from '../../models/Review';
 import { Sport } from '../../models/Sport';
@@ -70,6 +72,13 @@ const approvedActiveFacilityFilter = {
   active: true,
 } as const;
 
+const ACTIVE_RESERVATION_STATUSES = [
+  ReservationStatus.Pending,
+  ReservationStatus.Confirmed,
+];
+
+const ACTIVE_APPOINTMENT_STATUSES = [AppointmentStatus.Scheduled];
+
 const toSportSummary = (sport: PopulatedSport): PublicSport => ({
   id: sport._id.toString(),
   name: sport.name,
@@ -129,6 +138,168 @@ const getMappedFacilitySports = (
   getSportIdsFromFacility(facility)
     .map((sportId) => sportMap.get(sportId))
     .filter((sport): sport is PublicSport => !!sport);
+
+const getOpeningHoursForDate = (
+  facility: Pick<IFacility, 'openingHours'>,
+  date: Date,
+) => {
+  const weekday = date.getDay();
+
+  return (facility.openingHours ?? []).find((item) => item.day === weekday) ?? null;
+};
+
+const toDateTimeFromDayAndTime = (date: Date, time: string) => {
+  const [hours, minutes] = time.split(':').map(Number);
+
+  const result = new Date(date);
+  result.setHours(hours, minutes, 0, 0);
+
+  return result;
+};
+
+const getNextFullHour = (date: Date) => {
+  const result = new Date(date);
+
+  if (
+    result.getMinutes() === 0 &&
+    result.getSeconds() === 0 &&
+    result.getMilliseconds() === 0
+  ) {
+    return result;
+  }
+
+  result.setHours(result.getHours() + 1, 0, 0, 0);
+  return result;
+};
+
+const hasAvailableSlotToday = async (facilities: PopulatedFacility[]) => {
+  if (facilities.length === 0) {
+    return new Set<string>();
+  }
+
+  const now = new Date();
+  const startOfDay = new Date(now);
+  startOfDay.setHours(0, 0, 0, 0);
+
+  const endOfDay = new Date(startOfDay);
+  endOfDay.setDate(endOfDay.getDate() + 1);
+
+  const facilityIds = facilities.map((facility) => facility._id);
+  const resources = await Resource.find({
+    facilityId: { $in: facilityIds },
+    active: true,
+  })
+    .select('facilityId')
+    .lean();
+
+  if (resources.length === 0) {
+    return new Set<string>();
+  }
+
+  const resourceIds = resources.map((resource) => resource._id as Types.ObjectId);
+
+  const [reservations, appointments] = await Promise.all([
+    Reservation.find({
+      resourceId: { $in: resourceIds },
+      status: { $in: ACTIVE_RESERVATION_STATUSES },
+      startTime: { $lt: endOfDay },
+      endTime: { $gt: now },
+    })
+      .select('resourceId startTime endTime')
+      .lean(),
+    Appointment.find({
+      resourceId: { $in: resourceIds },
+      status: { $in: ACTIVE_APPOINTMENT_STATUSES },
+      startTime: { $lt: endOfDay },
+      endTime: { $gt: now },
+    })
+      .select('resourceId startTime endTime')
+      .lean(),
+  ]);
+
+  const busyIntervalsByResource = new Map<
+    string,
+    Array<{ startTime: Date; endTime: Date }>
+  >();
+
+  for (const interval of [...reservations, ...appointments]) {
+    const resourceId = (interval.resourceId as Types.ObjectId).toString();
+    const currentIntervals = busyIntervalsByResource.get(resourceId) ?? [];
+
+    currentIntervals.push({
+      startTime: new Date(interval.startTime),
+      endTime: new Date(interval.endTime),
+    });
+
+    busyIntervalsByResource.set(resourceId, currentIntervals);
+  }
+
+  const resourcesByFacility = new Map<string, string[]>();
+
+  for (const resource of resources) {
+    const facilityId = (resource.facilityId as Types.ObjectId).toString();
+    const currentResourceIds = resourcesByFacility.get(facilityId) ?? [];
+
+    currentResourceIds.push((resource._id as Types.ObjectId).toString());
+    resourcesByFacility.set(facilityId, currentResourceIds);
+  }
+
+  const availableFacilityIds = new Set<string>();
+
+  for (const facility of facilities) {
+    const facilityId = facility._id.toString();
+    const openingHours = getOpeningHoursForDate(facility, now);
+
+    if (!openingHours) {
+      continue;
+    }
+
+    const resourceIdsForFacility = resourcesByFacility.get(facilityId) ?? [];
+
+    if (resourceIdsForFacility.length === 0) {
+      continue;
+    }
+
+    const openingDateTime = toDateTimeFromDayAndTime(now, openingHours.open);
+    const closingDateTime = toDateTimeFromDayAndTime(now, openingHours.close);
+    let candidateStart = getNextFullHour(now);
+
+    if (candidateStart < openingDateTime) {
+      candidateStart = openingDateTime;
+    }
+
+    if (candidateStart >= closingDateTime) {
+      continue;
+    }
+
+    for (const resourceId of resourceIdsForFacility) {
+      const intervals = (busyIntervalsByResource.get(resourceId) ?? []).sort(
+        (first, second) => first.startTime.getTime() - second.startTime.getTime(),
+      );
+
+      let currentStart = new Date(candidateStart);
+
+      for (const interval of intervals) {
+        const currentEnd = new Date(currentStart.getTime() + 60 * 60 * 1000);
+
+        if (currentEnd <= interval.startTime) {
+          break;
+        }
+
+        if (currentStart < interval.endTime && currentEnd > interval.startTime) {
+          currentStart = getNextFullHour(interval.endTime);
+        }
+      }
+
+      if (currentStart.getTime() + 60 * 60 * 1000 <= closingDateTime.getTime()) {
+        availableFacilityIds.add(facilityId);
+        break;
+      }
+    }
+  }
+
+  return availableFacilityIds;
+};
 
 const toPublicProduct = (product: PublicProductDocument): PublicProduct => ({
   id: product._id.toString(),
@@ -328,14 +499,26 @@ const getFacilities = async (
     .sort({ [sortField]: sortDirection })
     .lean()) as unknown as PopulatedFacility[];
 
-  const facilityIds = facilities.map((facility) => facility._id);
+  const availableFacilityIds =
+    query.availableToday === 'true'
+      ? await hasAvailableSlotToday(facilities)
+      : null;
+
+  const finalFacilities =
+    availableFacilityIds === null
+      ? facilities
+      : facilities.filter((facility) =>
+          availableFacilityIds.has(facility._id.toString()),
+        );
+
+  const facilityIds = finalFacilities.map((facility) => facility._id);
   const [reviewStatsMap, sportMap] = await Promise.all([
     buildReviewStatsMap(facilityIds),
-    buildSportMap(facilities),
+    buildSportMap(finalFacilities),
   ]);
 
   return {
-    facilities: facilities.map((facility) => {
+    facilities: finalFacilities.map((facility) => {
       const id = facility._id.toString();
       const stats = reviewStatsMap.get(id) ?? {
         likesCount: 0,

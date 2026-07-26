@@ -38,7 +38,7 @@ export class EmployeeProductsComponent {
   }
 
   deleteProduct(product: EmployeeProduct) {
-    if (!window.confirm(`Delete product ${product.name}?`)) {
+    if (!window.confirm(`Obrisati proizvod ${product.name}?`)) {
       return;
     }
 
@@ -50,7 +50,7 @@ export class EmployeeProductsComponent {
       next: () => {
         this.products = this.products.filter((currentProduct) => currentProduct.id !== product.id);
         this.deletingIds.delete(product.id);
-        this.successMessage = 'Product deleted successfully.';
+        this.successMessage = 'Proizvod je uspešno obrisan.';
       },
       error: (error) => {
         this.deletingIds.delete(product.id);
@@ -64,7 +64,7 @@ export class EmployeeProductsComponent {
   }
 
   getActiveLabel(product: EmployeeProduct) {
-    return product.active ? 'Yes' : 'No';
+    return product.active ? 'Da' : 'Ne';
   }
 
   private loadProducts() {
@@ -81,7 +81,7 @@ export class EmployeeProductsComponent {
       },
       error: (error) => {
         this.products = [];
-        this.errorMessage = error.error?.message ?? 'Unable to load products.';
+        this.errorMessage = error.error?.message ?? 'Nije moguće učitati proizvode.';
         this.isLoading = false;
       },
     });

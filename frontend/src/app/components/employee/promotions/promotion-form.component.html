@@ -1,12 +1,13 @@
 <section class="page">
   <header class="page-header">
     <div>
-      <h1>{{ isEditMode ? 'Edit Promotion' : 'Create Promotion' }}</h1>
-      <p>{{ isEditMode ? 'Update the selected promotion.' : 'Add a new promotion for this facility.' }}</p>
+      <h1>{{ isEditMode ? 'Izmena promocije' : 'Kreiraj promociju' }}</h1>
+      <p>{{ isEditMode ? 'Ažurirajte izabranu promociju.' : 'Dodajte novu promociju za ovaj objekat.' }}</p>
     </div>
     <div class="header-links">
+      <a routerLink="/employee">Početna strana</a>
       <a [routerLink]="['/employee/facilities', facilityId, 'promotions']">Nazad na promocije</a>
-      <a [routerLink]="['/employee/facilities', facilityId]">Facility details</a>
+      <a [routerLink]="['/employee/facilities', facilityId]">Detalji objekta</a>
     </div>
   </header>
 
@@ -27,7 +28,7 @@
           <div class="field">
             <label for="sportId">Sport</label>
             <select id="sportId" formControlName="sportId">
-              <option value="">Select sport</option>
+              <option value="">Izaberite sport</option>
               @for (sport of supportedSports; track sport.id) {
                 <option [value]="sport.id">{{ sport.name }}</option>
               }
@@ -35,25 +36,25 @@
           </div>
 
           <div class="field">
-            <label for="startDate">Start Date</label>
+            <label for="startDate">Datum početka</label>
             <input id="startDate" type="date" formControlName="startDate" />
           </div>
 
           <div class="field">
-            <label for="endDate">End Date</label>
+            <label for="endDate">Datum završetka</label>
             <input id="endDate" type="date" formControlName="endDate" />
           </div>
 
           <div class="field">
-            <label for="discountType">Discount Type</label>
+            <label for="discountType">Tip popusta</label>
             <select id="discountType" formControlName="discountType">
-              <option value="percentage">Percentage</option>
-              <option value="fixed">Fixed</option>
+              <option value="percentage">Procenat</option>
+              <option value="fixed">Fiksni</option>
             </select>
           </div>
 
           <div class="field">
-            <label for="discountValue">Discount Value</label>
+            <label for="discountValue">Vrednost popusta</label>
             <input
               id="discountValue"
               type="number"
@@ -72,7 +73,7 @@
         </div>
 
         <button type="submit" [disabled]="promotionForm.invalid || isSubmitting">
-          {{ isSubmitting ? 'Saving...' : (isEditMode ? 'Save Changes' : 'Create Promotion') }}
+          {{ isSubmitting ? 'Čuvanje...' : (isEditMode ? 'Sačuvaj izmene' : 'Kreiraj promociju') }}
         </button>
       </form>
     </section>

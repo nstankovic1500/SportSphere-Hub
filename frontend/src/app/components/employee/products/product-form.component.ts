@@ -87,7 +87,7 @@ export class ProductFormComponent {
     if (this.productForm.invalid || this.isSubmitting) {
       this.productForm.markAllAsTouched();
       if (this.productForm.invalid) {
-        this.errorMessage = 'Please correct the product form fields and try again.';
+        this.errorMessage = 'Ispravite polja forme proizvoda i pokušajte ponovo.';
       }
       return;
     }
@@ -127,7 +127,7 @@ export class ProductFormComponent {
           error: (error) => {
             this.isSubmitting = false;
             this.isUploadingImage = false;
-            this.errorMessage = error.error?.message ?? 'Product was saved, but the image could not be uploaded.';
+            this.errorMessage = error.error?.message ?? 'Proizvod je sačuvan, ali slika nije mogla da se otpremi.';
           },
         });
       },
@@ -180,14 +180,18 @@ export class ProductFormComponent {
 
   private makePayload(includeActive = true): EmployeeProductRequest {
     const formValue = this.productForm.getRawValue();
+    const trimmedImage = formValue.image.trim();
     const payload: EmployeeProductRequest = {
       name: formValue.name.trim(),
       description: formValue.description.trim(),
       category: formValue.category.trim(),
       price: Number(formValue.price),
       stock: Number(formValue.stock),
-      image: formValue.image.trim(),
     };
+
+    if (trimmedImage) {
+      payload.image = trimmedImage;
+    }
 
     if (includeActive) {
       payload.active = formValue.active;
@@ -211,11 +215,11 @@ export class ProductFormComponent {
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
 
     if (!allowedTypes.includes(file.type)) {
-      return 'Only JPG, PNG and WEBP images are allowed.';
+      return 'Dozvoljene su samo JPG, PNG i WEBP slike.';
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      return 'Image size must not exceed 5 MB.';
+      return 'Veličina slike ne sme biti veća od 5 MB.';
     }
 
     return '';

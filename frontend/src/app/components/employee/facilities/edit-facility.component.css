@@ -9,8 +9,9 @@ form { display: grid; gap: 20px; }
 .wide-field { grid-column: 1 / -1; }
 input, textarea, select, button { font: inherit; border-radius: 12px; }
 input, textarea, select { padding: 12px 14px; border: 1px solid; }
-.sports-grid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
-.sport-option { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border: 1px solid; border-radius: 14px; }
+.sports-grid { display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); }
+.sport-option { display: flex; align-items: center; gap: 8px; padding: 8px 10px; min-height: 48px; border: 1px solid; border-radius: 12px; }
+.sport-option input { width: 16px; height: 16px; margin: 0; }
 .section-header { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
 .opening-hours-list { display: grid; gap: 12px; }
 .opening-hour-row { display: grid; gap: 12px; grid-template-columns: 1.4fr 1fr 1fr auto; }

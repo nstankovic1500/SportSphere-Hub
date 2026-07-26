@@ -1,12 +1,13 @@
 <section class="page">
   <header class="page-header">
     <div>
-      <h1>{{ isEditMode ? 'Edit Product' : 'Create Product' }}</h1>
-      <p>{{ isEditMode ? 'Update the selected product.' : 'Add a new product for this facility.' }}</p>
+      <h1>{{ isEditMode ? 'Izmena proizvoda' : 'Kreiraj proizvod' }}</h1>
+      <p>{{ isEditMode ? 'Ažurirajte izabrani proizvod.' : 'Dodajte novi proizvod za ovaj objekat.' }}</p>
     </div>
     <div class="header-links">
+      <a routerLink="/employee">Početna strana</a>
       <a [routerLink]="['/employee/facilities', facilityId, 'products']">Nazad na proizvode</a>
-      <a [routerLink]="['/employee/facilities', facilityId]">Facility details</a>
+      <a [routerLink]="['/employee/facilities', facilityId]">Detalji objekta</a>
     </div>
   </header>
 
@@ -23,7 +24,7 @@
             <label for="name">Naziv</label>
             <input id="name" type="text" formControlName="name" />
             @if (productForm.controls.name.touched && productForm.controls.name.hasError('required')) {
-              <p class="field-error">Name is required.</p>
+              <p class="field-error">Naziv je obavezan.</p>
             }
           </div>
 
@@ -31,7 +32,7 @@
             <label for="category">Kategorija</label>
             <input id="category" type="text" formControlName="category" />
             @if (productForm.controls.category.touched && productForm.controls.category.hasError('required')) {
-              <p class="field-error">Category is required.</p>
+              <p class="field-error">Kategorija je obavezna.</p>
             }
           </div>
 
@@ -39,10 +40,10 @@
             <label for="description">Opis</label>
             <textarea id="description" rows="4" formControlName="description"></textarea>
             @if (productForm.controls.description.touched && productForm.controls.description.hasError('required')) {
-              <p class="field-error">Description is required.</p>
+              <p class="field-error">Opis je obavezan.</p>
             }
             @if (productForm.controls.description.touched && productForm.controls.description.hasError('maxlength')) {
-              <p class="field-error">Description can have at most 500 characters.</p>
+              <p class="field-error">Opis može imati najviše 500 karaktera.</p>
             }
           </div>
 
@@ -50,10 +51,10 @@
             <label for="price">Cena</label>
             <input id="price" type="number" min="0" step="0.01" formControlName="price" />
             @if (productForm.controls.price.touched && productForm.controls.price.hasError('required')) {
-              <p class="field-error">Price is required.</p>
+              <p class="field-error">Cena je obavezna.</p>
             }
             @if (productForm.controls.price.touched && productForm.controls.price.hasError('min')) {
-              <p class="field-error">Price must be 0 or greater.</p>
+              <p class="field-error">Cena mora biti 0 ili veća.</p>
             }
           </div>
 
@@ -61,20 +62,20 @@
             <label for="stock">Zaliha</label>
             <input id="stock" type="number" min="0" step="1" formControlName="stock" />
             @if (productForm.controls.stock.touched && productForm.controls.stock.hasError('required')) {
-              <p class="field-error">Stock is required.</p>
+              <p class="field-error">Zaliha je obavezna.</p>
             }
             @if (productForm.controls.stock.touched && productForm.controls.stock.hasError('min')) {
-              <p class="field-error">Stock must be 0 or greater.</p>
+              <p class="field-error">Zaliha mora biti 0 ili veća.</p>
             }
             @if (productForm.controls.stock.touched && productForm.controls.stock.hasError('pattern')) {
-              <p class="field-error">Stock must be a whole number.</p>
+              <p class="field-error">Zaliha mora biti ceo broj.</p>
             }
           </div>
 
           <div class="field field-wide">
             <label for="image">Slika</label>
             <input id="image" type="file" accept="image/jpeg,image/png,image/webp" (change)="onImageSelected($event)" />
-            <small class="helper-text">Upload one JPG, PNG or WEBP image up to 5 MB.</small>
+            <small class="helper-text">Otpremite jednu JPG, PNG ili WEBP sliku do 5 MB.</small>
             @if (imageErrorMessage) {
               <p class="field-error">{{ imageErrorMessage }}</p>
             }
@@ -85,7 +86,7 @@
             @if (productImageUrl) {
               <img class="product-preview" [src]="productImageUrl" alt="Pregled proizvoda" />
             } @else {
-              <div class="product-preview placeholder">No image selected</div>
+              <div class="product-preview placeholder">Nijedna slika nije izabrana</div>
             }
           </div>
 
@@ -98,7 +99,7 @@
         </div>
 
         <button type="submit" [disabled]="isSubmitting">
-          {{ isSubmitting ? (isUploadingImage ? 'Uploading Image...' : 'Saving...') : (isEditMode ? 'Save Changes' : 'Create Product') }}
+          {{ isSubmitting ? (isUploadingImage ? 'Otpremanje slike...' : 'Čuvanje...') : (isEditMode ? 'Sačuvaj izmene' : 'Kreiraj proizvod') }}
         </button>
       </form>
     </section>

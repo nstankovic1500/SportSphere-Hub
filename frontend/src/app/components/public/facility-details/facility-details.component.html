@@ -1,5 +1,8 @@
 <section class="public-page">
-  <a class="back-link" routerLink="/facilities">Nazad na objekte</a>
+  <div class="header-links">
+    <a class="back-link" [routerLink]="homeRoute">Nazad na početnu</a>
+    <a class="back-link" routerLink="/facilities">Nazad na objekte</a>
+  </div>
 
   @if (isLoading) {
     <p class="state-message">Učitavanje detalja objekta...</p>

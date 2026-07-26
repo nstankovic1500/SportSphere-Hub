@@ -2,9 +2,10 @@
   <header class="page-header">
     <div>
       <h1>Prodavnica</h1>
-      <p>Browse active products across available facilities.</p>
+      <p>Pretraži asortiman iz svih objekata.</p>
     </div>
     <div class="header-links">
+      <a routerLink="/athlete">Početna strana</a>
       <a routerLink="/athlete/cart">Korpa</a>
       <a routerLink="/athlete/orders">Moje porudžbine</a>
     </div>
@@ -15,7 +16,7 @@
       <div class="field">
         <label for="facilityId">Objekat</label>
         <select id="facilityId" formControlName="facilityId">
-          <option value="">All facilities</option>
+          <option value="">Svi objekti</option>
           @for (facility of facilities; track facility.id) {
             <option [value]="facility.id">{{ facility.name }} - {{ facility.city }}</option>
           }
@@ -25,7 +26,7 @@
       <div class="field">
         <label for="category">Kategorija</label>
         <select id="category" formControlName="category">
-          <option value="">All categories</option>
+          <option value="">Sve kategorije</option>
           @for (category of categories; track category) {
             <option [value]="category">{{ category }}</option>
           }
@@ -60,7 +61,7 @@
       @for (product of filteredProducts; track product.id) {
         <article class="product-card">
           <img
-            [src]="getImageUrl(product.image) || 'https://placehold.co/320x180?text=Product'"
+            [src]="getImageUrl(product.image) || 'https://placehold.co/320x180?text=Proizvod'"
             [alt]="product.name"
             (error)="onImageError($event)" />
 
@@ -71,9 +72,9 @@
             </div>
 
             <p class="description">{{ product.description }}</p>
-            <p><strong>Facility:</strong> {{ product.facility.name }}</p>
-            <p><strong>Price:</strong> {{ product.price }} RSD</p>
-            <p><strong>Stock:</strong> {{ product.stock }}</p>
+            <p><strong>Objekat:</strong> {{ product.facility.name }}</p>
+            <p><strong>Cena:</strong> {{ product.price }} RSD</p>
+            <p><strong>Zaliha:</strong> {{ product.stock }}</p>
 
             <div class="quantity-row">
               <label [for]="'quantity-' + product.id">Količina</label>
@@ -93,12 +94,12 @@
               (click)="addToCart(product)">
               {{
                 product.stock === 0
-                  ? 'Out of stock'
+                  ? 'Nema na stanju'
                   : isAdding(product.id)
-                    ? 'Adding...'
+                    ? 'Dodavanje...'
                     : isAdded(product.id)
-                      ? 'Added to cart!'
-                      : 'Add to Cart'
+                      ? 'Dodato u korpu!'
+                      : 'Dodaj u korpu'
               }}
             </button>
           </div>

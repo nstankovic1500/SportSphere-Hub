@@ -33,6 +33,44 @@ form {
   gap: 20px;
 }
 
+.profile-image-section {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 20px;
+  align-items: start;
+  padding: 20px;
+  border: 1px solid #dde6f2;
+  border-radius: 18px;
+  background: #fbfdff;
+}
+
+.profile-preview {
+  width: 140px;
+  height: 140px;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid #d8e1ee;
+  background: #eef4fb;
+}
+
+.profile-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.profile-image-controls {
+  display: grid;
+  gap: 12px;
+}
+
+.avatar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
 .form-grid {
   display: grid;
   gap: 16px;
@@ -59,22 +97,26 @@ select {
 
 .sports-grid {
   display: grid;
-  gap: 10px;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 8px;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
 }
 
 .sport-option {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 12px 14px;
+  gap: 8px;
+  padding: 8px 10px;
   border: 1px solid #d8e1ee;
-  border-radius: 14px;
+  border-radius: 12px;
   background: #f8fbff;
+  min-height: 48px;
 }
 
 .sport-option input {
   padding: 0;
+  width: 16px;
+  height: 16px;
+  margin: 0;
 }
 
 .employee-section {
@@ -98,6 +140,12 @@ button {
   font: inherit;
   font-weight: 700;
   cursor: pointer;
+}
+
+.secondary-button {
+  background: #eff4fb;
+  color: #1f3b63;
+  border: 1px solid #cbd7e6;
 }
 
 button:disabled {
@@ -132,7 +180,12 @@ button:disabled {
     padding: 24px;
   }
 
+  .profile-image-section,
   .form-grid {
     grid-template-columns: 1fr;
+  }
+
+  .profile-preview {
+    margin: 0 auto;
   }
 }

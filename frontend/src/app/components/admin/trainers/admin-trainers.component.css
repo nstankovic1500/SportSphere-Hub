@@ -1,0 +1,9 @@
+.page { padding: 24px; }
+.page-header { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; margin-bottom: 24px; }
+.header-links { display: flex; gap: 16px; flex-wrap: wrap; }
+.table-wrapper { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 12px 10px; text-align: left; border-bottom: 1px solid #d0d7de; vertical-align: top; }
+.message, .state-message { margin: 0 0 16px; padding: 12px 14px; border-radius: 12px; }
+.danger-button { padding: 10px 14px; border-radius: 12px; border: 0; cursor: pointer; }
+@media (max-width: 768px) { .page { padding: 16px; } .page-header { flex-direction: column; } }

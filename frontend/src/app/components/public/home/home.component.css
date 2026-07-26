@@ -1,22 +1,30 @@
 .public-page {
-  min-height: 100vh;
-  padding: 24px;
-  background: linear-gradient(180deg, #23262b 0%, #2a2e34 45%, #30353c 100%);
+  display: grid;
+  gap: 24px;
 }
 
 .hero {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(240px, 0.8fr);
   gap: 24px;
+  align-items: center;
   padding: 32px;
   border-radius: 24px;
-  background: #2d3138;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.28);
+  background:
+    radial-gradient(circle at top right, rgba(255, 255, 255, 0.38), transparent 28%),
+    linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+  color: #ffffff;
+  box-shadow: 0 24px 54px rgba(37, 99, 235, 0.24);
 }
 
 .eyebrow {
-  margin: 0 0 8px;
-  color: #cfd4da;
+  display: inline-flex;
+  margin-bottom: 10px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+  font-size: 0.82rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -30,72 +38,90 @@ p {
 }
 
 h1 {
-  font-size: 2.6rem;
-  line-height: 1.1;
+  font-size: clamp(2.3rem, 4vw, 4rem);
+  line-height: 1.02;
+  color: #ffffff;
 }
 
 .hero-copy {
-  margin-top: 12px;
-  max-width: 620px;
-  color: #c3c9d0;
+  margin-top: 16px;
+  max-width: 640px;
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 1.05rem;
 }
 
 .hero-actions {
-  display: flex;
-  flex-direction: column;
+  display: grid;
   gap: 12px;
-  min-width: 180px;
 }
 
-.hero-actions a,
-.section-heading a,
-.card-body a {
-  color: #f1f3f5;
-  font-weight: 700;
-  text-decoration: none;
+.hero-actions a {
+  min-width: 0;
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.hero-actions a:last-child {
+  background: rgba(15, 23, 42, 0.12);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+.hero-actions a:last-child:hover {
+  background: rgba(255, 255, 255, 0.22);
+  color: #ffffff;
 }
 
 .stats-card,
 .content-section {
-  margin-top: 24px;
-  padding: 24px;
-  border-radius: 20px;
-  background: #2d3138;
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.22);
+  padding: 28px;
+}
+
+.stats-card {
+  display: grid;
+  gap: 12px;
 }
 
 .stats-value {
-  margin-top: 8px;
-  font-size: 2.2rem;
-  font-weight: 700;
+  font-size: 3rem;
+  font-weight: 800;
+  color: var(--color-primary-strong);
 }
 
 .section-heading {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.section-heading a {
+  font-weight: 700;
 }
 
 .card-grid,
 .promotion-list {
   display: grid;
-  gap: 16px;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
 }
 
 .facility-card,
 .promotion-card {
-  border: 1px solid #565d67;
-  border-radius: 18px;
   overflow: hidden;
-  background: #343941;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.facility-card:hover,
+.promotion-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 36px rgba(15, 23, 42, 0.12);
 }
 
 .facility-card img,
 .image-placeholder {
   width: 100%;
-  height: 180px;
+  height: 190px;
   object-fit: cover;
   display: block;
 }
@@ -103,44 +129,30 @@ h1 {
 .image-placeholder {
   display: grid;
   place-items: center;
-  background: #40464f;
-  color: #d5d9de;
+  background: linear-gradient(135deg, #eaf1ff 0%, #dbeafe 100%);
+  color: var(--color-text-soft);
+  font-weight: 600;
 }
 
 .card-body,
 .promotion-card {
-  padding: 16px;
-}
-
-.card-body {
-  display: grid;
-  gap: 8px;
-}
-
-.promotion-card {
   display: grid;
   gap: 10px;
+  padding: 20px;
 }
 
-.state-message {
-  margin-top: 24px;
-  padding: 14px 16px;
-  border-radius: 12px;
-  background: #3a4048;
-  color: #eef1f4;
+.card-body p,
+.promotion-card p {
+  color: var(--color-text-soft);
 }
 
-.state-message.error {
-  background: #4a3c3c;
-  color: #f0d0d0;
+.card-body a {
+  width: fit-content;
+  margin-top: 6px;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .hero {
-    flex-direction: column;
-  }
-
-  .hero-actions {
-    min-width: auto;
+    grid-template-columns: 1fr;
   }
 }

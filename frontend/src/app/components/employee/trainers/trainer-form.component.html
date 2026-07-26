@@ -1,12 +1,12 @@
 <section class="page">
   <header class="page-header">
     <div>
-      <h1>{{ isEditMode ? 'Edit Trainer' : 'New Trainer' }}</h1>
-      <p>{{ isEditMode ? 'Update trainer information.' : 'Create a new trainer for this facility.' }}</p>
+      <h1>{{ isEditMode ? 'Izmena trenera' : 'Novi trener' }}</h1>
+      <p>{{ isEditMode ? 'Ažurirajte podatke o treneru.' : 'Kreirajte novog trenera za ovaj objekat.' }}</p>
     </div>
     <div class="header-links">
       <a [routerLink]="['/employee/facilities', facilityId, 'trainers']">Nazad na trenere</a>
-      <a [routerLink]="['/employee/facilities', facilityId]">Facility details</a>
+      <a [routerLink]="['/employee/facilities', facilityId]">Detalji objekta</a>
     </div>
   </header>
 
@@ -27,60 +27,60 @@
             <label for="firstName">Ime</label>
             <input id="firstName" type="text" formControlName="firstName" />
             @if (firstNameControl.touched && firstNameControl.hasError('required')) {
-              <p class="field-error">First name is required.</p>
+              <p class="field-error">Ime je obavezno.</p>
             }
           </div>
           <div class="field">
             <label for="lastName">Prezime</label>
             <input id="lastName" type="text" formControlName="lastName" />
             @if (lastNameControl.touched && lastNameControl.hasError('required')) {
-              <p class="field-error">Last name is required.</p>
+              <p class="field-error">Prezime je obavezno.</p>
             }
           </div>
           <div class="field">
             <label for="email">Imejl</label>
             <input id="email" type="email" formControlName="email" />
             @if (emailControl.touched && emailControl.hasError('required')) {
-              <p class="field-error">Email is required.</p>
+              <p class="field-error">Imejl je obavezan.</p>
             }
             @if (emailControl.touched && emailControl.hasError('email')) {
-              <p class="field-error">Enter a valid email address.</p>
+              <p class="field-error">Unesite ispravnu mejl adresu.</p>
             }
           </div>
           <div class="field">
             <label for="phone">Telefon</label>
             <input id="phone" type="text" formControlName="phone" />
             @if (phoneControl.touched && phoneControl.hasError('required')) {
-              <p class="field-error">Phone is required.</p>
+              <p class="field-error">Polje je obavezno</p>
             }
             @if (phoneControl.touched && phoneControl.hasError('pattern')) {
-              <p class="field-error">Enter a valid phone number.</p>
+              <p class="field-error">Unesite ispravan broj telefona.</p>
             }
           </div>
           <div class="field">
             <label for="pricePerHour">Cena po satu</label>
             <input id="pricePerHour" type="number" min="0" step="0.01" formControlName="pricePerHour" />
             @if (pricePerHourControl.touched && pricePerHourControl.hasError('required')) {
-              <p class="field-error">Price per hour is required.</p>
+              <p class="field-error">Cena po satu je obavezna.</p>
             }
             @if (pricePerHourControl.touched && pricePerHourControl.hasError('min')) {
-              <p class="field-error">Price per hour cannot be negative.</p>
+              <p class="field-error">Cena po satu ne može biti negativna.</p>
             }
           </div>
           @if (isEditMode) {
             <label class="checkbox-field">
               <input type="checkbox" formControlName="active" />
-              <span>Aktivno</span>
+              <span>Aktivan/na</span>
             </label>
           }
           <div class="field wide-field">
             <label for="biography">Biografija</label>
             <textarea id="biography" rows="5" formControlName="biography"></textarea>
             @if (biographyControl.touched && biographyControl.hasError('required')) {
-              <p class="field-error">Biography is required.</p>
+              <p class="field-error">Biografija je obavezna.</p>
             }
             @if (biographyControl.touched && biographyControl.hasError('maxlength')) {
-              <p class="field-error">Biography can have at most 1000 characters.</p>
+              <p class="field-error">Biografija može imati najviše 1000 karaktera.</p>
             }
           </div>
         </div>
@@ -100,15 +100,15 @@
             }
           </div>
           @if (selectedSports.touched && selectedSports.hasError('required')) {
-            <p class="field-error">Select at least one sport.</p>
+            <p class="field-error">Izaberite bar jedan sport.</p>
           }
         </div>
 
         <div class="field">
           <div class="section-header">
-            <label>Working Hours</label>
+            <label>Radno vreme</label>
             <button type="button" class="secondary-button" (click)="addWorkingHour()">
-              Add Row
+              Dodaj red
             </button>
           </div>
           <div formArrayName="workingHours" class="working-hours-list">
@@ -127,33 +127,33 @@
                   (click)="removeWorkingHour($index)"
                   [disabled]="workingHourRows.length === 1"
                 >
-                  Remove
+                  Ukloni
                 </button>
                 @if (row.get('open')?.touched && row.get('open')?.hasError('required')) {
-                  <p class="field-error row-error">Open time is required.</p>
+                  <p class="field-error row-error">Vreme otvaranja je obavezno.</p>
                 }
                 @if (row.get('open')?.touched && row.get('open')?.hasError('pattern')) {
-                  <p class="field-error row-error">Open time must use HH:mm format.</p>
+                  <p class="field-error row-error">Vreme otvaranja mora biti u formatu HH:mm.</p>
                 }
                 @if (row.get('close')?.touched && row.get('close')?.hasError('required')) {
-                  <p class="field-error row-error">Close time is required.</p>
+                  <p class="field-error row-error">Vreme zatvaranja je obavezno.</p>
                 }
                 @if (row.get('close')?.touched && row.get('close')?.hasError('pattern')) {
-                  <p class="field-error row-error">Close time must use HH:mm format.</p>
+                  <p class="field-error row-error">Vreme zatvaranja mora biti u formatu HH:mm.</p>
                 }
                 @if (row.touched && row.get('open')?.value && row.get('close')?.value && row.get('close')?.value <= row.get('open')?.value) {
-                  <p class="field-error row-error">Close time must be after open time.</p>
+                  <p class="field-error row-error">Vreme zatvaranja mora biti posle vremena otvaranja.</p>
                 }
               </div>
             }
           </div>
           @if (hasWorkingHoursDuplicateDays()) {
-            <p class="field-error">Working hours cannot contain duplicate days.</p>
+            <p class="field-error">Radno vreme ne sme sadržati duplirane dane.</p>
           }
         </div>
 
-        <button type="submit" [disabled]="trainerForm.invalid || isSubmitting">
-          {{ isSubmitting ? 'Saving...' : (isEditMode ? 'Save Changes' : 'Create Trainer') }}
+        <button type="submit" class="submit-button" [disabled]="trainerForm.invalid || isSubmitting">
+          {{ isSubmitting ? 'Čuvanje...' : (isEditMode ? 'Sačuvaj izmene' : 'Kreiraj trenera') }}
         </button>
       </form>
     </section>

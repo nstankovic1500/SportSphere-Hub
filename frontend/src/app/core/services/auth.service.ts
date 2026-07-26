@@ -7,9 +7,11 @@ import { environment } from '../../../environments/environment';
 import type {
   ApiResponse,
   CurrentUserResponseData,
+  ForgotPasswordApiResponse,
   LoginResponseData,
+  ResetPasswordApiResponse,
 } from '../models/api-response.model';
-import type { RegisterRequest, RegisterResponseData } from '../models/register.model';
+import type { RegisterResponseData } from '../models/register.model';
 import type { User } from '../models/user.model';
 
 @Injectable({
@@ -71,10 +73,24 @@ export class AuthService {
       );
   }
 
-  register(payload: RegisterRequest) {
+  register(payload: FormData) {
     return this.http.post<ApiResponse<RegisterResponseData>>(
       `${environment.apiUrl}/auth/register`,
       payload,
+    );
+  }
+
+  forgotPassword(identifier: string) {
+    return this.http.post<ForgotPasswordApiResponse>(
+      `${environment.apiUrl}/auth/forgot-password`,
+      { identifier },
+    );
+  }
+
+  resetPassword(token: string, password: string) {
+    return this.http.post<ResetPasswordApiResponse>(
+      `${environment.apiUrl}/auth/reset-password/${token}`,
+      { password },
     );
   }
 

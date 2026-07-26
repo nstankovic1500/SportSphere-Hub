@@ -1,19 +1,19 @@
 <section class="page">
   <header class="page-header">
     <div>
-      <h1>Ad Requests</h1>
+      <h1>Prijave na oglas</h1>
       @if (ad) {
         <p>
-          {{ ad.sportName }} in {{ ad.city }} on {{ ad.date | date: 'mediumDate' }},
+          {{ ad.sportName }} u gradu {{ ad.city }} dana {{ ad.date | date: 'mediumDate' }},
           {{ ad.startTime }} - {{ ad.endTime }}
         </p>
       } @else {
-        <p>Review pending, accepted, and rejected apply requests for your ad.</p>
+        <p>Pregledajte prijave na vaš oglas koje čekaju obradu, kao i prihvaćene i odbijene prijave.</p>
       }
     </div>
     <div class="header-links">
-      <a routerLink="/athlete">Nazad na kontrolnu tablu</a>
-      <a routerLink="/athlete/ads">Back to ads</a>
+      <a routerLink="/athlete">Nazad na početnu stranu</a>
+      <a routerLink="/athlete/ads">Nazad na oglase</a>
     </div>
   </header>
 
@@ -28,11 +28,11 @@
   @if (ad) {
     <section class="summary-grid">
       <article class="summary-card">
-        <span class="summary-label">Missing players</span>
+        <span class="summary-label">Igrača nedostaje</span>
         <strong>{{ ad.missingPlayers }}</strong>
       </article>
       <article class="summary-card">
-        <span class="summary-label">Accepted players</span>
+        <span class="summary-label">Prihvaćeni igrači</span>
         <strong>{{ ad.acceptedPlayers }}</strong>
       </article>
       <article class="summary-card">
@@ -43,16 +43,16 @@
   }
 
   @if (isCompleted) {
-    <p class="message success">This ad is completed because the team is full.</p>
+    <p class="message success">Oglas je završen jer je tim popunjen.</p>
   }
 
   @if (isLoading) {
-    <p class="state-message">Loading ad requests...</p>
+    <p class="state-message">Učitavanje prijava na oglas...</p>
   } @else if (!ad) {
-    <p class="state-message error">Ad details are unavailable.</p>
+    <p class="state-message error">Detalji oglasa nisu dostupni.</p>
   } @else if (requests.length === 0) {
     <section class="panel">
-      <p class="state-message">No apply requests found for this ad.</p>
+      <p class="state-message">Nema prijava za ovaj oglas.</p>
     </section>
   } @else {
     <section class="panel">
@@ -62,8 +62,8 @@
             <tr>
               <th>Sportista</th>
               <th>Status</th>
-              <th>Sent at</th>
-              <th>Action</th>
+              <th>Poslato</th>
+              <th>Akcija</th>
             </tr>
           </thead>
           <tbody>
@@ -84,7 +84,7 @@
                         [disabled]="isProcessing(request.id)"
                         (click)="approveRequest(request)"
                       >
-                        {{ isProcessing(request.id) ? 'Processing...' : 'Approve' }}
+                        {{ isProcessing(request.id) ? 'Obrada...' : 'Odobri' }}
                       </button>
                       <button
                         type="button"
@@ -92,7 +92,7 @@
                         [disabled]="isProcessing(request.id)"
                         (click)="rejectRequest(request)"
                       >
-                        Reject
+                        Odbij
                       </button>
                     </div>
                   } @else {

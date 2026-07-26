@@ -65,11 +65,96 @@ interface ResolvedFacilityRequestResponse {
   facility: PendingFacilityRequest;
 }
 
+interface AdminUser {
+  id: string;
+  username: string;
+  firstName: string;
+  lastName: string;
+  phone: string;
+  email: string;
+  profileImage: string;
+  favoriteSports: string[];
+  role: UserRole;
+  status: UserStatus;
+  employeeData?: IEmployeeData;
+  createdAt: Date;
+}
+
+interface AdminUsersResponse {
+  users: AdminUser[];
+}
+
+interface UpdateAdminUserBody {
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+  email?: string;
+  role?: UserRole;
+  status?: UserStatus;
+  favoriteSports?: string[];
+  employeeData?: IEmployeeData;
+}
+
+interface ResolvedAdminUserResponse {
+  user: AdminUser;
+}
+
+interface AdminTrainer {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  facilityId: string;
+  facilityName: string;
+  sports: string[];
+  pricePerHour: number | null;
+  active: boolean;
+  createdAt: Date;
+}
+
+interface AdminTrainersResponse {
+  trainers: AdminTrainer[];
+}
+
+interface ResolvedAdminTrainerResponse {
+  trainer: AdminTrainer;
+}
+
+interface CreateAdminSportBody {
+  name?: string;
+}
+
+interface AdminSport {
+  id: string;
+  name: string;
+  active: boolean;
+}
+
+interface AdminSportsResponse {
+  sports: AdminSport[];
+}
+
+interface ResolvedAdminSportResponse {
+  sport: AdminSport;
+}
+
 export type {
+  AdminSport,
+  AdminSportsResponse,
+  AdminTrainer,
+  AdminTrainersResponse,
+  AdminUser,
+  AdminUsersResponse,
+  CreateAdminSportBody,
   PendingFacilityRequest,
   PendingFacilityRequestsResponse,
   RegistratingUser,
   ResolvedFacilityRequestResponse,
   ResolvedRegistrationResponse,
   PendingRegistrationsResponse,
+  ResolvedAdminSportResponse,
+  ResolvedAdminTrainerResponse,
+  ResolvedAdminUserResponse,
+  UpdateAdminUserBody,
 };

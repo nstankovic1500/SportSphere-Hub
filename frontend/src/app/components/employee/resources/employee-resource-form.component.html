@@ -1,17 +1,18 @@
 <section class="page">
   <header class="page-header">
     <div>
-      <h1>{{ isEditMode ? 'Edit Resource' : 'Create Resource' }}</h1>
-      <p>{{ isEditMode ? 'Update the selected resource.' : 'Add a new resource to this facility.' }}</p>
+      <h1>{{ isEditMode ? 'Izmena resursa' : 'Kreiraj resurs' }}</h1>
+      <p>{{ isEditMode ? 'Ažurirajte izabrani resurs.' : 'Dodajte novi resurs ovom objektu.' }}</p>
     </div>
     <div class="header-links">
-      <a [routerLink]="['/employee/facilities', facilityId, 'resources']">Back to resources</a>
-      <a [routerLink]="['/employee/facilities', facilityId]">Facility details</a>
+      <a routerLink="/employee">Početna strana</a>
+      <a [routerLink]="['/employee/facilities', facilityId, 'resources']">Nazad na resurse</a>
+      <a [routerLink]="['/employee/facilities', facilityId]">Detalji objekta</a>
     </div>
   </header>
 
   @if (isLoading) {
-    <p class="state-message">Loading resource form...</p>
+    <p class="state-message">Učitavanje forme resursa...</p>
   } @else {
     <section class="panel">
       @if (successMessage) { <p class="message success">{{ successMessage }}</p> }
@@ -31,7 +32,7 @@
           <div class="field">
             <label for="sportId">Sport</label>
             <select id="sportId" formControlName="sportId">
-              <option value="">Select sport</option>
+              <option value="">Izaberite sport</option>
               @for (sport of supportedSports; track sport.id) {
                 <option [value]="sport.id">{{ sport.name }}</option>
               }
@@ -48,7 +49,7 @@
         </div>
 
         <button type="submit" [disabled]="resourceForm.invalid || isSubmitting">
-          {{ isSubmitting ? 'Saving...' : (isEditMode ? 'Save Changes' : 'Create Resource') }}
+          {{ isSubmitting ? 'Čuvanje...' : (isEditMode ? 'Sačuvaj izmene' : 'Kreiraj resurs') }}
         </button>
       </form>
     </section>

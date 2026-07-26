@@ -30,15 +30,30 @@ export class EmployeePromotionsComponent {
   getDiscountLabel(promotion: EmployeePromotion) {
     return promotion.discountType === 'percentage'
       ? `${promotion.discountValue}%`
-      : `${promotion.discountValue} fixed`;
+      : `${promotion.discountValue} fiksno`;
   }
 
   getPeriodLabel(promotion: EmployeePromotion) {
     return `${promotion.startDate} - ${promotion.endDate}`;
   }
 
+  getStateLabel(state: EmployeePromotion['state']) {
+    switch (state) {
+      case 'upcoming':
+        return 'Predstojeća';
+      case 'active':
+        return 'Aktivna';
+      case 'expired':
+        return 'Istekla';
+      case 'inactive':
+        return 'Neaktivna';
+      default:
+        return state;
+    }
+  }
+
   deletePromotion(promotion: EmployeePromotion) {
-    if (!window.confirm(`Delete promotion ${promotion.name}?`)) {
+    if (!window.confirm(`Obrisati promociju ${promotion.name}?`)) {
       return;
     }
 
@@ -52,7 +67,7 @@ export class EmployeePromotionsComponent {
           (currentPromotion) => currentPromotion.id !== promotion.id,
         );
         this.deletingIds.delete(promotion.id);
-        this.successMessage = 'Promotion deleted successfully.';
+        this.successMessage = 'Promocija je uspešno obrisana.';
       },
       error: (error) => {
         this.deletingIds.delete(promotion.id);

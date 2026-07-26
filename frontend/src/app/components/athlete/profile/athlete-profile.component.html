@@ -2,10 +2,10 @@
   <header class="page-header">
     <div>
       <h1>Profil sportiste</h1>
-      <p>Manage your personal information and review your reservations.</p>
+      <p>Upravljajte ličnim podacima i pregledajte svoje rezervacije.</p>
     </div>
     <div class="header-links">
-      <a routerLink="/athlete">Nazad na kontrolnu tablu</a>
+      <a routerLink="/athlete">Nazad na početnu stranu</a>
       <a routerLink="/facilities">Pregledaj objekte</a>
     </div>
   </header>
@@ -21,9 +21,9 @@
       <div class="profile-image-section">
         <div class="profile-image-card">
           @if (profileImageUrl) {
-            <img class="profile-image" [src]="profileImageUrl" [alt]="profile?.username || 'Profile image'" />
+            <img class="profile-image" [src]="profileImageUrl" [alt]="profile?.username || 'Profilna slika'" />
           } @else {
-            <div class="profile-image placeholder">No image</div>
+            <div class="profile-image placeholder">Nema slike</div>
           }
         </div>
 
@@ -31,12 +31,17 @@
           <label for="profileImage">Profilna slika</label>
           <input id="profileImage" type="file" accept="image/jpeg,image/png,image/webp" (change)="onProfileImageChange($event)" />
           <small class="helper-text">Dozvoljeni formati: JPG, PNG, WEBP. Maksimalna veličina: 5 MB.</small>
+          <div class="action-row">
+            <button type="button" class="secondary-button" [disabled]="isGeneratingAvatar" (click)="generateAvatar()">
+              {{ isGeneratingAvatar ? 'Generisanje...' : 'Generiši avatar' }}
+            </button>
+            <button type="button" [disabled]="!selectedProfileImageFile || isUploadingImage" (click)="uploadProfileImage()">
+              {{ isUploadingImage ? 'Otpremanje...' : 'Sačuvaj kao profilnu sliku' }}
+            </button>
+          </div>
           @if (imageErrorMessage) {
             <p class="message error">{{ imageErrorMessage }}</p>
           }
-          <button type="button" [disabled]="!selectedProfileImageFile || isUploadingImage" (click)="uploadProfileImage()">
-            {{ isUploadingImage ? 'Uploading...' : 'Upload Image' }}
-          </button>
         </div>
       </div>
 
@@ -59,10 +64,10 @@
             <label for="email">Imejl</label>
             <input id="email" type="email" formControlName="email" />
             @if (email.touched && email.hasError('required')) {
-              <small class="field-error">Email is required.</small>
+              <small class="field-error">Imejl je obavezan.</small>
             }
             @if (email.touched && email.hasError('email')) {
-              <small class="field-error">Enter a valid email address.</small>
+              <small class="field-error">Unesite ispravnu mejl adresu.</small>
             }
           </div>
 
@@ -70,7 +75,7 @@
             <label for="firstName">Ime</label>
             <input id="firstName" type="text" formControlName="firstName" />
             @if (firstName.touched && firstName.hasError('required')) {
-              <small class="field-error">First name is required.</small>
+              <small class="field-error">Ime je obavezno.</small>
             }
           </div>
 
@@ -78,7 +83,7 @@
             <label for="lastName">Prezime</label>
             <input id="lastName" type="text" formControlName="lastName" />
             @if (lastName.touched && lastName.hasError('required')) {
-              <small class="field-error">Last name is required.</small>
+              <small class="field-error">Prezime je obavezno.</small>
             }
           </div>
 
@@ -86,7 +91,10 @@
             <label for="phone">Telefon</label>
             <input id="phone" type="text" formControlName="phone" />
             @if (phone.touched && phone.hasError('required')) {
-              <small class="field-error">Phone is required.</small>
+              <small class="field-error">Polje je obavezno.</small>
+            }
+            @if (phone.touched && phone.hasError('pattern')) {
+              <small class="field-error">Unesite ispravan broj telefona.</small>
             }
           </div>
 
@@ -123,12 +131,12 @@
           </div>
           <small class="helper-text">Izaberite do 5 sportova.</small>
           @if (favoriteSports.touched && favoriteSports.hasError('maxSelectedSports')) {
-            <small class="field-error">You can select at most 5 sports.</small>
+            <small class="field-error">Možete izabrati najviše 5 sportova.</small>
           }
         </div>
 
         <button type="submit" [disabled]="profileForm.invalid || isSaving">
-          {{ isSaving ? 'Saving...' : 'Save Changes' }}
+          {{ isSaving ? 'Čuvanje...' : 'Sačuvaj izmene' }}
         </button>
       </form>
     </section>
@@ -141,7 +149,7 @@
       }
 
       @if (reservations.length === 0) {
-        <p class="state-message">No reservations found.</p>
+        <p class="state-message">Nema pronađenih rezervacija.</p>
       } @else {
         <div class="table-wrapper">
           <table>
@@ -151,10 +159,10 @@
                 <th>Grad</th>
                 <th>Resurs</th>
                 <th>Sport</th>
-                <th>Start Time</th>
-                <th>End Time</th>
+                <th>Početak</th>
+                <th>Kraj</th>
                 <th>Status</th>
-                <th>Action</th>
+                <th>Akcija</th>
               </tr>
             </thead>
             <tbody>
@@ -175,7 +183,7 @@
                         [disabled]="isCancelling(reservation.id)"
                         (click)="cancelReservation(reservation)"
                       >
-                        {{ isCancelling(reservation.id) ? 'Cancelling...' : 'Cancel' }}
+                        {{ isCancelling(reservation.id) ? 'Otkazivanje...' : 'Otkaži' }}
                       </button>
                     } @else {
                       <span>-</span>

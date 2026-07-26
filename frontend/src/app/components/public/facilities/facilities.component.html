@@ -4,7 +4,7 @@
       <h1>Objekti</h1>
       <p>Pretražite odobrene sportske objekte po gradu, sportu i tipu resursa.</p>
     </div>
-    <a routerLink="/">Nazad na početnu</a>
+    <a [routerLink]="homeRoute">Nazad na početnu</a>
   </header>
 
   <form class="filters" [formGroup]="filterForm" (ngSubmit)="applyFilters()">
@@ -50,6 +50,13 @@
         </select>
       </div>
     </div>
+
+    @if (showAvailableTodayFilter) {
+      <label class="availability-toggle">
+        <input type="checkbox" formControlName="availableToday" />
+        <span>Samo slobodni termini danas</span>
+      </label>
+    }
 
     <div class="city-section">
       <label>Gradovi</label>

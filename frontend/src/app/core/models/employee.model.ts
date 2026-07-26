@@ -55,6 +55,7 @@ export interface EmployeeFacility {
   images: string[];
   openingHours?: EmployeeOpeningHour[];
   sports: EmployeeFavoriteSport[];
+  resources?: EmployeeResource[];
   createdAt: string;
 }
 
@@ -255,7 +256,7 @@ export interface EmployeeProductRequest {
   price: number;
   stock: number;
   category: string;
-  image: string;
+  image?: string;
   active?: boolean;
 }
 

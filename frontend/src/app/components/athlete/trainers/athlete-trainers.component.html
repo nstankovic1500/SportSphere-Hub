@@ -1,11 +1,11 @@
 <section class="page">
   <header class="page-header">
     <div>
-      <h1>Find Trainers</h1>
-      <p>Browse active trainers, filter by facility or sport, and book a training session.</p>
+      <h1>Treneri</h1>
+      <p>Pretraži trenere, filtriraj po objektu i/ili sportu.</p>
     </div>
     <nav class="page-links">
-      <a routerLink="/athlete">Dashboard</a>
+      <a routerLink="/athlete">Početna strana</a>
       <a routerLink="/athlete/trainings">Moji treninzi</a>
     </nav>
   </header>
@@ -14,7 +14,7 @@
     <label>
       <span>Objekat</span>
       <select formControlName="facilityId">
-        <option value="">All facilities</option>
+        <option value="">Svi objekti</option>
         @for (facility of facilities; track facility.id) {
           <option [value]="facility.id">{{ facility.name }} - {{ facility.city }}</option>
         }
@@ -33,36 +33,36 @@
 
     <div class="filter-actions">
       <button type="submit" [disabled]="isFiltering">
-        {{ isFiltering ? 'Filtering...' : 'Apply filters' }}
+        {{ isFiltering ? 'Filtriranje...' : 'Primeni filtere' }}
       </button>
       <button type="button" class="secondary-button" (click)="resetFilters()" [disabled]="isFiltering">
-        Reset
+        Resetuj
       </button>
     </div>
   </form>
 
   @if (isLoading) {
-    <p class="state-message">Loading trainers...</p>
+    <p class="state-message">Učitavanje trenera...</p>
   } @else if (errorMessage) {
     <p class="state-message error">{{ errorMessage }}</p>
   } @else if (trainers.length === 0) {
-    <p class="state-message">No trainers found for the selected filters.</p>
+    <p class="state-message">Nema trenera za izabrane filtere.</p>
   } @else {
     <div class="trainer-grid">
       @for (trainer of trainers; track trackByTrainerId($index, trainer)) {
         <article class="trainer-card">
           <div class="trainer-card__header">
             <h2>{{ trainer.firstName }} {{ trainer.lastName }}</h2>
-            <span class="price">{{ trainer.hourlyPrice }} / hour</span>
+            <span class="price">{{ formatPrice(trainer) }}</span>
           </div>
 
           <p class="specialization">{{ trainer.specialization }}</p>
-          <p><strong>Facility:</strong> {{ trainer.facility.name }}, {{ trainer.facility.city }}</p>
-          <p><strong>Sports:</strong> {{ getSportsLabel(trainer) }}</p>
-          <p><strong>Average rating:</strong> {{ trainer.ratingAverage }} ({{ trainer.ratingCount }})</p>
+          <p><strong>Objekat:</strong> {{ trainer.facility.name }}, {{ trainer.facility.city }}</p>
+          <p><strong>Sportovi:</strong> {{ getSportsLabel(trainer) }}</p>
+          <p><strong>Rejting:</strong> {{ formatRating(trainer) }}</p>
 
           <div class="card-actions">
-            <a [routerLink]="['/athlete/trainers', trainer.id]">Details / Book</a>
+            <a [routerLink]="['/athlete/trainers', trainer.id]">Detalji i rezervacija</a>
           </div>
         </article>
       }

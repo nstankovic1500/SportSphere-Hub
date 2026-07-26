@@ -6,6 +6,7 @@ import { forkJoin } from 'rxjs';
 
 import type { FacilityListItem } from '../../../core/models/public.model';
 import type { Sport } from '../../../core/models/sport.model';
+import { AuthService } from '../../../core/services/auth.service';
 import { PublicService } from '../../../core/services/public.service';
 import { buildUploadImageUrl } from '../../../core/utils/image.util';
 
@@ -19,12 +20,14 @@ import { buildUploadImageUrl } from '../../../core/utils/image.util';
 export class FacilitiesComponent {
   private readonly publicService = inject(PublicService);
   private readonly formBuilder = inject(FormBuilder);
+  private readonly authService = inject(AuthService);
 
   readonly filterForm = this.formBuilder.nonNullable.group({
     name: [''],
     cities: this.formBuilder.nonNullable.control<string[]>([]),
     sportId: [''],
     resourceType: [''],
+    availableToday: false,
     sortBy: this.formBuilder.nonNullable.control<'name' | 'city'>('name'),
     sortOrder: this.formBuilder.nonNullable.control<'asc' | 'desc'>('asc'),
   });
@@ -64,6 +67,7 @@ export class FacilitiesComponent {
       cities: [],
       sportId: '',
       resourceType: '',
+      availableToday: false,
       sortBy: 'name',
       sortOrder: 'asc',
     });
@@ -77,6 +81,28 @@ export class FacilitiesComponent {
 
   getImageUrl(imagePath: string | null) {
     return buildUploadImageUrl(imagePath);
+  }
+
+  get showAvailableTodayFilter() {
+    return this.authService.getCurrentUser()?.role === 'athlete';
+  }
+
+  get homeRoute() {
+    const role = this.authService.getCurrentUser()?.role;
+
+    if (role === 'athlete') {
+      return '/athlete';
+    }
+
+    if (role === 'employee') {
+      return '/employee';
+    }
+
+    if (role === 'admin') {
+      return '/admin';
+    }
+
+    return '/';
   }
 
   private loadPageData() {
@@ -106,6 +132,8 @@ export class FacilitiesComponent {
     }
 
     const formValue = this.filterForm.getRawValue();
+    const availableToday =
+      this.showAvailableTodayFilter && formValue.availableToday ? 'true' : undefined;
 
     this.publicService
       .getFacilities({
@@ -114,6 +142,7 @@ export class FacilitiesComponent {
         sportId: formValue.sportId || undefined,
         resourceType:
           (formValue.resourceType as 'outdoor' | 'indoor' | 'team_hall' | '') || undefined,
+        availableToday,
         sortBy: formValue.sortBy,
         sortOrder: formValue.sortOrder,
       })

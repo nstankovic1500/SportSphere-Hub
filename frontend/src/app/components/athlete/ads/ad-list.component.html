@@ -1,12 +1,12 @@
 <section class="page">
   <header class="page-header">
     <div>
-      <h1>Ads</h1>
-      <p>Browse active ads, filter by sport, city, and date, or manage your own ads.</p>
+      <h1>Oglasi</h1>
+      <p>Pregledajte aktivne oglase, filtrirajte po sportu, gradu i datumu ili upravljajte svojim oglasima.</p>
     </div>
     <div class="header-links">
-      <a routerLink="/athlete">Nazad na kontrolnu tablu</a>
-      <a routerLink="/athlete/ads/new">Create ad</a>
+      <a routerLink="/athlete">Nazad na početnu stranu</a>
+      <a routerLink="/athlete/ads/new">Kreiraj oglas</a>
     </div>
   </header>
 
@@ -26,7 +26,7 @@
         <div class="field">
           <label for="city">Grad</label>
           <select id="city" formControlName="city">
-            <option value="">All cities</option>
+            <option value="">Svi gradovi</option>
             @for (city of cities; track city) {
               <option [value]="city">{{ city }}</option>
             }
@@ -41,10 +41,10 @@
 
       <div class="form-actions">
         <button type="submit" [disabled]="isFiltering">
-          {{ isFiltering ? 'Applying...' : 'Apply filters' }}
+          {{ isFiltering ? 'Primena...' : 'Primeni filtere' }}
         </button>
         <button type="button" class="secondary-button" [disabled]="isFiltering" (click)="resetFilters()">
-          Reset
+          Resetuj
         </button>
       </div>
     </form>
@@ -59,10 +59,10 @@
   }
 
   @if (isLoading) {
-    <p class="state-message">Loading ads...</p>
+    <p class="state-message">Učitavanje oglasa...</p>
   } @else if (ads.length === 0) {
     <section class="panel">
-      <p class="state-message">No active ads match the selected filters.</p>
+      <p class="state-message">Nema aktivnih oglasa za izabrane filtere.</p>
     </section>
   } @else {
     <section class="panel">
@@ -73,11 +73,11 @@
               <th>Sport</th>
               <th>Grad</th>
               <th>Datum</th>
-              <th>Time</th>
-              <th>Author</th>
-              <th>Missing players</th>
-              <th>Accepted players</th>
-              <th>Action</th>
+              <th>Vreme</th>
+              <th>Autor</th>
+              <th>Igrača nedostaje</th>
+              <th>Prihvaćeni igrači</th>
+              <th>Akcija</th>
             </tr>
           </thead>
           <tbody>
@@ -94,7 +94,7 @@
                   @if (ad.isOwner) {
                     <div class="action-group">
                       <a class="inline-link" [routerLink]="['/athlete/ads', ad.id, 'requests']">
-                        Manage requests
+                        Upravljaj prijavama
                       </a>
                       <button
                         type="button"
@@ -102,18 +102,28 @@
                         [disabled]="!(ad.status === 'active') || isClosing(ad.id)"
                         (click)="closeAd(ad)"
                       >
-                        {{ isClosing(ad.id) ? 'Closing...' : 'Close' }}
+                        {{ isClosing(ad.id) ? 'Zatvaranje...' : 'Zatvori' }}
                       </button>
                     </div>
                   } @else if (ad.hasRequested) {
-                    <span class="status-badge pending">Request sent</span>
+                    <span
+                      class="status-badge"
+                      [class.pending]="ad.requestStatus === 'pending'"
+                      [class.accepted]="ad.requestStatus === 'accepted'"
+                      [class.rejected]="ad.requestStatus === 'rejected'">
+                      @switch (ad.requestStatus) {
+                        @case ('accepted') { Prihvaćen si }
+                        @case ('rejected') { Prijava je odbijena }
+                        @default { Zahtev je poslat }
+                      }
+                    </span>
                   } @else {
                     <button
                       type="button"
                       [disabled]="isApplying(ad.id)"
                       (click)="applyToAd(ad)"
                     >
-                      {{ isApplying(ad.id) ? 'Sending...' : 'Apply' }}
+                      {{ isApplying(ad.id) ? 'Slanje...' : 'Prijavi se' }}
                     </button>
                   }
                 </td>

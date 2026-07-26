@@ -10,6 +10,7 @@ import type {
   DatesSetArg,
   EventInput,
 } from '@fullcalendar/core';
+import srLocale from '@fullcalendar/core/locales/sr';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import { forkJoin } from 'rxjs';
 
@@ -49,6 +50,9 @@ export class ReservationComponent {
 
   reservationForm = this.fb.nonNullable.group({
     resourceId: ['', Validators.required],
+    date: [''],
+    startTime: [''],
+    endTime: [''],
   });
 
   facility: FacilityDetails | null = null;
@@ -92,6 +96,18 @@ export class ReservationComponent {
 
   get resourceId() {
     return this.reservationForm.controls.resourceId;
+  }
+
+  get date() {
+    return this.reservationForm.controls.date;
+  }
+
+  get startTime() {
+    return this.reservationForm.controls.startTime;
+  }
+
+  get endTime() {
+    return this.reservationForm.controls.endTime;
   }
 
   get hasResources() {
@@ -141,7 +157,7 @@ export class ReservationComponent {
 
   confirmReservation() {
     if (!this.selectedSlot || !this.currentResource) {
-      this.backendError = 'Please select a valid reservation time.';
+      this.backendError = 'Izaberite ispravan termin za rezervaciju.';
       return;
     }
 
@@ -158,7 +174,7 @@ export class ReservationComponent {
     this.athleteService.createReservation(body).subscribe({
       next: () => {
         this.isSubmitting = false;
-        this.successMessage = 'Reservation created successfully.';
+        this.successMessage = 'Rezervacija je uspešno kreirana.';
         this.clearSelection();
         this.loadAvailabilityForCurrentRange(true);
 
@@ -173,8 +189,44 @@ export class ReservationComponent {
     });
   }
 
+  selectFromForm() {
+    const date = this.date.value;
+    const startTime = this.startTime.value;
+    const endTime = this.endTime.value;
+
+    if (!date || !startTime || !endTime) {
+      this.backendError = 'Popunite datum, vreme početka i vreme završetka.';
+      return;
+    }
+
+    const start = this.makeDate(date, startTime);
+    const end = this.makeDate(date, endTime);
+    const selectionInfo = {
+      start,
+      end,
+    };
+
+    const valid = this.canSelectSlot(selectionInfo, false);
+
+    if (!valid) {
+      return;
+    }
+
+    this.selectedSlot = {
+      date,
+      startTime,
+      endTime,
+      durationHours: this.getDurationInHours(start, end),
+    };
+    this.successMessage = '';
+    this.backendError = '';
+  }
+
   clearSelection() {
     this.selectedSlot = null;
+    this.date.setValue('');
+    this.startTime.setValue('');
+    this.endTime.setValue('');
     this.clearSelectedSlot();
   }
 
@@ -212,6 +264,12 @@ export class ReservationComponent {
         center: 'title',
         right: 'timeGridDay,timeGridWeek',
       },
+      locale: srLocale,
+      buttonText: {
+        today: 'danas',
+        day: 'dan',
+        week: 'nedelja',
+      },
       allDaySlot: false,
       selectable: true,
       selectMirror: true,
@@ -241,6 +299,11 @@ export class ReservationComponent {
       dayHeaderFormat: {
         weekday: 'short',
         month: 'numeric',
+        day: 'numeric',
+      },
+      titleFormat: {
+        year: 'numeric',
+        month: 'short',
         day: 'numeric',
       },
       slotLabelFormat: {
@@ -276,8 +339,12 @@ export class ReservationComponent {
       endTime: this.formatTime(info.end),
       durationHours: this.getDurationInHours(info.start, info.end),
     };
+    this.date.setValue(this.selectedSlot.date);
+    this.startTime.setValue(this.selectedSlot.startTime);
+    this.endTime.setValue(this.selectedSlot.endTime);
 
     this.successMessage = '';
+    this.backendError = '';
   }
 
   private loadAvailabilityForCurrentRange(force = false) {

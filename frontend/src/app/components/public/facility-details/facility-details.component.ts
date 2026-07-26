@@ -96,6 +96,24 @@ export class FacilityDetailsComponent {
     return buildUploadImageUrl(imagePath);
   }
 
+  get homeRoute() {
+    const role = this.currentUser?.role;
+
+    if (role === 'athlete') {
+      return '/athlete';
+    }
+
+    if (role === 'employee') {
+      return '/employee';
+    }
+
+    if (role === 'admin') {
+      return '/admin';
+    }
+
+    return '/';
+  }
+
   getMapUrl(): SafeResourceUrl | null {
     if (!this.facility?.location?.coordinates || this.facility.location.coordinates.length < 2) {
       return null;

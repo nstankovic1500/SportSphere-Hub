@@ -5,7 +5,7 @@
       <p>Pregled svih informacija za ovaj objekat.</p>
     </div>
     <div class="header-links">
-      <a routerLink="/employee/facilities">Nazad na objekte</a>
+      <a routerLink="/employee/profile">Nazad na profil</a>
       @if (facility) {
         <a [routerLink]="['/employee/facilities', facility.id, 'edit']">Izmeni objekat</a>
         <a [routerLink]="['/employee/facilities', facility.id, 'attendance']">Rezervacije i treninzi</a>

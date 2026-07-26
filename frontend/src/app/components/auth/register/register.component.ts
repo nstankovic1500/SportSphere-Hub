@@ -16,12 +16,18 @@ import type {
   ApiResponse,
   SportsResponseData,
 } from '../../../core/models/api-response.model';
-import type { RegisterRequest } from '../../../core/models/register.model';
 import type { Sport } from '../../../core/models/sport.model';
 import { AuthService } from '../../../core/services/auth.service';
+import {
+  avatarPreviewToPngFile,
+  generateAvatarPreview,
+} from '../../../core/utils/avatar.util';
 
 const passwordPattern =
   /^(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9])[A-Za-z].{7,11}$/;
+const phonePattern = /^[0-9+\-\s()]{6,20}$/;
+const allowedImageTypes = ['image/jpeg', 'image/png', 'image/webp'];
+const maxImageSize = 5 * 1024 * 1024;
 
 const passwordValidator: ValidatorFn = (
   control: AbstractControl,
@@ -90,7 +96,6 @@ export class RegisterComponent {
   readonly registerForm = this.formBuilder.nonNullable.group(
     {
       username: ['', Validators.required],
-
       password: [
         '',
         [
@@ -98,13 +103,10 @@ export class RegisterComponent {
           passwordValidator,
         ],
       ],
-
       confirmPassword: ['', Validators.required],
-
       firstName: ['', Validators.required],
       lastName: ['', Validators.required],
-      phone: ['', Validators.required],
-
+      phone: ['', [Validators.required, Validators.pattern(phonePattern)]],
       email: [
         '',
         [
@@ -112,17 +114,14 @@ export class RegisterComponent {
           Validators.email,
         ],
       ],
-
       role: this.formBuilder.nonNullable.control<
         'athlete' | 'employee'
       >('athlete'),
-
       favoriteSports:
         this.formBuilder.nonNullable.control<string[]>(
           [],
           [maxSelectedSportsValidator(5)],
         ),
-
       employeeData: this.formBuilder.nonNullable.group({
         companyName: [''],
         headOfficeAddress: [''],
@@ -139,9 +138,13 @@ export class RegisterComponent {
 
   isLoadingSports = true;
   isSubmitting = false;
+  isGeneratingAvatar = false;
 
   errorMessage = '';
   successMessage = '';
+  profileImageError = '';
+  profileImagePreview = '';
+  selectedProfileImageFile: File | null = null;
 
   constructor() {
     this.loadSports();
@@ -195,6 +198,10 @@ export class RegisterComponent {
     return this.role.value === 'employee';
   }
 
+  get previewImageUrl(): string {
+    return this.profileImagePreview || 'assets/images/default-avatar.png';
+  }
+
   canSelectMoreSports(sportId: string): boolean {
     return (
       this.isSportSelected(sportId) ||
@@ -238,6 +245,60 @@ export class RegisterComponent {
     this.favoriteSports.updateValueAndValidity();
   }
 
+  onProfileImageChange(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+
+    this.profileImageError = '';
+
+    if (!file) {
+      this.selectedProfileImageFile = null;
+      this.profileImagePreview = '';
+      return;
+    }
+
+    const errorMessage = this.validateImageFile(file);
+
+    if (errorMessage) {
+      this.selectedProfileImageFile = null;
+      this.profileImagePreview = '';
+      this.profileImageError = errorMessage;
+      input.value = '';
+      return;
+    }
+
+    this.selectedProfileImageFile = file;
+    this.profileImagePreview = URL.createObjectURL(file);
+  }
+
+  async generateAvatar(): Promise<void> {
+    if (this.isGeneratingAvatar) {
+      return;
+    }
+
+    this.isGeneratingAvatar = true;
+    this.profileImageError = '';
+
+    try {
+      const seedBase =
+        this.username.value.trim() ||
+        this.email.value.trim() ||
+        `${this.firstName.value.trim()}-${this.lastName.value.trim()}` ||
+        'sportsphere';
+
+      const avatar = await generateAvatarPreview(`${seedBase}-${Date.now()}`);
+      this.selectedProfileImageFile = await avatarPreviewToPngFile(
+        avatar.previewUrl,
+        `avatar-${Date.now()}.png`,
+      );
+      this.profileImagePreview = avatar.previewUrl;
+    } catch {
+      this.profileImageError = 'Nije moguće generisati avatar.';
+    } finally {
+      this.isGeneratingAvatar = false;
+    }
+  }
+
   onSubmit(): void {
     if (
       this.registerForm.invalid ||
@@ -256,9 +317,8 @@ export class RegisterComponent {
     this.authService.register(payload).subscribe({
       next: () => {
         this.isSubmitting = false;
-
         this.successMessage =
-          'Registration request submitted. Wait for administrator approval.';
+          'Zahtev za registraciju je poslat. Sačekajte odobrenje administratora.';
 
         this.resetForm();
 
@@ -269,10 +329,9 @@ export class RegisterComponent {
 
       error: (error) => {
         this.isSubmitting = false;
-
         this.errorMessage =
           error.error?.message ??
-          'Registration failed.';
+          'Registracija nije uspela.';
       },
     });
   }
@@ -345,38 +404,53 @@ export class RegisterComponent {
     pib.updateValueAndValidity();
   }
 
-  private buildPayload(): RegisterRequest {
+  private validateImageFile(file: File): string {
+    if (!allowedImageTypes.includes(file.type)) {
+      return 'Dozvoljeni su samo JPG, PNG i WEBP formati.';
+    }
+
+    if (file.size > maxImageSize) {
+      return 'Veličina slike ne sme biti veća od 5 MB.';
+    }
+
+    return '';
+  }
+
+  private buildPayload(): FormData {
     const formValue =
       this.registerForm.getRawValue();
 
-    const payload: RegisterRequest = {
-      username: formValue.username.trim(),
-      password: formValue.password,
-      firstName: formValue.firstName.trim(),
-      lastName: formValue.lastName.trim(),
-      phone: formValue.phone.trim(),
-      email: formValue.email.trim().toLowerCase(),
-      role: formValue.role,
-      favoriteSports: formValue.favoriteSports,
-    };
+    const formData = new FormData();
+    formData.append('username', formValue.username.trim());
+    formData.append('password', formValue.password);
+    formData.append('firstName', formValue.firstName.trim());
+    formData.append('lastName', formValue.lastName.trim());
+    formData.append('phone', formValue.phone.trim());
+    formData.append('email', formValue.email.trim().toLowerCase());
+    formData.append('role', formValue.role);
+    formData.append('favoriteSports', JSON.stringify(formValue.favoriteSports));
 
     if (formValue.role === 'employee') {
-      payload.employeeData = {
-        companyName:
-          formValue.employeeData.companyName.trim(),
-
-        headOfficeAddress:
-          formValue.employeeData.headOfficeAddress.trim(),
-
-        registrationNumber:
-          formValue.employeeData.registrationNumber.trim(),
-
-        pib:
-          formValue.employeeData.pib.trim(),
-      };
+      formData.append(
+        'employeeData',
+        JSON.stringify({
+          companyName:
+            formValue.employeeData.companyName.trim(),
+          headOfficeAddress:
+            formValue.employeeData.headOfficeAddress.trim(),
+          registrationNumber:
+            formValue.employeeData.registrationNumber.trim(),
+          pib:
+            formValue.employeeData.pib.trim(),
+        }),
+      );
     }
 
-    return payload;
+    if (this.selectedProfileImageFile) {
+      formData.append('profileImage', this.selectedProfileImageFile);
+    }
+
+    return formData;
   }
 
   private resetForm(): void {
@@ -399,5 +473,8 @@ export class RegisterComponent {
     });
 
     this.updateEmployeeValidators('athlete');
+    this.profileImageError = '';
+    this.profileImagePreview = '';
+    this.selectedProfileImageFile = null;
   }
 }

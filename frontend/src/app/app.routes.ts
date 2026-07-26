@@ -2,11 +2,16 @@ import { Routes } from '@angular/router';
 
 import { authGuard } from './core/guards/auth.guard';
 import { AdminLoginComponent } from './components/auth/admin-login/admin-login.component';
+import { ForgotPasswordComponent } from './components/auth/forgot-password/forgot-password.component';
 import { LoginComponent } from './components/auth/login/login.component';
 import { RegisterComponent } from './components/auth/register/register.component';
+import { ResetPasswordComponent } from './components/auth/reset-password/reset-password.component';
 import { AdminComponent } from './components/admin/admin.component';
 import { RegistrationRequestsComponent } from './components/admin/registration-requests/registration-requests.component';
 import { FacilityRequestsComponent } from './components/admin/facility-requests/facility-requests.component';
+import { AdminUsersComponent } from './components/admin/users/admin-users.component';
+import { AdminTrainersComponent } from './components/admin/trainers/admin-trainers.component';
+import { AdminSportsComponent } from './components/admin/sports/admin-sports.component';
 import { AthleteProfileComponent } from './components/athlete/profile/athlete-profile.component';
 import { ReservationComponent } from './components/athlete/reservation/reservation.component';
 import { AdListComponent } from './components/athlete/ads/ad-list.component';
@@ -24,7 +29,6 @@ import { HomeComponent } from './components/public/home/home.component';
 import { AthleteComponent } from './components/athlete/athlete.component';
 import { EmployeeComponent } from './components/employee/employee.component';
 import { EmployeeProfileComponent } from './components/employee/profile/employee-profile.component';
-import { EmployeeFacilitiesComponent } from './components/employee/facilities/employee-facilities.component';
 import { CreateFacilityComponent } from './components/employee/facilities/create-facility.component';
 import { EmployeeFacilityDetailsComponent } from './components/employee/facilities/employee-facility-details.component';
 import { EditFacilityComponent } from './components/employee/facilities/edit-facility.component';
@@ -56,6 +60,14 @@ export const routes: Routes = [
   {
     path: 'login',
     component: LoginComponent,
+  },
+  {
+    path: 'forgot-password',
+    component: ForgotPasswordComponent,
+  },
+  {
+    path: 'reset-password/:token',
+    component: ResetPasswordComponent,
   },
   {
     path: 'register',
@@ -179,11 +191,8 @@ export const routes: Routes = [
   },
   {
     path: 'employee/facilities',
-    component: EmployeeFacilitiesComponent,
-    canActivate: [authGuard],
-    data: {
-      roles: ['employee'],
-    },
+    redirectTo: 'employee/profile',
+    pathMatch: 'full',
   },
   {
     path: 'employee/facilities/new',
@@ -348,6 +357,30 @@ export const routes: Routes = [
   {
     path: 'admin/facility-requests',
     component: FacilityRequestsComponent,
+    canActivate: [authGuard],
+    data: {
+      roles: ['admin'],
+    },
+  },
+  {
+    path: 'admin/users',
+    component: AdminUsersComponent,
+    canActivate: [authGuard],
+    data: {
+      roles: ['admin'],
+    },
+  },
+  {
+    path: 'admin/trainers',
+    component: AdminTrainersComponent,
+    canActivate: [authGuard],
+    data: {
+      roles: ['admin'],
+    },
+  },
+  {
+    path: 'admin/sports',
+    component: AdminSportsComponent,
     canActivate: [authGuard],
     data: {
       roles: ['admin'],

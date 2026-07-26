@@ -70,7 +70,7 @@ export class PromotionFormComponent {
     if (this.promotionForm.invalid || this.isSubmitting || !this.hasValidDateRange()) {
       this.promotionForm.markAllAsTouched();
       if (!this.hasValidDateRange()) {
-        this.errorMessage = 'End date must be after start date.';
+        this.errorMessage = 'Datum završetka mora biti posle datuma početka.';
       }
       return;
     }
@@ -87,8 +87,8 @@ export class PromotionFormComponent {
       next: () => {
         this.isSubmitting = false;
         this.successMessage = this.isEditMode
-          ? 'Promotion updated successfully.'
-          : 'Promotion created successfully.';
+          ? 'Promocija je uspešno ažurirana.'
+          : 'Promocija je uspešno kreirana.';
         window.setTimeout(() => {
           void this.router.navigate(['/employee/facilities', this.facilityId, 'promotions']);
         }, 1200);

@@ -140,6 +140,62 @@ type PopulatedOrder = IOrder & {
   };
 };
 
+const hydrateLegacyOrderItems = async (
+  order: {
+    items: Array<{
+      productId: Types.ObjectId;
+      name?: string;
+      priceAtPurchase?: number;
+      quantity: number;
+    }>;
+    markModified?: (path: string) => void;
+  },
+) => {
+  const missingProductIds = [
+    ...new Set(
+      (order.items ?? [])
+        .filter(
+          (item) =>
+            !item.name ||
+            !item.name.trim() ||
+            typeof item.priceAtPurchase !== 'number' ||
+            Number.isNaN(item.priceAtPurchase),
+        )
+        .map((item) => item.productId?.toString?.() ?? '')
+        .filter(Boolean),
+    ),
+  ];
+
+  if (missingProductIds.length === 0) {
+    return;
+  }
+
+  const products = await Product.find({
+    _id: { $in: missingProductIds.map((productId) => new Types.ObjectId(productId)) },
+  })
+    .select('name price')
+    .lean();
+  const productMap = new Map(products.map((product) => [product._id!.toString(), product]));
+
+  for (const item of order.items ?? []) {
+    const product = productMap.get(item.productId?.toString?.() ?? '');
+
+    if (!product) {
+      continue;
+    }
+
+    if (!item.name || !item.name.trim()) {
+      item.name = product.name;
+    }
+
+    if (typeof item.priceAtPurchase !== 'number' || Number.isNaN(item.priceAtPurchase)) {
+      item.priceAtPurchase = product.price;
+    }
+  }
+
+  order.markModified?.('items');
+};
+
 const populateReservationRefs = (query: any) => {
   return query
     .populate({
@@ -941,7 +997,7 @@ const createTrainingAppointment = async (
   }
 
   if (startTime.getTime() <= new Date().getTime()) {
-    throw new AppError('Training appointment must be in the future', 400);
+    throw new AppError('Rezervacija ne može biti u prošlosti', 400);
   }
 
   if (!isOnFullHour(startTime) || !isOnFullHour(endTime)) {
@@ -953,7 +1009,7 @@ const createTrainingAppointment = async (
   }
 
   if (!(getDateKey(startTime) === getDateKey(endTime))) {
-    throw new AppError('Training appointment must start and end on the same date', 400);
+    throw new AppError('Trening mora započeti i završiti se istog dana', 400);
   }
 
   if (endTime.getTime() - startTime.getTime() < 60 * 60 * 1000) {
@@ -963,7 +1019,7 @@ const createTrainingAppointment = async (
   const availableSports = trainer.sports ?? [];
 
   if (availableSports.length === 0) {
-    throw new AppError('Trainer has no active sports', 400);
+    throw new AppError('Trener nema aktivne sportove', 400);
   }
 
   let selectedSport = availableSports[0];
@@ -1017,7 +1073,7 @@ const createTrainingAppointment = async (
   }).select('_id');
 
   if (overlappingReservation) {
-    throw new AppError('Training appointment overlaps with an existing reservation on this resource', 400);
+    throw new AppError('Preklapanje termina', 400);
   }
 
   const overlappingAppointmentOnResource = await Appointment.findOne({
@@ -1028,7 +1084,7 @@ const createTrainingAppointment = async (
   }).select('_id');
 
   if (overlappingAppointmentOnResource) {
-    throw new AppError('Training appointment overlaps with an existing appointment on this resource', 400);
+    throw new AppError('Preklapanje termina', 400);
   }
 
   const overlappingAppointment = await Appointment.findOne({
@@ -1039,7 +1095,7 @@ const createTrainingAppointment = async (
   }).select('_id');
 
   if (overlappingAppointment) {
-    throw new AppError('Training appointment overlaps with an existing appointment', 400);
+    throw new AppError('Preklapanje termina', 400);
   }
 
   const createdAppointment = await Appointment.create({
@@ -1198,15 +1254,46 @@ const checkoutOrders = async (athleteId: string) => {
   const createdOrderIds: Types.ObjectId[] = [];
 
   for (const group of groupedByFacility.values()) {
+    const orderItems = group.items.map((item) => {
+      const product = productMap.get(item.productId);
+
+      if (!product) {
+        throw new AppError(`Product ${item.name || item.productId} is no longer available`, 400);
+      }
+
+      const snapshotName =
+        typeof product.name === 'string' && product.name.trim()
+          ? product.name.trim()
+          : typeof item.name === 'string' && item.name.trim()
+            ? item.name.trim()
+            : '';
+      const snapshotPrice =
+        typeof product.price === 'number' && Number.isFinite(product.price)
+          ? product.price
+          : typeof item.price === 'number' && Number.isFinite(item.price)
+            ? item.price
+            : NaN;
+
+      if (!snapshotName) {
+        throw new AppError('Naziv proizvoda nedostaje za kreiranje porudžbine', 400);
+      }
+
+      if (Number.isNaN(snapshotPrice)) {
+        throw new AppError('Cena proizvoda nedostaje za kreiranje porudžbine', 400);
+      }
+
+      return {
+        productId: new Types.ObjectId(item.productId),
+        name: snapshotName,
+        quantity: item.quantity,
+        priceAtPurchase: snapshotPrice,
+      };
+    });
+
     const order = await Order.create({
       athleteId: athlete._id,
       facilityId: group.facilityId,
-      items: group.items.map((item) => ({
-        productId: new Types.ObjectId(item.productId),
-        name: item.name,
-        quantity: item.quantity,
-        priceAtPurchase: item.price,
-      })),
+      items: orderItems,
       totalPrice: group.items.reduce((sum, item) => sum + item.lineTotal, 0),
       status: OrderStatus.Pending,
       createdAt: new Date(),
@@ -1300,6 +1387,7 @@ const updateOrderStatus = async (
     throw new AppError('Only active orders can be cancelled', 400);
   }
 
+  await hydrateLegacyOrderItems(order);
   order.status = OrderStatus.Cancelled;
   await order.save();
 

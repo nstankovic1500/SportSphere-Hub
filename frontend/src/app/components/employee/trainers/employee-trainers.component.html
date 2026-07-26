@@ -1,10 +1,11 @@
 <section class="page">
   <header class="page-header">
     <div>
-      <h1>Trainers</h1>
-      <p>Manage trainers for this facility.</p>
+      <h1>Treneri</h1>
+      <p>Upravljajte trenerima za ovaj objekat.</p>
     </div>
     <div class="header-links">
+      <a routerLink="/employee">Početna strana</a>
       <a [routerLink]="['/employee/facilities', facilityId]">Nazad na objekat</a>
       <a [routerLink]="['/employee/facilities', facilityId, 'trainers', 'new']">Novi trener</a>
     </div>
@@ -15,12 +16,12 @@
   }
 
   @if (isLoading) {
-    <p class="state-message">Loading trainers...</p>
+    <p class="state-message">Učitavanje trenera...</p>
   } @else if (errorMessage && trainers.length === 0) {
     <p class="state-message error">{{ errorMessage }}</p>
   } @else if (trainers.length === 0) {
     <section class="panel">
-      <p class="state-message">No trainers found.</p>
+      <p class="state-message">Nema pronađenih trenera.</p>
     </section>
   } @else {
     @if (errorMessage) {
@@ -36,7 +37,7 @@
               <th>Telefon</th>
               <th>Imejl</th>
               <th>Cena po satu</th>
-              <th>Aktivno</th>
+              <th>Aktivan/na</th>
               <th>Akcije</th>
             </tr>
           </thead>
@@ -48,16 +49,16 @@
                 <td>{{ trainer.phone }}</td>
                 <td>{{ trainer.email }}</td>
                 <td>{{ trainer.pricePerHour }}</td>
-                <td>{{ trainer.active ? 'Yes' : 'No' }}</td>
+                <td>{{ trainer.active ? 'Da' : 'Ne' }}</td>
                 <td class="actions-cell">
-                  <a [routerLink]="['/employee/facilities', facilityId, 'trainers', trainer.id, 'edit']">Edit</a>
+                  <a [routerLink]="['/employee/facilities', facilityId, 'trainers', trainer.id, 'edit']">Izmeni</a>
                   <button
                     type="button"
                     class="secondary-button"
                     [disabled]="isDeleting(trainer.id)"
                     (click)="deleteTrainer(trainer)"
                   >
-                    {{ isDeleting(trainer.id) ? 'Deleting...' : 'Delete' }}
+                    {{ isDeleting(trainer.id) ? 'Brisanje...' : 'Obriši' }}
                   </button>
                 </td>
               </tr>

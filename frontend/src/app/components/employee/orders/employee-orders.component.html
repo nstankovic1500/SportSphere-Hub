@@ -5,6 +5,7 @@
       <p>@if (facility) { Porudžbine za {{ facility.name }}. } @else { Porudžbine za izabrani objekat. }</p>
     </div>
     <div class="header-links">
+      <a routerLink="/employee">Početna strana</a>
       <a [routerLink]="['/employee/facilities', facilityId]">Nazad na objekat</a>
     </div>
   </header>

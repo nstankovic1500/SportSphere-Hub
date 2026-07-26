@@ -1,0 +1,167 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>Upravljanje korisnicima</h1>
+      <p>Pregled, izmena i brisanje naloga u sistemu.</p>
+    </div>
+    <div class="header-links">
+      <a routerLink="/admin">Nazad na početnu stranu</a>
+    </div>
+  </header>
+
+  @if (successMessage) {
+    <p class="message success">{{ successMessage }}</p>
+  }
+
+  @if (errorMessage) {
+    <p class="message error">{{ errorMessage }}</p>
+  }
+
+  @if (isLoading) {
+    <p class="state-message">Učitavanje korisnika...</p>
+  } @else if (users.length === 0) {
+    <p class="state-message">Nema korisnika za prikaz.</p>
+  } @else {
+    <div class="cards">
+      @for (user of users; track user.id) {
+        <article class="card">
+          @if (editingUserId === user.id) {
+            <form [formGroup]="editForm" class="edit-form">
+              <div class="field">
+                <input type="text" formControlName="firstName" placeholder="Ime" />
+                @if (editForm.controls.firstName.touched && editForm.controls.firstName.hasError('required')) {
+                  <small class="field-error">Ime je obavezno.</small>
+                }
+              </div>
+
+              <div class="field">
+                <input type="text" formControlName="lastName" placeholder="Prezime" />
+                @if (editForm.controls.lastName.touched && editForm.controls.lastName.hasError('required')) {
+                  <small class="field-error">Prezime je obavezno.</small>
+                }
+              </div>
+
+              <div class="field">
+                <input type="text" formControlName="phone" placeholder="Telefon" />
+                @if (editForm.controls.phone.touched && editForm.controls.phone.hasError('required')) {
+                  <small class="field-error">Telefon je obavezan.</small>
+                }
+                @if (editForm.controls.phone.touched && editForm.controls.phone.hasError('pattern')) {
+                  <small class="field-error">Unesite ispravan broj telefona.</small>
+                }
+              </div>
+
+              <div class="field">
+                <input type="email" formControlName="email" placeholder="Imejl" />
+                @if (editForm.controls.email.touched && editForm.controls.email.hasError('required')) {
+                  <small class="field-error">Imejl je obavezan.</small>
+                }
+                @if (editForm.controls.email.touched && editForm.controls.email.hasError('email')) {
+                  <small class="field-error">Unesite ispravnu imejl adresu.</small>
+                }
+              </div>
+
+              <div class="field">
+                <select formControlName="role">
+                  <option value="athlete">sportista</option>
+                  <option value="employee">zaposleni</option>
+                  <option value="admin">administrator</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <select formControlName="status">
+                  <option value="pending">na čekanju</option>
+                  <option value="approved">odobren</option>
+                  <option value="rejected">odbijen</option>
+                  <option value="blocked">blokiran</option>
+                </select>
+              </div>
+
+              <div class="sports-grid">
+                @for (sport of sports; track sport.id) {
+                  <label class="sport-option">
+                    <input
+                      type="checkbox"
+                      [checked]="isSportSelected(sport.id)"
+                      [disabled]="!canSelectMoreSports(sport.id)"
+                      (change)="onSportChange(sport.id, $any($event.target).checked)"
+                    />
+                    <span>{{ sport.name }}</span>
+                  </label>
+                }
+              </div>
+              @if (editForm.controls.favoriteSports.touched && editForm.controls.favoriteSports.hasError('maxSelectedSports')) {
+                <small class="field-error">Možete izabrati najviše 5 omiljenih sportova.</small>
+              }
+
+              @if (editForm.controls.role.value === 'employee') {
+                <div class="field">
+                  <input type="text" formControlName="companyName" placeholder="Naziv firme" />
+                  @if (editForm.controls.companyName.touched && editForm.controls.companyName.hasError('required')) {
+                    <small class="field-error">Naziv firme je obavezan.</small>
+                  }
+                </div>
+
+                <div class="field">
+                  <input type="text" formControlName="headOfficeAddress" placeholder="Adresa sedišta" />
+                  @if (editForm.controls.headOfficeAddress.touched && editForm.controls.headOfficeAddress.hasError('required')) {
+                    <small class="field-error">Adresa sedišta je obavezna.</small>
+                  }
+                </div>
+
+                <div class="field">
+                  <input type="text" formControlName="registrationNumber" placeholder="Matični broj" />
+                  @if (editForm.controls.registrationNumber.touched && editForm.controls.registrationNumber.hasError('required')) {
+                    <small class="field-error">Matični broj je obavezan.</small>
+                  }
+                  @if (editForm.controls.registrationNumber.touched && editForm.controls.registrationNumber.hasError('pattern')) {
+                    <small class="field-error">Matični broj mora sadržati tačno 8 cifara.</small>
+                  }
+                </div>
+
+                <div class="field">
+                  <input type="text" formControlName="pib" placeholder="PIB" />
+                  @if (editForm.controls.pib.touched && editForm.controls.pib.hasError('required')) {
+                    <small class="field-error">PIB je obavezan.</small>
+                  }
+                  @if (editForm.controls.pib.touched && editForm.controls.pib.hasError('pattern')) {
+                    <small class="field-error">PIB mora sadržati tačno 9 cifara i ne sme početi nulom.</small>
+                  }
+                </div>
+              }
+
+              <div class="actions">
+                <button type="button" (click)="saveUser(user)" [disabled]="isSaving">
+                  {{ isSaving ? 'Čuvanje...' : 'Sačuvaj' }}
+                </button>
+                <button type="button" class="secondary-button" (click)="cancelEdit()">Otkaži</button>
+              </div>
+            </form>
+          } @else {
+            <h2>{{ user.firstName }} {{ user.lastName }}</h2>
+            <p><strong>Korisničko ime:</strong> {{ user.username }}</p>
+            <p><strong>Imejl:</strong> {{ user.email }}</p>
+            <p><strong>Telefon:</strong> {{ user.phone }}</p>
+            <p><strong>Uloga:</strong> {{ getRoleLabel(user.role) }}</p>
+            <p><strong>Status:</strong> {{ getStatusLabel(user.status) }}</p>
+            <p><strong>Omiljeni sportovi:</strong> {{ user.favoriteSports.length ? user.favoriteSports.join(', ') : '-' }}</p>
+            @if (user.employeeData) {
+              <p><strong>Firma:</strong> {{ user.employeeData.companyName }}</p>
+              <p><strong>Matični broj:</strong> {{ user.employeeData.registrationNumber }}</p>
+              <p><strong>PIB:</strong> {{ user.employeeData.pib }}</p>
+            }
+            <p><strong>Kreiran:</strong> {{ user.createdAt | date: 'medium' }}</p>
+
+            <div class="actions">
+              <button type="button" (click)="startEdit(user)">Izmeni</button>
+              <button type="button" class="danger-button" (click)="deleteUser(user)" [disabled]="isDeleting">
+                {{ isDeleting ? 'Brisanje...' : 'Obriši' }}
+              </button>
+            </div>
+          }
+        </article>
+      }
+    </div>
+  }
+</section>

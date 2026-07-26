@@ -7,7 +7,7 @@ const notFoundMiddleware = (
   _res: Response,
   next: NextFunction,
 ): void => {
-  next(new AppError(`Route not found: ${req.method} ${req.originalUrl}`, 404));
+  next(new AppError(`Ruta nije pronađena: ${req.method} ${req.originalUrl}`, 404));
 };
 
 export { notFoundMiddleware };

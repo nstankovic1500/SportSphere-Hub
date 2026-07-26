@@ -29,7 +29,7 @@ const errorMiddleware = (
   if (error instanceof mongoose.Error.CastError) {
     res.status(400).json({
       success: false,
-      message: 'Invalid resource identifier',
+      message: 'Neispravan identifikator resursa',
     });
     return;
   }
@@ -44,7 +44,7 @@ const errorMiddleware = (
 
   res.status(500).json({
     success: false,
-    message: 'Internal server error',
+    message: 'Interna serverska greška',
   });
 };
 

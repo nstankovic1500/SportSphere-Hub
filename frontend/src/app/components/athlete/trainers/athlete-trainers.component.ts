@@ -56,6 +56,14 @@ export class AthleteTrainersComponent {
     return trainer.sports.map((sport) => sport.name).join(', ');
   }
 
+  formatPrice(trainer: TrainerListItem) {
+    return `${trainer.hourlyPrice} RSD / sat`;
+  }
+
+  formatRating(trainer: TrainerListItem) {
+    return `${trainer.ratingAverage.toFixed(1)} (${trainer.ratingCount} ocena)`;
+  }
+
   trackByTrainerId(_: number, trainer: TrainerListItem) {
     return trainer.id;
   }

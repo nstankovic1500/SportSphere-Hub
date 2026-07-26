@@ -143,9 +143,10 @@ export class CreateFacilityComponent {
         const parsed = JSON.parse(content) as Record<string, unknown>;
         this.applyJsonData(parsed);
         this.importedJsonFileName = file.name;
-      } catch {
+      } catch (error) {
         this.importedJsonFileName = '';
-        this.jsonErrorMessage = 'JSON fajl nije ispravan.';
+        this.jsonErrorMessage =
+          error instanceof Error ? error.message : 'JSON fajl nije ispravan.';
         input.value = '';
       }
     });
@@ -252,7 +253,7 @@ export class CreateFacilityComponent {
     this.successMessage = 'Zahtev za objekat je uspešno poslat.';
 
     window.setTimeout(() => {
-      void this.router.navigate(['/employee/facilities']);
+      void this.router.navigate(['/employee/profile']);
     }, 1200);
   }
 
@@ -281,7 +282,7 @@ export class CreateFacilityComponent {
     const openingHours = this.mapImportedOpeningHours(data['openingHours']);
     const coordinates = this.mapImportedCoordinates(data['location']);
 
-    this.facilityForm.patchValue({
+    const importedValues = {
       name: this.toText(data['name']),
       city: this.toText(data['city']),
       country: this.toText(data['country']),
@@ -292,14 +293,36 @@ export class CreateFacilityComponent {
       hourlyPrice: this.toNumber(data['hourlyPrice']),
       allowedNoShows: this.toInteger(data['allowedNoShows']),
       sports,
+      openingHours,
+    };
+
+    const missingFields = this.getMissingJsonFields(importedValues);
+
+    if (missingFields.length > 0) {
+      throw new Error(
+        `JSON fajl nema sva obavezna polja ili nisu ispravna: ${missingFields.join(', ')}.`,
+      );
+    }
+
+    this.facilityForm.patchValue({
+      name: importedValues.name,
+      city: importedValues.city,
+      country: importedValues.country,
+      address: importedValues.address,
+      description: importedValues.description,
+      longitude: importedValues.longitude,
+      latitude: importedValues.latitude,
+      hourlyPrice: importedValues.hourlyPrice,
+      allowedNoShows: importedValues.allowedNoShows,
+      sports: importedValues.sports,
     });
 
     this.facilityForm.setControl(
       'openingHours',
       this.formBuilder.array<FormGroup>(
-        openingHours.length > 0
-          ? openingHours.map((row) => this.createOpeningHourGroup(row.day, row.open, row.close))
-          : [this.createOpeningHourGroup()],
+        importedValues.openingHours.map((row) =>
+          this.createOpeningHourGroup(row.day, row.open, row.close),
+        ),
       ),
     );
 
@@ -307,6 +330,68 @@ export class CreateFacilityComponent {
     this.facilityForm.markAsUntouched();
     this.jsonErrorMessage = '';
     this.successMessage = 'JSON podaci su uspešno učitani u formu.';
+  }
+
+  private getMissingJsonFields(data: {
+    name: string;
+    city: string;
+    country: string;
+    address: string;
+    description: string;
+    longitude: number;
+    latitude: number;
+    hourlyPrice: number;
+    allowedNoShows: number;
+    sports: string[];
+    openingHours: Array<{ day: number; open: string; close: string }>;
+  }) {
+    const missingFields: string[] = [];
+
+    if (!data.name) {
+      missingFields.push('name');
+    }
+
+    if (!data.city) {
+      missingFields.push('city');
+    }
+
+    if (!data.country) {
+      missingFields.push('country');
+    }
+
+    if (!data.address) {
+      missingFields.push('address');
+    }
+
+    if (!data.description) {
+      missingFields.push('description');
+    }
+
+    if (!Number.isFinite(data.longitude) || data.longitude < -180 || data.longitude > 180) {
+      missingFields.push('longitude/location.coordinates[0]');
+    }
+
+    if (!Number.isFinite(data.latitude) || data.latitude < -90 || data.latitude > 90) {
+      missingFields.push('latitude/location.coordinates[1]');
+    }
+
+    if (!Number.isFinite(data.hourlyPrice) || data.hourlyPrice < 0) {
+      missingFields.push('hourlyPrice');
+    }
+
+    if (!Number.isInteger(data.allowedNoShows) || data.allowedNoShows < 0) {
+      missingFields.push('allowedNoShows');
+    }
+
+    if (data.sports.length === 0) {
+      missingFields.push('sports');
+    }
+
+    if (data.openingHours.length === 0) {
+      missingFields.push('openingHours');
+    }
+
+    return missingFields;
   }
 
   private mapImportedSports(value: unknown) {

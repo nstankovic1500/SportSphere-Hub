@@ -58,7 +58,7 @@ export class LoginComponent {
       },
       error: (error) => {
         this.isLoading = false;
-        this.errorMessage = error.error?.message ?? 'Login failed.';
+        this.errorMessage = error.error?.message ?? 'Prijava nije uspela.';
       },
     });
   }

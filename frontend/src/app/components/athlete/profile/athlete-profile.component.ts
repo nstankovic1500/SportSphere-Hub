@@ -9,7 +9,13 @@ import type { Sport } from '../../../core/models/sport.model';
 import { AuthService } from '../../../core/services/auth.service';
 import { AthleteService } from '../../../core/services/athlete.service';
 import { PublicService } from '../../../core/services/public.service';
+import {
+  avatarPreviewToPngFile,
+  generateAvatarPreview,
+} from '../../../core/utils/avatar.util';
 import { buildUploadImageUrl } from '../../../core/utils/image.util';
+
+const phonePattern = /^[0-9+\-\s()]{6,20}$/;
 
 @Component({
   selector: 'app-athlete-profile',
@@ -28,7 +34,7 @@ export class AthleteProfileComponent {
     username: [{ value: '', disabled: true }, Validators.required],
     firstName: ['', Validators.required],
     lastName: ['', Validators.required],
-    phone: ['', Validators.required],
+    phone: ['', [Validators.required, Validators.pattern(phonePattern)]],
     email: ['', [Validators.required, Validators.email]],
     favoriteSports: this.formBuilder.nonNullable.control<string[]>([]),
   });
@@ -47,6 +53,7 @@ export class AthleteProfileComponent {
   imageErrorMessage = '';
   profileImagePreview = '';
   selectedProfileImageFile: File | null = null;
+  isGeneratingAvatar = false;
 
   constructor() {
     this.loadPageData();
@@ -170,6 +177,30 @@ export class AthleteProfileComponent {
     this.profileImagePreview = URL.createObjectURL(file);
   }
 
+  async generateAvatar() {
+    this.isGeneratingAvatar = true;
+    this.imageErrorMessage = '';
+    this.successMessage = '';
+
+    try {
+      const seedBase = this.profile?.username
+        || this.username.getRawValue()
+        || `${this.firstName.value}-${this.lastName.value}`
+        || `sportista-${Date.now()}`;
+      const avatar = await generateAvatarPreview(`${seedBase}-${Date.now()}`);
+      this.selectedProfileImageFile = await avatarPreviewToPngFile(
+        avatar.previewUrl,
+        `avatar-${Date.now()}.png`,
+      );
+      this.profileImagePreview = avatar.previewUrl;
+    } catch (error) {
+      this.imageErrorMessage =
+        error instanceof Error ? error.message : 'Nije moguće generisati avatar.';
+    } finally {
+      this.isGeneratingAvatar = false;
+    }
+  }
+
   uploadProfileImage() {
     if (!this.selectedProfileImageFile || this.isUploadingImage) {
       return;
@@ -267,11 +298,11 @@ export class AthleteProfileComponent {
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
 
     if (!allowedTypes.includes(file.type)) {
-      return 'Only JPG, PNG and WEBP images are allowed.';
+      return 'Dozvoljene su samo JPG, PNG i WEBP slike.';
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      return 'Image size must not exceed 5 MB.';
+      return 'Veličina slike ne sme biti veća od 5 MB.';
     }
 
     return '';

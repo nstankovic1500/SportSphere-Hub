@@ -1,32 +1,35 @@
-<section class="page">
-  <h1>Athlete Dashboard</h1>
-  <p>Welcome, {{ user?.firstName }}</p>
-  <p>Role: {{ user?.role }}</p>
-  <div class="dashboard-links">
-    <a class="dashboard-link" routerLink="/athlete/profile">
-      View profile
-    </a>
-    <a class="dashboard-link" routerLink="/athlete/ads">
-      Ads
-    </a>
-    <a class="dashboard-link" routerLink="/athlete/trainers">
-      Trainers
-    </a>
-    <a class="dashboard-link" routerLink="/athlete/trainings">
-      My trainings
-    </a>
-    <a class="dashboard-link" routerLink="/athlete/shop">
-      Shop
-    </a>
-    <a class="dashboard-link" routerLink="/athlete/cart">
-      Cart
-    </a>
-    <a class="dashboard-link" routerLink="/athlete/orders">
-      My orders
-    </a>
-    <a class="dashboard-link" routerLink="/facilities">
-      Browse facilities
-    </a>
-  </div>
-  <button type="button" (click)="logout()">Odjava</button>
+<section class="page dashboard-page">
+  <header class="dashboard-hero">
+    <div class="dashboard-hero__content">
+      <span class="dashboard-eyebrow">SportSphere</span>
+      <h1>Početna strana sportiste</h1>
+      <p>Upravljajte rezervacijama, treninzima, oglasima i kupovinom opreme sa jednog mesta.</p>
+    </div>
+    <button type="button" class="secondary-button" (click)="logout()">Odjava</button>
+  </header>
+
+  <nav class="dashboard-nav" aria-label="Glavna navigacija sportiste">
+    <a class="dashboard-link active" routerLink="/athlete">Početna strana</a>
+    <a class="dashboard-link" routerLink="/athlete/profile">Profil</a>
+    <a class="dashboard-link" routerLink="/athlete/ads">Oglasi</a>
+    <a class="dashboard-link" routerLink="/athlete/trainers">Treneri</a>
+    <a class="dashboard-link" routerLink="/athlete/trainings">Moji treninzi</a>
+    <a class="dashboard-link" routerLink="/athlete/shop">Prodavnica</a>
+    <a class="dashboard-link" routerLink="/athlete/cart">Korpa</a>
+    <a class="dashboard-link" routerLink="/athlete/orders">Moje porudžbine</a>
+    <a class="dashboard-link" routerLink="/facilities">Objekti</a>
+  </nav>
+
+  <section class="stats-grid">
+    <article class="stat-card">
+      <span class="stat-label">Korisnik</span>
+      <strong>{{ user?.firstName }} {{ user?.lastName }}</strong>
+      <p>Vaš SportsSphere nalog za sportistu.</p>
+    </article>
+    <article class="stat-card">
+      <span class="stat-label">Uloga</span>
+      <strong>Sportista</strong>
+      <p>Pristup rezervacijama, treninzima i kupovini.</p>
+    </article>
+  </section>
 </section>

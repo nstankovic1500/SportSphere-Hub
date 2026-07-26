@@ -2,9 +2,10 @@
   <header class="page-header">
     <div>
       <h1>Promocije</h1>
-      <p>Manage promotions for the selected facility.</p>
+      <p>Upravljajte promocijama za izabrani objekat.</p>
     </div>
     <div class="header-links">
+      <a routerLink="/employee">Početna strana</a>
       <a [routerLink]="['/employee/facilities', facilityId]">Nazad na objekat</a>
       <a [routerLink]="['/employee/facilities', facilityId, 'promotions', 'new']">Kreiraj promociju</a>
     </div>
@@ -15,12 +16,12 @@
   }
 
   @if (isLoading) {
-    <p class="state-message">Loading promotions...</p>
+    <p class="state-message">Učitavanje promocija...</p>
   } @else if (errorMessage && promotions.length === 0) {
     <p class="state-message error">{{ errorMessage }}</p>
   } @else if (promotions.length === 0) {
     <section class="panel">
-      <p class="state-message">No promotions found.</p>
+      <p class="state-message">Nema pronađenih promocija.</p>
     </section>
   } @else {
     @if (errorMessage) {
@@ -35,9 +36,9 @@
               <th>Naziv</th>
               <th>Sport</th>
               <th>Period</th>
-              <th>Discount</th>
+              <th>Popust</th>
               <th>Aktivno</th>
-              <th>State</th>
+              <th>Stanje</th>
               <th>Akcije</th>
             </tr>
           </thead>
@@ -48,16 +49,16 @@
                 <td>{{ promotion.sport.name }}</td>
                 <td>{{ promotion.startDate | date: 'mediumDate' }} - {{ promotion.endDate | date: 'mediumDate' }}</td>
                 <td>{{ getDiscountLabel(promotion) }}</td>
-                <td>{{ promotion.active ? 'Yes' : 'No' }}</td>
-                <td>{{ promotion.state }}</td>
+                <td>{{ promotion.active ? 'Da' : 'Ne' }}</td>
+                <td>{{ getStateLabel(promotion.state) }}</td>
                 <td class="actions-cell">
-                  <a [routerLink]="['/employee/facilities', facilityId, 'promotions', promotion.id, 'edit']">Edit</a>
+                  <a [routerLink]="['/employee/facilities', facilityId, 'promotions', promotion.id, 'edit']">Izmeni</a>
                   <button
                     type="button"
                     class="secondary-button"
                     [disabled]="isDeleting(promotion.id)"
                     (click)="deletePromotion(promotion)">
-                    {{ isDeleting(promotion.id) ? 'Deleting...' : 'Delete' }}
+                    {{ isDeleting(promotion.id) ? 'Brisanje...' : 'Obriši' }}
                   </button>
                 </td>
               </tr>

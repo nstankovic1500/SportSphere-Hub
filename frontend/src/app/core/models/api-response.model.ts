@@ -1,6 +1,12 @@
 import type { User } from './user.model';
 import type { Sport } from './sport.model';
 import type {
+  AdminSportsResponseData,
+  AdminTrainersResponseData,
+  AdminUsersResponseData,
+  ResolvedAdminSportResponseData,
+  ResolvedAdminTrainerResponseData,
+  ResolvedAdminUserResponseData,
   FacilityRequestsResponseData,
   RegistrationRequestsResponseData,
   ResolvedFacilityRequestResponseData,
@@ -62,6 +68,11 @@ export interface CurrentUserResponseData {
   user: User;
 }
 
+export interface ForgotPasswordResponseData {
+  resetLink: string;
+  expiresAt: string;
+}
+
 export interface SportsResponseData {
   sports: Sport[];
 }
@@ -71,10 +82,16 @@ export type AdminRegistrationRequestsResponse =
 
 export type AdminResolvedRegistrationResponse =
   ApiResponse<ResolvedRegistrationResponseData>;
+export type AdminUsersApiResponse = ApiResponse<AdminUsersResponseData>;
+export type AdminUserApiResponse = ApiResponse<ResolvedAdminUserResponseData>;
 export type AdminFacilityRequestsResponse =
   ApiResponse<FacilityRequestsResponseData>;
 export type AdminResolvedFacilityRequestResponse =
   ApiResponse<ResolvedFacilityRequestResponseData>;
+export type AdminTrainersApiResponse = ApiResponse<AdminTrainersResponseData>;
+export type AdminTrainerApiResponse = ApiResponse<ResolvedAdminTrainerResponseData>;
+export type AdminSportsApiResponse = ApiResponse<AdminSportsResponseData>;
+export type AdminSportApiResponse = ApiResponse<ResolvedAdminSportResponseData>;
 
 export type PublicHomeApiResponse = ApiResponse<HomeResponseData>;
 export type PublicCitiesApiResponse = ApiResponse<CitiesResponseData>;
@@ -87,6 +104,8 @@ export type AdListApiResponse = ApiResponse<AdListResponseData>;
 export type AdCreateApiResponse = ApiResponse<AdCreateResponseData>;
 export type AdRequestsApiResponse = ApiResponse<AdRequestsResponseData>;
 export type ApplyToAdApiResponse = ApiResponse<ApplyToAdResponseData>;
+export type ForgotPasswordApiResponse = ApiResponse<ForgotPasswordResponseData>;
+export type ResetPasswordApiResponse = ApiResponse<Record<string, never>>;
 export type EmployeeProfileApiResponse = ApiResponse<{ employee: EmployeeProfile }>;
 export type EmployeeFacilitiesApiResponse = ApiResponse<{ facilities: EmployeeFacility[] }>;
 export type EmployeeCreatedFacilityApiResponse = ApiResponse<{ facility: EmployeeFacility }>;

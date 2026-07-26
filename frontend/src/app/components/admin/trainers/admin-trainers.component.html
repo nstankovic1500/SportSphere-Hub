@@ -1,0 +1,68 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>Evidencija trenera</h1>
+      <p>Pregled svih trenera u sistemu i njihova deaktivacija.</p>
+    </div>
+    <div class="header-links">
+      <a routerLink="/admin">Nazad na početnu stranu</a>
+    </div>
+  </header>
+
+  @if (successMessage) {
+    <p class="message success">{{ successMessage }}</p>
+  }
+
+  @if (errorMessage) {
+    <p class="message error">{{ errorMessage }}</p>
+  }
+
+  @if (isLoading) {
+    <p class="state-message">Učitavanje trenera...</p>
+  } @else if (trainers.length === 0) {
+    <p class="state-message">Nema trenera za prikaz.</p>
+  } @else {
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Trener</th>
+            <th>Objekat</th>
+            <th>Sportovi</th>
+            <th>Cena po satu</th>
+            <th>Status</th>
+            <th>Kreiran</th>
+            <th>Akcija</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (trainer of trainers; track trainer.id) {
+            <tr>
+              <td>{{ trainer.firstName }} {{ trainer.lastName }}</td>
+              <td>{{ trainer.facilityName }}</td>
+              <td>{{ trainer.sports.join(', ') }}</td>
+              <td>
+                @if (trainer.pricePerHour !== null) {
+                  {{ trainer.pricePerHour }} RSD
+                } @else {
+                  <span>Nije postavljena</span>
+                }
+              </td>
+              <td>{{ trainer.active ? 'aktivan' : 'deaktiviran' }}</td>
+              <td>{{ trainer.createdAt | date: 'medium' }}</td>
+              <td>
+                @if (trainer.active) {
+                  <button type="button" class="danger-button" (click)="deactivateTrainer(trainer)" [disabled]="isProcessing">
+                    {{ isProcessing ? 'Obrada...' : 'Deaktiviraj' }}
+                  </button>
+                } @else {
+                  <span>-</span>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

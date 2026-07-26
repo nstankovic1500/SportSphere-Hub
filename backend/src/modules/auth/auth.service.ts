@@ -1,4 +1,6 @@
 import bcrypt from 'bcrypt';
+import crypto from 'crypto';
+import type { Express } from 'express';
 import { Types } from 'mongoose';
 import jwt, { type SignOptions } from 'jsonwebtoken';
 
@@ -6,7 +8,9 @@ import { env } from '../../config/env';
 import { Sport } from '../../models/Sport';
 import { User, UserRole, UserStatus, type IUser } from '../../models/User';
 import { AppError } from '../../utils/AppError';
+import { DEFAULT_PROFILE_IMAGE, safeDeleteFile } from '../../utils/file-storage';
 import type {
+  ForgotPasswordResponseData,
   JwtPayload,
   LoginUser,
   RegisterEmployeeData,
@@ -16,6 +20,7 @@ import type {
 } from './auth.types';
 
 const INVALID_CREDENTIALS_MESSAGE = 'Invalid username or password';
+const PASSWORD_RESET_WINDOW_MS = 30 * 60 * 1000;
 const jwtOptions: SignOptions = {
   expiresIn: env.JWT_EXPIRES_IN as SignOptions['expiresIn'],
 };
@@ -255,6 +260,60 @@ const adminLogin = async (username: string, password: string) => {
   return loginWithRole(username, password, UserRole.Admin);
 };
 
+const forgotPassword = async (identifier: string): Promise<ForgotPasswordResponseData> => {
+  const normalizedIdentifier = trimString(identifier).toLowerCase();
+
+  ensureRequired(normalizedIdentifier, 'identifier');
+
+  const user = await User.findOne({
+    $or: [
+      { username: normalizedIdentifier },
+      { email: normalizedIdentifier },
+    ],
+  }).select('+passwordResetTokenHash +passwordResetExpiresAt');
+
+  if (!user) {
+    throw new AppError('Korisnik sa unetim korisničkim imenom ili imejl adresom nije pronađen', 404);
+  }
+
+  const rawToken = crypto.randomBytes(32).toString('hex');
+  const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
+  const expiresAt = new Date(Date.now() + PASSWORD_RESET_WINDOW_MS);
+
+  user.passwordResetTokenHash = tokenHash;
+  user.passwordResetExpiresAt = expiresAt;
+  await user.save();
+
+  return {
+    resetLink: `http://localhost:4200/reset-password/${rawToken}`,
+    expiresAt,
+  };
+};
+
+const resetPassword = async (token: string, password: string) => {
+  const normalizedToken = trimString(token);
+  const normalizedPassword = trimString(password);
+
+  ensureRequired(normalizedToken, 'token');
+  ensureRequired(normalizedPassword, 'password');
+  validatePassword(normalizedPassword);
+
+  const tokenHash = crypto.createHash('sha256').update(normalizedToken).digest('hex');
+  const user = await User.findOne({
+    passwordResetTokenHash: tokenHash,
+    passwordResetExpiresAt: { $gt: new Date() },
+  }).select('+passwordResetTokenHash +passwordResetExpiresAt +passwordHash');
+
+  if (!user) {
+    throw new AppError('Link za resetovanje lozinke nije važeći ili je istekao', 400);
+  }
+
+  user.passwordHash = await bcrypt.hash(normalizedPassword, 10);
+  user.passwordResetTokenHash = undefined;
+  user.passwordResetExpiresAt = undefined;
+  await user.save();
+};
+
 const getCurrentUser = async (userId: string) => {
   const user = await User.findById(userId);
 
@@ -265,7 +324,7 @@ const getCurrentUser = async (userId: string) => {
   return CreateUser(user);
 };
 
-const register = async (body: RegisterRequestBody) => {
+const register = async (body: RegisterRequestBody, profileImageFile?: Express.Multer.File) => {
   const data = normalizeRegisterData(body);
 
   ensureRequired(data.username, 'username');
@@ -298,15 +357,18 @@ const register = async (body: RegisterRequestBody) => {
   ]);
 
   if (existingUsername) {
-    throw new AppError('username already exists', 409);
+    throw new AppError('Korisničko ime već postoji', 409);
   }
 
   if (existingEmail) {
-    throw new AppError('email already exists', 409);
+    throw new AppError('Mejl adresa je već registrovana', 409);
   }
 
   const passwordHash = await bcrypt.hash(data.password, 10);
   const createdAt = new Date();
+  const profileImage = profileImageFile
+    ? `profiles/${profileImageFile.filename}`
+    : DEFAULT_PROFILE_IMAGE;
 
   try {
     const user = await User.create({
@@ -316,7 +378,7 @@ const register = async (body: RegisterRequestBody) => {
       lastName: data.lastName,
       phone: data.phone,
       email: data.email,
-      profileImage: 'profiles/default-avatar.png',
+      profileImage,
       favoriteSports,
       role: data.role,
       status: UserStatus.Pending,
@@ -329,6 +391,10 @@ const register = async (body: RegisterRequestBody) => {
       user: createRegisteredUser(user),
     } as RegisterResponseData;
   } catch (error) {
+    if (profileImageFile) {
+      await safeDeleteFile(profileImage);
+    }
+
     handleDuplicateKeyError(error);
   }
 };
@@ -341,4 +407,4 @@ const verifyToken = (token: string) => {
   }
 };
 
-export { adminLogin, getCurrentUser, login, register, verifyToken };
+export { adminLogin, forgotPassword, getCurrentUser, login, register, resetPassword, verifyToken };

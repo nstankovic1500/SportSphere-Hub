@@ -34,6 +34,8 @@ interface IUser {
   status: UserStatus;
   employeeData?: IEmployeeData;
   blockedFacilities?: Types.ObjectId[];
+  passwordResetTokenHash?: string;
+  passwordResetExpiresAt?: Date;
   createdAt?: Date;
 }
 
@@ -67,6 +69,7 @@ const userSchema = new Schema<IUser>(
       type: String,
       required: true,
       trim: true,
+      unique: true,
     },
     passwordHash: {
       type: String,
@@ -92,6 +95,7 @@ const userSchema = new Schema<IUser>(
       required: true,
       trim: true,
       lowercase: true,
+      unique: true,
     },
     profileImage: {
       type: String,
@@ -119,6 +123,16 @@ const userSchema = new Schema<IUser>(
       required: false,
     },
     blockedFacilities: [{ type: Schema.Types.ObjectId, ref: 'Facility' }],
+    passwordResetTokenHash: {
+      type: String,
+      required: false,
+      select: false,
+    },
+    passwordResetExpiresAt: {
+      type: Date,
+      required: false,
+      select: false,
+    },
     createdAt: {
       type: Date,
       required: true,

@@ -31,6 +31,7 @@ export interface AdListItem {
   createdAt: string;
   isOwner: boolean;
   hasRequested: boolean;
+  requestStatus: 'pending' | 'accepted' | 'rejected' | null;
 }
 
 export interface ApplyRequestItem {

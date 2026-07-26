@@ -69,17 +69,24 @@ select {
 
 .sports-grid {
   display: grid;
-  gap: 10px;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 8px;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
 }
 
 .sport-option {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 12px 14px;
+  gap: 8px;
+  padding: 8px 10px;
   border: 1px solid;
-  border-radius: 14px;
+  border-radius: 12px;
+  min-height: 48px;
+}
+
+.sport-option input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
 }
 
 .section-header {

@@ -69,3 +69,77 @@ export interface FacilityRequestsResponseData {
 export interface ResolvedFacilityRequestResponseData {
   facility: FacilityRequest;
 }
+
+export interface AdminUser {
+  id: string;
+  username: string;
+  firstName: string;
+  lastName: string;
+  phone: string;
+  email: string;
+  profileImage: string;
+  favoriteSports: string[];
+  role: UserRole;
+  status: UserStatus;
+  employeeData?: EmployeeData;
+  createdAt: string;
+}
+
+export interface AdminUsersResponseData {
+  users: AdminUser[];
+}
+
+export interface UpdateAdminUserRequest {
+  firstName: string;
+  lastName: string;
+  phone: string;
+  email: string;
+  role: UserRole;
+  status: UserStatus;
+  favoriteSports: string[];
+  employeeData?: EmployeeData;
+}
+
+export interface ResolvedAdminUserResponseData {
+  user: AdminUser;
+}
+
+export interface AdminTrainer {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  facilityId: string;
+  facilityName: string;
+  sports: string[];
+  pricePerHour: number | null;
+  active: boolean;
+  createdAt: string;
+}
+
+export interface AdminTrainersResponseData {
+  trainers: AdminTrainer[];
+}
+
+export interface ResolvedAdminTrainerResponseData {
+  trainer: AdminTrainer;
+}
+
+export interface AdminSport {
+  id: string;
+  name: string;
+  active: boolean;
+}
+
+export interface AdminSportsResponseData {
+  sports: AdminSport[];
+}
+
+export interface CreateAdminSportRequest {
+  name: string;
+}
+
+export interface ResolvedAdminSportResponseData {
+  sport: AdminSport;
+}

@@ -36,7 +36,7 @@ export class EmployeeTrainersComponent {
   }
 
   deleteTrainer(trainer: EmployeeTrainer) {
-    if (!window.confirm(`Delete trainer ${this.getTrainerName(trainer)}?`)) {
+    if (!window.confirm(`Obrisati trenera ${this.getTrainerName(trainer)}?`)) {
       return;
     }
 
@@ -48,7 +48,7 @@ export class EmployeeTrainersComponent {
       next: () => {
         this.trainers = this.trainers.filter((currentTrainer) => !(currentTrainer.id === trainer.id));
         this.deletingIds.delete(trainer.id);
-        this.successMessage = 'Trainer deleted successfully.';
+        this.successMessage = 'Trener je uspešno obrisan.';
       },
       error: (error) => {
         this.deletingIds.delete(trainer.id);

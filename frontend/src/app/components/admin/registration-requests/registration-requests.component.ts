@@ -1,5 +1,6 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { Component, inject } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 import type { RegistrationRequest } from '../../../core/models/admin.model';
 import { AdminService } from '../../../core/services/admin.service';
@@ -7,7 +8,7 @@ import { AdminService } from '../../../core/services/admin.service';
 @Component({
   selector: 'app-registration-requests',
   standalone: true,
-  imports: [CommonModule, DatePipe],
+  imports: [CommonModule, DatePipe, RouterLink],
   templateUrl: './registration-requests.component.html',
   styleUrl: './registration-requests.component.css',
 })
@@ -32,8 +33,12 @@ export class RegistrationRequestsComponent {
     return request.id || request._id || request.email;
   }
 
+  getRoleLabel(role: RegistrationRequest['role']) {
+    return role === 'athlete' ? 'sportista' : role === 'employee' ? 'zaposleni' : role;
+  }
+
   approve(request: RegistrationRequest) {
-    if (!window.confirm(`Approve registration for ${request.username}?`)) {
+    if (!window.confirm(`Odobriti registraciju za korisnika ${request.username}?`)) {
       return;
     }
 
@@ -41,7 +46,7 @@ export class RegistrationRequestsComponent {
   }
 
   reject(request: RegistrationRequest) {
-    if (!window.confirm(`Reject registration for ${request.username}?`)) {
+    if (!window.confirm(`Odbiti registraciju za korisnika ${request.username}?`)) {
       return;
     }
 
@@ -72,7 +77,7 @@ export class RegistrationRequestsComponent {
     action: 'approve' | 'reject',
   ) {
     if (!request.id) {
-      this.errorMessage = 'Registration request id is missing.';
+      this.errorMessage = 'Nedostaje identifikator zahteva za registraciju.';
       return;
     }
 
@@ -93,13 +98,16 @@ export class RegistrationRequestsComponent {
         this.processingRequestIds.delete(request.id);
         this.successMessage =
           action === 'approve'
-            ? 'Registration request approved.'
-            : 'Registration request rejected.';
+            ? 'Zahtev za registraciju je odobren.'
+            : 'Zahtev za registraciju je odbijen.';
       },
       error: (error) => {
         this.processingRequestIds.delete(request.id);
         this.errorMessage =
-          error.error?.message ?? `Unable to ${action} registration request.`;
+          error.error?.message ??
+          (action === 'approve'
+            ? 'Nije moguće odobriti zahtev za registraciju.'
+            : 'Nije moguće odbiti zahtev za registraciju.');
       },
     });
   }

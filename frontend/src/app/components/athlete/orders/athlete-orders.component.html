@@ -2,9 +2,10 @@
   <header class="page-header">
     <div>
       <h1>Moje porudžbine</h1>
-      <p>Track active orders and previous order history.</p>
+      <p>Pratite aktivne porudžbine i istoriju prethodnih porudžbina.</p>
     </div>
     <div class="header-links">
+      <a routerLink="/athlete">Početna strana</a>
       <a routerLink="/athlete/shop">Prodavnica</a>
       <a routerLink="/athlete/cart">Korpa</a>
     </div>
@@ -36,18 +37,18 @@
           @for (order of activeOrders; track order.id) {
             <article class="order-card active">
               <h3>#{{ getShortReference(order.id) }}</h3>
-              <p><strong>Facility:</strong> {{ order.facility.name }}</p>
-              <p><strong>Created:</strong> {{ order.createdAt | date: 'medium' }}</p>
-              <p><strong>Status:</strong> {{ order.status }}</p>
+              <p><strong>Objekat:</strong> {{ order.facility.name }}</p>
+              <p><strong>Kreirano:</strong> {{ order.createdAt | date: 'medium' }}</p>
+              <p><strong>Status:</strong> {{ getStatusLabel(order.status) }}</p>
               <ul>
                 @for (item of order.items; track item.productId + item.name) {
                   <li>{{ item.name }} x{{ item.quantity }} - {{ formatCurrency(item.priceAtPurchase) }}</li>
                 }
               </ul>
-              <p><strong>Total:</strong> {{ formatCurrency(order.totalPrice) }}</p>
+              <p><strong>Ukupno:</strong> {{ formatCurrency(order.totalPrice) }}</p>
               @if (canCancel(order)) {
                 <button type="button" class="secondary-button" [disabled]="isUpdating(order.id)" (click)="cancelOrder(order)">
-                  {{ isUpdating(order.id) ? 'Cancelling...' : 'Cancel' }}
+                  {{ isUpdating(order.id) ? 'Otkazivanje...' : 'Otkaži' }}
                 </button>
               }
             </article>
@@ -65,15 +66,15 @@
           @for (order of orderHistory; track order.id) {
             <article class="order-card history">
               <h3>#{{ getShortReference(order.id) }}</h3>
-              <p><strong>Facility:</strong> {{ order.facility.name }}</p>
-              <p><strong>Created:</strong> {{ order.createdAt | date: 'medium' }}</p>
-              <p><strong>Status:</strong> {{ order.status }}</p>
+              <p><strong>Objekat:</strong> {{ order.facility.name }}</p>
+              <p><strong>Kreirano:</strong> {{ order.createdAt | date: 'medium' }}</p>
+              <p><strong>Status:</strong> {{ getStatusLabel(order.status) }}</p>
               <ul>
                 @for (item of order.items; track item.productId + item.name) {
                   <li>{{ item.name }} x{{ item.quantity }} - {{ formatCurrency(item.priceAtPurchase) }}</li>
                 }
               </ul>
-              <p><strong>Total:</strong> {{ formatCurrency(order.totalPrice) }}</p>
+              <p><strong>Ukupno:</strong> {{ formatCurrency(order.totalPrice) }}</p>
             </article>
           }
         </div>

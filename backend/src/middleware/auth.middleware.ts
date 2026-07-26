@@ -12,13 +12,13 @@ const authMiddleware = async (
   const authorizationHeader = req.headers.authorization;
 
   if (!authorizationHeader || !authorizationHeader.startsWith('Bearer ')) {
-    next(new AppError('Authentication token is required', 401));
+    next(new AppError('Autentikacioni token je obavezan', 401));
     return;
   }
 
   const token = authorizationHeader.slice('Bearer '.length).trim();
   if (!token) {
-    next(new AppError('Authentication token is required', 401));
+    next(new AppError('Autentikacioni token je obavezan', 401));
     return;
   }
 

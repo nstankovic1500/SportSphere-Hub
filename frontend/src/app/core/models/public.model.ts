@@ -116,6 +116,7 @@ export interface FacilitiesQueryParams {
   cities?: string;
   sportId?: string;
   resourceType?: 'outdoor' | 'indoor' | 'team_hall';
+  availableToday?: string;
   sortBy?: 'name' | 'city';
   sortOrder?: 'asc' | 'desc';
 }

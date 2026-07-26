@@ -2,11 +2,10 @@
   <header class="page-header">
     <div>
       <h1>Profil zaposlenog</h1>
-      <p>Manage your personal and company information.</p>
+      <p>Upravljajte ličnim i podacima o firmi.</p>
     </div>
     <div class="header-links">
-      <a routerLink="/employee">Nazad na kontrolnu tablu</a>
-      <a routerLink="/employee/facilities">My facilities</a>
+      <a routerLink="/employee">Nazad na početnu stranu</a>
     </div>
   </header>
 
@@ -21,9 +20,9 @@
       <div class="profile-image-section">
         <div class="profile-image-card">
           @if (profileImageUrl) {
-            <img class="profile-image" [src]="profileImageUrl" [alt]="profile?.username || 'Profile image'" />
+            <img class="profile-image" [src]="profileImageUrl" [alt]="profile?.username || 'Profilna slika'" />
           } @else {
-            <div class="profile-image placeholder">No image</div>
+            <div class="profile-image placeholder">Nema slike</div>
           }
         </div>
 
@@ -31,12 +30,17 @@
           <label for="profileImage">Profilna slika</label>
           <input id="profileImage" type="file" accept="image/jpeg,image/png,image/webp" (change)="onProfileImageChange($event)" />
           <small class="helper-text">Dozvoljeni formati: JPG, PNG, WEBP. Maksimalna veličina: 5 MB.</small>
+          <div class="action-row">
+            <button type="button" class="secondary-button" [disabled]="isGeneratingAvatar" (click)="generateAvatar()">
+              {{ isGeneratingAvatar ? 'Generisanje...' : 'Generiši avatar' }}
+            </button>
+            <button type="button" [disabled]="!selectedProfileImageFile || isUploadingImage" (click)="uploadProfileImage()">
+              {{ isUploadingImage ? 'Otpremanje...' : 'Sačuvaj kao profilnu sliku' }}
+            </button>
+          </div>
           @if (imageErrorMessage) {
             <p class="message error">{{ imageErrorMessage }}</p>
           }
-          <button type="button" [disabled]="!selectedProfileImageFile || isUploadingImage" (click)="uploadProfileImage()">
-            {{ isUploadingImage ? 'Uploading...' : 'Upload Image' }}
-          </button>
         </div>
       </div>
 
@@ -59,10 +63,10 @@
             <label for="email">Imejl</label>
             <input id="email" type="email" formControlName="email" />
             @if (email.touched && email.hasError('required')) {
-              <small class="field-error">Email is required.</small>
+              <small class="field-error">Imejl je obavezan.</small>
             }
             @if (email.touched && email.hasError('email')) {
-              <small class="field-error">Enter a valid email address.</small>
+              <small class="field-error">Unesite ispravnu mejl adresu.</small>
             }
           </div>
 
@@ -70,7 +74,7 @@
             <label for="firstName">Ime</label>
             <input id="firstName" type="text" formControlName="firstName" />
             @if (firstName.touched && firstName.hasError('required')) {
-              <small class="field-error">First name is required.</small>
+              <small class="field-error">Ime je obavezno.</small>
             }
           </div>
 
@@ -78,7 +82,7 @@
             <label for="lastName">Prezime</label>
             <input id="lastName" type="text" formControlName="lastName" />
             @if (lastName.touched && lastName.hasError('required')) {
-              <small class="field-error">Last name is required.</small>
+              <small class="field-error">Prezime je obavezno.</small>
             }
           </div>
 
@@ -86,7 +90,10 @@
             <label for="phone">Telefon</label>
             <input id="phone" type="text" formControlName="phone" />
             @if (phone.touched && phone.hasError('required')) {
-              <small class="field-error">Phone is required.</small>
+              <small class="field-error">Polje je obavezno.</small>
+            }
+            @if (phone.touched && phone.hasError('pattern')) {
+              <small class="field-error">Unesite ispravan broj telefona.</small>
             }
           </div>
 
@@ -94,15 +101,15 @@
             <label for="companyName">Naziv firme</label>
             <input id="companyName" type="text" formControlName="companyName" />
             @if (companyName.touched && companyName.hasError('required')) {
-              <small class="field-error">Company name is required.</small>
+              <small class="field-error">Naziv firme je obavezan.</small>
             }
           </div>
 
           <div class="field">
-            <label for="headOfficeAddress">Head-Office Address</label>
+            <label for="headOfficeAddress">Adresa sedišta</label>
             <input id="headOfficeAddress" type="text" formControlName="headOfficeAddress" />
             @if (headOfficeAddress.touched && headOfficeAddress.hasError('required')) {
-              <small class="field-error">Head-office address is required.</small>
+              <small class="field-error">Adresa sedišta je obavezna.</small>
             }
           </div>
 
@@ -149,14 +156,82 @@
           </div>
           <small class="helper-text">Izaberite do 5 sportova.</small>
           @if (favoriteSports.touched && favoriteSports.hasError('maxSelectedSports')) {
-            <small class="field-error">You can select at most 5 sports.</small>
+            <small class="field-error">Možete izabrati najviše 5 sportova.</small>
           }
         </div>
 
         <button type="submit" [disabled]="profileForm.invalid || isSaving">
-          {{ isSaving ? 'Saving...' : 'Save Changes' }}
+          {{ isSaving ? 'Čuvanje...' : 'Sačuvaj izmene' }}
         </button>
       </form>
+    </section>
+
+    <section class="panel">
+      <div class="section-header">
+        <div>
+          <h2>Moji objekti</h2>
+          <p>Pregled objekata koje vodite, sa sportovima i elementima.</p>
+        </div>
+        <a class="secondary-button link-button" routerLink="/employee/facilities/new">Kreiraj objekat</a>
+      </div>
+
+      @if (facilities.length === 0) {
+        <p class="state-message">Nijedan objekat nije dodeljen vašem nalogu.</p>
+      } @else {
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Naziv</th>
+                <th>Grad</th>
+                <th>Sportovi</th>
+                <th>Elementi</th>
+                <th>Akcija</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (facility of facilities; track facility.id) {
+                <tr>
+                  <td>{{ facility.name }}</td>
+                  <td>{{ facility.city }}</td>
+                  <td>{{ getSportsLabel(facility) }}</td>
+                  <td>
+                    @if (hasAnyResources(facility)) {
+                      <div class="resource-groups">
+                        @if (getOutdoorResources(facility).length) {
+                          <div class="resource-group">
+                            <strong>Otvoreni tereni:</strong>
+                            <span>{{ getResourceListLabel(getOutdoorResources(facility)) }}</span>
+                          </div>
+                        }
+
+                        @if (getIndoorResources(facility).length) {
+                          <div class="resource-group">
+                            <strong>Zatvorene hale/tereni:</strong>
+                            <span>{{ getResourceListLabel(getIndoorResources(facility)) }}</span>
+                          </div>
+                        }
+
+                        @if (getTeamHallResources(facility).length) {
+                          <div class="resource-group">
+                            <strong>Dvorane:</strong>
+                            <span>{{ getResourceListLabel(getTeamHallResources(facility)) }}</span>
+                          </div>
+                        }
+                      </div>
+                    } @else {
+                      <span>Nema dodatih elemenata.</span>
+                    }
+                  </td>
+                  <td>
+                    <a class="secondary-button link-button" [routerLink]="['/employee/facilities', facility.id]">Detalji</a>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
     </section>
   }
 </section>

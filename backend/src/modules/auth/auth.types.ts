@@ -7,6 +7,14 @@ interface LoginRequestBody {
   password: string;
 }
 
+interface ForgotPasswordRequestBody {
+  identifier: string;
+}
+
+interface ResetPasswordRequestBody {
+  password: string;
+}
+
 interface RegisterEmployeeData {
   companyName: string;
   headOfficeAddress: string;
@@ -62,6 +70,11 @@ interface RegisterResponseData {
   user: RegisteredUser;
 }
 
+interface ForgotPasswordResponseData {
+  resetLink: string;
+  expiresAt: Date;
+}
+
 interface JwtPayload {
   userId: string;
   role: UserRole;
@@ -76,6 +89,8 @@ interface AuthenticatedRequest extends Request {
 
 export type {
   AuthenticatedRequest,
+  ForgotPasswordRequestBody,
+  ForgotPasswordResponseData,
   JwtPayload,
   LoginRequestBody,
   LoginResponseData,
@@ -84,4 +99,5 @@ export type {
   RegisterRequestBody,
   RegisterResponseData,
   RegisteredUser,
+  ResetPasswordRequestBody,
 };

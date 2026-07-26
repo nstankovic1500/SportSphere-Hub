@@ -15,13 +15,13 @@ import { AdminService } from '../../../core/services/admin.service';
 export class FacilityRequestsComponent {
   private readonly adminService = inject(AdminService);
   private readonly dayLabels: { [key: number]: string } = {
-    0: 'Sun',
-    1: 'Mon',
-    2: 'Tue',
-    3: 'Wed',
-    4: 'Thu',
-    5: 'Fri',
-    6: 'Sat',
+    0: 'Ned',
+    1: 'Pon',
+    2: 'Uto',
+    3: 'Sre',
+    4: 'Čet',
+    5: 'Pet',
+    6: 'Sub',
   };
 
   requests: FacilityRequest[] = [];
@@ -35,7 +35,7 @@ export class FacilityRequestsComponent {
   }
 
   approve(request: FacilityRequest) {
-    if (!window.confirm(`Approve facility request for ${request.name}?`)) {
+    if (!window.confirm(`Odobriti zahtev za objekat ${request.name}?`)) {
       return;
     }
 
@@ -43,7 +43,7 @@ export class FacilityRequestsComponent {
   }
 
   reject(request: FacilityRequest) {
-    if (!window.confirm(`Reject facility request for ${request.name}?`)) {
+    if (!window.confirm(`Odbiti zahtev za objekat ${request.name}?`)) {
       return;
     }
 
@@ -72,7 +72,7 @@ export class FacilityRequestsComponent {
     const openingHours = request.openingHours ?? [];
 
     if (openingHours.length === 0) {
-      return 'Not provided';
+      return 'Nije uneto';
     }
 
     return openingHours
@@ -109,12 +109,16 @@ export class FacilityRequestsComponent {
         this.requests = this.requests.filter((currentRequest) => !(currentRequest.id === request.id));
         this.processingIds.delete(request.id);
         this.successMessage = action === 'approve'
-          ? 'Facility request approved.'
-          : 'Facility request rejected.';
+          ? 'Zahtev za objekat je odobren.'
+          : 'Zahtev za objekat je odbijen.';
       },
       error: (error) => {
         this.processingIds.delete(request.id);
-        this.errorMessage = error.error?.message ?? `Unable to ${action} facility request.`;
+        this.errorMessage =
+          error.error?.message ??
+          (action === 'approve'
+            ? 'Nije moguće odobriti zahtev za objekat.'
+            : 'Nije moguće odbiti zahtev za objekat.');
       },
     });
   }

@@ -58,12 +58,12 @@ export class AdRequestsComponent {
 
         this.processingIds.delete(request.id);
         this.actionMessage = this.isCompleted
-          ? 'Request approved. Team is now full.'
-          : 'Request approved successfully.';
+          ? 'Prijava je odobrena. Tim je sada popunjen.'
+          : 'Prijava je uspešno odobrena.';
       },
       error: (error) => {
         this.processingIds.delete(request.id);
-        this.errorMessage = error.error?.message ?? 'Unable to approve request.';
+        this.errorMessage = error.error?.message ?? 'Nije moguće odobriti prijavu.';
       },
     });
   }
@@ -85,11 +85,11 @@ export class AdRequestsComponent {
             : currentRequest,
         );
         this.processingIds.delete(request.id);
-        this.actionMessage = 'Request rejected successfully.';
+        this.actionMessage = 'Prijava je uspešno odbijena.';
       },
       error: (error) => {
         this.processingIds.delete(request.id);
-        this.errorMessage = error.error?.message ?? 'Unable to reject request.';
+        this.errorMessage = error.error?.message ?? 'Nije moguće odbiti prijavu.';
       },
     });
   }
@@ -112,7 +112,7 @@ export class AdRequestsComponent {
         this.isLoading = false;
       },
       error: (error) => {
-        this.errorMessage = error.error?.message ?? 'Unable to load ad requests.';
+        this.errorMessage = error.error?.message ?? 'Nije moguće učitati prijave na oglas.';
         this.isLoading = false;
       },
     });

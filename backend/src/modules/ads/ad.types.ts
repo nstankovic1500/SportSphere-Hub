@@ -31,6 +31,7 @@ interface AdListItem {
   createdAt: Date;
   isOwner: boolean;
   hasRequested: boolean;
+  requestStatus: 'pending' | 'accepted' | 'rejected' | null;
 }
 
 interface ApplyRequestItem {

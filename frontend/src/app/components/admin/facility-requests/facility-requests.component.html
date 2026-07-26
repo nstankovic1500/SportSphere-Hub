@@ -2,10 +2,10 @@
   <header class="page-header">
     <div>
       <h1>Zahtevi za objekte</h1>
-      <p>Review pending facility requests submitted by employees.</p>
+      <p>Pregledajte zahteve za objekte koje su podneli zaposleni i koji čekaju obradu.</p>
     </div>
     <div class="header-links">
-      <a routerLink="/admin">Nazad na kontrolnu tablu</a>
+      <a routerLink="/admin">Nazad na početnu stranu</a>
       <a routerLink="/admin/registration-requests">Zahtevi za registraciju</a>
     </div>
   </header>
@@ -32,7 +32,7 @@
                 <h2>{{ request.name }}</h2>
                 <p>{{ request.city }}, {{ request.country }}</p>
               </div>
-              <span class="status-badge">Pending</span>
+              <span class="status-badge">Na čekanju</span>
             </div>
 
             <div class="details-grid">
@@ -75,7 +75,7 @@
                 type="button"
                 class="approve-button"
                 title="Odobri zahtev"
-                aria-label="Approve request"
+                aria-label="Odobri zahtev"
                 [disabled]="isProcessing(request.id)"
                 (click)="approve(request)"
               >
@@ -89,7 +89,7 @@
                 type="button"
                 class="secondary-button"
                 title="Odbij zahtev"
-                aria-label="Reject request"
+                aria-label="Odbij zahtev"
                 [disabled]="isProcessing(request.id)"
                 (click)="reject(request)"
               >

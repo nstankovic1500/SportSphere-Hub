@@ -131,7 +131,7 @@ export class TrainerBookingComponent {
         this.isLoadingAvailability = false;
       },
       error: (error) => {
-        this.errorMessage = error.error?.message ?? 'Unable to load trainer availability.';
+        this.errorMessage = error.error?.message ?? 'Nije moguće učitati dostupnost trenera.';
         this.availability = null;
         this.availableSlots = [];
         this.selectedSlots = [];
@@ -158,7 +158,7 @@ export class TrainerBookingComponent {
       .sort((first, second) => first.startTime.localeCompare(second.startTime));
 
     if (!this.isContinuous(nextSelection)) {
-      this.errorMessage = 'Selected slots must form one continuous training appointment.';
+      this.errorMessage = 'Izabrani termini moraju činiti jedan neprekidan trening.';
       return;
     }
 
@@ -188,13 +188,13 @@ export class TrainerBookingComponent {
     }).subscribe({
       next: () => {
         this.isSubmitting = false;
-        this.successMessage = 'Training appointment created successfully.';
+        this.successMessage = 'Trening je uspešno zakazan.';
         this.selectedSlots = [];
         this.loadAvailability();
       },
       error: (error) => {
         this.isSubmitting = false;
-        this.errorMessage = error.error?.message ?? 'Unable to create training appointment.';
+        this.errorMessage = error.error?.message ?? 'Nije moguće zakazati trening.';
       },
     });
   }
@@ -269,7 +269,7 @@ export class TrainerBookingComponent {
         });
       },
       error: (error) => {
-        this.errorMessage = error.error?.message ?? 'Unable to load trainer details.';
+        this.errorMessage = error.error?.message ?? 'Nije moguće učitati detalje trenera.';
         this.isLoadingTrainer = false;
       },
     });

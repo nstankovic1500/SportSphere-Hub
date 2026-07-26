@@ -2,7 +2,10 @@
   <div class="page-header">
     <div>
       <h1>Zahtevi za registraciju</h1>
-      <p>Review pending athlete and employee registrations.</p>
+      <p>Pregledajte zahteve za registraciju sportista i zaposlenih koji čekaju obradu.</p>
+    </div>
+    <div class="header-links">
+      <a routerLink="/admin">Početna strana</a>
     </div>
   </div>
 
@@ -45,7 +48,7 @@
               <td>{{ request.lastName }}</td>
               <td>{{ request.email }}</td>
               <td>{{ request.phone }}</td>
-              <td>{{ request.role }}</td>
+              <td>{{ getRoleLabel(request.role) }}</td>
               <td>{{ request.favoriteSports.length ? request.favoriteSports.join(', ') : '-' }}</td>
               <td>{{ request.employeeData?.companyName ?? '-' }}</td>
               <td>{{ request.employeeData?.registrationNumber ?? '-' }}</td>
@@ -58,7 +61,7 @@
                   [disabled]="isProcessing(request)"
                   (click)="approve(request)"
                 >
-                  {{ isProcessing(request) ? 'Working...' : 'Approve' }}
+                  {{ isProcessing(request) ? 'Obrada...' : 'Odobri' }}
                 </button>
                 <button
                   type="button"
@@ -66,7 +69,7 @@
                   [disabled]="isProcessing(request)"
                   (click)="reject(request)"
                 >
-                  {{ isProcessing(request) ? 'Working...' : 'Reject' }}
+                  {{ isProcessing(request) ? 'Obrada...' : 'Odbij' }}
                 </button>
               </td>
             </tr>

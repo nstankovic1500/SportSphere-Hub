@@ -2,9 +2,10 @@
   <header class="page-header">
     <div>
       <h1>Resursi</h1>
-      <p>Manage facility resources.</p>
+      <p>Upravljajte resursima objekta.</p>
     </div>
     <div class="header-links">
+      <a routerLink="/employee">Početna strana</a>
       <a [routerLink]="['/employee/facilities', facilityId]">Nazad na objekat</a>
       <a [routerLink]="['/employee/facilities', facilityId, 'resources', 'new']">Kreiraj resurs</a>
     </div>
@@ -16,7 +17,7 @@
   } @else if (errorMessage && resources.length === 0) {
     <p class="state-message error">{{ errorMessage }}</p>
   } @else if (resources.length === 0) {
-    <section class="panel"><p class="state-message">No resources found.</p></section>
+    <section class="panel"><p class="state-message">Nema pronađenih resursa.</p></section>
   } @else {
     @if (errorMessage) { <p class="message error">{{ errorMessage }}</p> }
     <section class="panel">
@@ -31,11 +32,11 @@
                 <td>{{ resource.sport.name }}</td>
                 <td>{{ resource.capacity }}</td>
                 <td>{{ resource.equipmentDescription }}</td>
-                <td>{{ resource.active ? 'Yes' : 'No' }}</td>
+                <td>{{ resource.active ? 'Da' : 'Ne' }}</td>
                 <td class="actions-cell">
-                  <a [routerLink]="['/employee/facilities', facilityId, 'resources', resource.id, 'edit']">Edit</a>
+                  <a [routerLink]="['/employee/facilities', facilityId, 'resources', resource.id, 'edit']">Izmeni</a>
                   <button type="button" class="secondary-button" [disabled]="isDeleting(resource.id)" (click)="deleteResource(resource)">
-                    {{ isDeleting(resource.id) ? 'Deleting...' : 'Delete' }}
+                    {{ isDeleting(resource.id) ? 'Brisanje...' : 'Obriši' }}
                   </button>
                 </td>
               </tr>

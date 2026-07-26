@@ -1,17 +1,18 @@
 <section class="page">
   <header class="page-header">
     <div>
-      <h1>Reserve Resource</h1>
-      <p>Select a resource and choose one or more free whole-hour slots on the calendar.</p>
+      <h1>Rezervacija resursa</h1>
+      <p>Izaberite resurs i odredite jedan ili više slobodnih termina u punim satima preko forme ili kalendara.</p>
     </div>
     <div class="header-links">
+      <a routerLink="/athlete">Početna strana</a>
       <a routerLink="/facilities">Pregledaj objekte</a>
-      <a routerLink="/athlete/profile">Back to profile</a>
+      <a routerLink="/athlete/profile">Nazad na profil</a>
     </div>
   </header>
 
   @if (isLoadingFacility) {
-    <p class="state-message">Loading facility...</p>
+    <p class="state-message">Učitavanje objekta...</p>
   } @else if (backendError && !facility) {
     <p class="state-message error">{{ backendError }}</p>
   } @else if (facility) {
@@ -19,18 +20,18 @@
       <h2>{{ facility.name }}</h2>
       <p>{{ facility.city }}, {{ facility.country }}</p>
       <p>{{ facility.address }}</p>
-      <p>{{ facility.hourlyPrice }} per hour</p>
+      <p>{{ facility.hourlyPrice }} po satu</p>
     </section>
 
     <section class="panel">
-      <h2>Active Resources</h2>
+      <h2>Aktivni resursi</h2>
 
       @if (!hasResources) {
         <p class="state-message">Nema dostupnih aktivnih resursa.</p>
       } @else {
         <div class="resource-toolbar">
           <button type="button" class="secondary-button" [disabled]="!hasPreviousResource" (click)="goToPreviousResource()">
-            Previous Resource
+            Prethodni resurs
           </button>
 
           <div class="field resource-field">
@@ -38,14 +39,14 @@
             <select id="resourceId" [formControl]="resourceId">
               @for (resource of activeResources; track resource.id) {
                 <option [value]="resource.id">
-                  {{ resource.name }} - {{ resource.sport?.name ?? 'No sport' }}
+                  {{ resource.name }} - {{ resource.sport?.name ?? 'Bez sporta' }}
                 </option>
               }
             </select>
           </div>
 
           <button type="button" class="secondary-button" [disabled]="!hasNextResource" (click)="goToNextResource()">
-            Next Resource
+            Sledeći resurs
           </button>
         </div>
 
@@ -78,9 +79,41 @@
       <section class="panel">
         <div class="panel-header">
           <div>
-            <h2>Reservation Calendar</h2>
+            <h2>Forma za rezervaciju</h2>
+            <p>Termin možete izabrati unosom datuma i perioda ili direktno preko kalendara.</p>
+          </div>
+        </div>
+
+        <div class="reservation-form-grid">
+          <div class="field">
+            <label for="reservationDate">Datum</label>
+            <input id="reservationDate" type="date" [formControl]="date" />
+          </div>
+
+          <div class="field">
+            <label for="reservationStartTime">Vreme početka</label>
+            <input id="reservationStartTime" type="time" step="3600" [formControl]="startTime" />
+          </div>
+
+          <div class="field">
+            <label for="reservationEndTime">Vreme završetka</label>
+            <input id="reservationEndTime" type="time" step="3600" [formControl]="endTime" />
+          </div>
+        </div>
+
+        <div class="action-row">
+          <button type="button" class="secondary-button" (click)="selectFromForm()">
+            Izaberi termin iz forme
+          </button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <h2>Kalendar za rezervacije</h2>
             @if (currentResource) {
-              <p>{{ currentResource.name }} - {{ currentResource.sport?.name ?? 'No sport' }}</p>
+              <p>{{ currentResource.name }} - {{ currentResource.sport?.name ?? 'Bez sporta' }}</p>
             }
           </div>
         </div>
@@ -94,7 +127,7 @@
         }
 
         @if (isLoadingAvailability) {
-          <p class="state-message">Loading calendar availability...</p>
+          <p class="state-message">Učitavanje dostupnosti kalendara...</p>
         }
 
         <div class="calendar-wrapper">
@@ -104,24 +137,24 @@
 
       @if (selectedSlot) {
         <section class="panel">
-          <h2>Reservation Summary</h2>
+          <h2>Pregled rezervacije</h2>
 
           <div class="summary-card">
-            <p><strong>Facility:</strong> {{ facility.name }}</p>
-            <p><strong>Resource:</strong> {{ currentResource ? currentResource.name : '' }}</p>
+            <p><strong>Objekat:</strong> {{ facility.name }}</p>
+            <p><strong>Resurs:</strong> {{ currentResource ? currentResource.name : '' }}</p>
             <p><strong>Sport:</strong> {{ currentResource ? (currentResource.sport?.name ?? '-') : '-' }}</p>
-            <p><strong>Date:</strong> {{ selectedSlot.date }}</p>
-            <p><strong>Start time:</strong> {{ selectedSlot.startTime }}</p>
-            <p><strong>End time:</strong> {{ selectedSlot.endTime }}</p>
-            <p><strong>Duration:</strong> {{ selectedSlot.durationHours }} hour{{ selectedSlot.durationHours > 1 ? 's' : '' }}</p>
+            <p><strong>Datum:</strong> {{ selectedSlot.date }}</p>
+            <p><strong>Početak:</strong> {{ selectedSlot.startTime }}</p>
+            <p><strong>Kraj:</strong> {{ selectedSlot.endTime }}</p>
+            <p><strong>Trajanje:</strong> {{ selectedSlot.durationHours }} sat{{ selectedSlot.durationHours > 1 ? 'a' : '' }}</p>
           </div>
 
           <div class="action-row">
             <button type="button" [disabled]="!canConfirmReservation" (click)="confirmReservation()">
-              {{ isSubmitting ? 'Submitting...' : 'Confirm Reservation' }}
+              {{ isSubmitting ? 'Potvrđivanje...' : 'Potvrdi rezervaciju' }}
             </button>
             <button type="button" class="secondary-button" [disabled]="isSubmitting" (click)="clearSelection()">
-              Clear Selection
+              Očisti izbor
             </button>
           </div>
         </section>

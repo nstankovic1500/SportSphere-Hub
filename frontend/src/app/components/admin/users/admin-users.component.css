@@ -1,0 +1,16 @@
+.page { padding: 24px; }
+.page-header { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; margin-bottom: 24px; }
+.header-links { display: flex; gap: 16px; flex-wrap: wrap; }
+.cards { display: grid; gap: 16px; }
+.card { padding: 20px; border-radius: 18px; border: 1px solid #d0d7de; background: #ffffff; }
+.card h2, .card p { margin: 0 0 10px; }
+.edit-form { display: grid; gap: 12px; }
+.edit-form input, .edit-form select { padding: 10px 12px; border: 1px solid #d0d7de; border-radius: 12px; font: inherit; }
+.sports-grid { display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); }
+.sport-option { display: flex; gap: 8px; align-items: center; padding: 8px 10px; min-height: 48px; border: 1px solid #d0d7de; border-radius: 12px; }
+.sport-option input { width: 16px; height: 16px; margin: 0; }
+.field-error { color: #b42318; font-size: 0.95rem; }
+.actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+.message, .state-message { margin: 0 0 16px; padding: 12px 14px; border-radius: 12px; }
+.danger-button, .secondary-button, button { padding: 10px 14px; border-radius: 12px; border: 0; cursor: pointer; }
+@media (max-width: 768px) { .page { padding: 16px; } .page-header { flex-direction: column; } }

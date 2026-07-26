@@ -1,14 +1,28 @@
-<section class="page">
-  <h1>Kontrolna tabla zaposlenog</h1>
-  <p>Dobrodošli, {{ user?.firstName }}</p>
-  <p>Uloga: zaposleni</p>
-  <div class="dashboard-links">
-    <a class="dashboard-link" routerLink="/employee/profile">
-      Profil
-    </a>
-    <a class="dashboard-link" routerLink="/employee/facilities">
-      Moji objekti
-    </a>
-  </div>
-  <button type="button" (click)="logout()">Odjava</button>
+<section class="page dashboard-page">
+  <header class="dashboard-hero dashboard-hero--employee">
+    <div class="dashboard-hero__content">
+      <span class="dashboard-eyebrow">SportSphere</span>
+      <h1>Početna strana zaposlenog</h1>
+      <p>Upravljajte objektima, terminima, porudžbinama i sadržajem objekta iz jednog operativnog centra.</p>
+    </div>
+    <button type="button" class="secondary-button" (click)="logout()">Odjava</button>
+  </header>
+
+  <nav class="dashboard-nav" aria-label="Glavna navigacija zaposlenog">
+    <a class="dashboard-link active" routerLink="/employee">Početna strana</a>
+    <a class="dashboard-link" routerLink="/employee/profile">Profil</a>
+  </nav>
+
+  <section class="stats-grid">
+    <article class="stat-card">
+      <span class="stat-label">Zaposleni</span>
+      <strong>{{ user?.firstName }} {{ user?.lastName }}</strong>
+      <p>Pregled svih operativnih zadataka na jednom mestu.</p>
+    </article>
+    <article class="stat-card">
+      <span class="stat-label">Uloga</span>
+      <strong>Zaposleni</strong>
+      <p>Pristup objektima, kalendarima, resursima i prodavnici.</p>
+    </article>
+  </section>
 </section>
