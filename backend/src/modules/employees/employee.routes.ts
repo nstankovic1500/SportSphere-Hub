@@ -20,6 +20,7 @@ import {
   getFacilityCalendar,
   getFacilities,
   getFacility,
+  getMonthlyReportPdf,
   getFacilityOrders,
   getFacilityProducts,
   getFacilityPromotions,
@@ -58,6 +59,7 @@ employeeRouter.get('/facilities/:facilityId', getFacility);
 employeeRouter.patch('/facilities/:facilityId', updateFacility);
 employeeRouter.get('/facilities/:facilityId/attendance', getAttendance);
 employeeRouter.get('/facilities/:facilityId/calendar', getFacilityCalendar);
+employeeRouter.get('/facilities/:facilityId/reports/monthly-pdf', getMonthlyReportPdf);
 employeeRouter.get('/facilities/:facilityId/orders', getFacilityOrders);
 employeeRouter.get('/facilities/:facilityId/products', getFacilityProducts);
 employeeRouter.post('/facilities/:facilityId/products', createProduct);

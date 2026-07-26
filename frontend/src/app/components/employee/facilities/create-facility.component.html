@@ -1,17 +1,17 @@
 <section class="page">
   <header class="page-header">
     <div>
-      <h1>Create Facility</h1>
-      <p>Submit a new facility request for admin approval.</p>
+      <h1>Kreiraj objekat</h1>
+      <p>Pošaljite novi zahtev za objekat radi odobrenja administratora.</p>
     </div>
     <div class="header-links">
       <a routerLink="/employee">Nazad na kontrolnu tablu</a>
-      <a routerLink="/employee/facilities">My facilities</a>
+      <a routerLink="/employee/facilities">Moji objekti</a>
     </div>
   </header>
 
   @if (isLoading) {
-    <p class="state-message">Loading facility form...</p>
+    <p class="state-message">Učitavanje forme objekta...</p>
   } @else {
     <section class="panel">
       @if (successMessage) {
@@ -23,6 +23,25 @@
       }
 
       <form [formGroup]="facilityForm" (ngSubmit)="submit()">
+        <div class="field wide-field">
+          <label for="facilityJson">Uvoz objekta iz JSON fajla</label>
+          <input
+            id="facilityJson"
+            type="file"
+            accept="application/json,.json"
+            (change)="onJsonSelected($event)"
+          />
+          <small class="helper-text">
+            Možete učitati JSON fajl sa podacima za objekat, a forma će se automatski popuniti.
+          </small>
+          @if (importedJsonFileName) {
+            <small class="helper-text">Učitani fajl: {{ importedJsonFileName }}</small>
+          }
+          @if (jsonErrorMessage) {
+            <small class="field-error">{{ jsonErrorMessage }}</small>
+          }
+        </div>
+
         <div class="form-grid">
           <div class="field">
             <label for="name">Naziv</label>
@@ -50,12 +69,12 @@
           </div>
 
           <div class="field">
-            <label for="longitude">Longitude</label>
+            <label for="longitude">Geografska dužina</label>
             <input id="longitude" type="number" step="any" formControlName="longitude" />
           </div>
 
           <div class="field">
-            <label for="latitude">Latitude</label>
+            <label for="latitude">Geografska širina</label>
             <input id="latitude" type="number" step="any" formControlName="latitude" />
           </div>
 
@@ -85,7 +104,7 @@
             }
           </div>
           @if (selectedSports.touched && selectedSports.hasError('required')) {
-            <small class="field-error">Select at least one sport.</small>
+            <small class="field-error">Izaberite bar jedan sport.</small>
           }
         </div>
 
@@ -93,7 +112,7 @@
           <div class="section-header">
             <label>Radno vreme</label>
             <button type="button" class="secondary-button" (click)="addOpeningHour()">
-              Add Row
+              Dodaj red
             </button>
           </div>
 
@@ -111,9 +130,8 @@
                   type="button"
                   class="secondary-button"
                   (click)="removeOpeningHour($index)"
-                  [disabled]="openingHourRows.length === 1"
                 >
-                  Remove
+                  Ukloni
                 </button>
               </div>
             }
@@ -121,7 +139,7 @@
         </div>
 
         <div class="field wide-field">
-          <label for="facilityImages">Facility Images</label>
+          <label for="facilityImages">Slike objekta</label>
           <input
             id="facilityImages"
             type="file"
@@ -129,7 +147,7 @@
             accept="image/jpeg,image/png,image/webp"
             (change)="onImagesSelected($event)"
           />
-          <small class="helper-text">Upload up to 5 JPG, PNG or WEBP images per request.</small>
+          <small class="helper-text">Otpremite do 5 JPG, PNG ili WEBP slika po zahtevu.</small>
           @if (imageErrorMessage) {
             <small class="field-error">{{ imageErrorMessage }}</small>
           }
@@ -143,7 +161,7 @@
         </div>
 
         <button type="submit" [disabled]="facilityForm.invalid || isSubmitting">
-          {{ isSubmitting ? (isUploadingImages ? 'Uploading Images...' : 'Submitting...') : 'Submit Facility Request' }}
+          {{ isSubmitting ? (isUploadingImages ? 'Otpremanje slika...' : 'Slanje...') : 'Pošalji zahtev za objekat' }}
         </button>
       </form>
     </section>

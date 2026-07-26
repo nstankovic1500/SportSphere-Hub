@@ -268,7 +268,10 @@ export class EmployeeCalendarComponent {
         const updatedEvent = response.data.event;
         this.events = this.events.map((event) => (event.id === updatedEvent.id ? updatedEvent : event));
         this.syncCalendarEvents(this.events.map((event) => this.toCalendarEvent(event)));
-        this.successMessage = `${updatedEvent.itemType === 'training' ? 'Training' : 'Reservation'} moved successfully.`;
+        this.successMessage =
+          updatedEvent.itemType === 'training'
+            ? 'Trening je uspešno pomeren.'
+            : 'Rezervacija je uspešno pomerena.';
       },
       error: (error) => {
         this.isMovingEvent = false;

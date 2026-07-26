@@ -25,6 +25,21 @@ export class AthleteTrainingsComponent {
     this.loadAppointments();
   }
 
+  getStatusLabel(status: AthleteTrainingAppointment['status']) {
+    switch (status) {
+      case 'scheduled':
+        return 'Zakazan';
+      case 'completed':
+        return 'Završen';
+      case 'cancelled':
+        return 'Otkazan';
+      case 'no_show':
+        return 'Nije došao';
+      default:
+        return status;
+    }
+  }
+
   cancelAppointment(appointment: AthleteTrainingAppointment) {
     if (!appointment.canCancel || this.cancellingIds.has(appointment.id)) {
       return;
@@ -42,7 +57,7 @@ export class AthleteTrainingsComponent {
             : currentAppointment,
         );
         this.cancellingIds.delete(appointment.id);
-        this.successMessage = 'Training appointment cancelled successfully.';
+        this.successMessage = 'Termin treninga je uspešno otkazan.';
       },
       error: (error) => {
         this.cancellingIds.delete(appointment.id);

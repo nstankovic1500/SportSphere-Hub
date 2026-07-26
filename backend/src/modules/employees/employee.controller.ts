@@ -9,6 +9,7 @@ import type {
   EmployeeCalendarQuery,
   MoveReservationBody,
 } from './employee-calendar.types';
+import type { MonthlyReportQuery } from './employee-reports.types';
 import type {
   CreateEmployeeFacilityBody,
   EmployeeProductBody,
@@ -37,6 +38,8 @@ import {
   getFacilityCalendar as getFacilityCalendarService,
   getFacilities as getFacilitiesService,
   getFacility as getFacilityService,
+  getMonthlyEquipmentPdf as getMonthlyEquipmentPdfService,
+  getMonthlyOccupancyPdf as getMonthlyOccupancyPdfService,
   getFacilityOrders as getFacilityOrdersService,
   getFacilityProducts as getFacilityProductsService,
   getFacilityPromotions as getFacilityPromotionsService,
@@ -157,6 +160,24 @@ const getFacilityOrders = asyncHandler(async (req: AuthenticatedRequest, res: Re
     success: true,
     data,
   });
+});
+
+const getMonthlyReportPdf = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const employeeId = String(req.auth?.userId);
+  const facilityId = String(req.params.facilityId);
+  const query = req.query as MonthlyReportQuery;
+  const month = typeof query.month === 'string' ? query.month : '';
+  const type = query.type === 'equipment' ? 'equipment' : 'occupancy';
+
+  const data =
+    type === 'equipment'
+      ? await getMonthlyEquipmentPdfService(employeeId, facilityId, month)
+      : await getMonthlyOccupancyPdfService(employeeId, facilityId, month);
+
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', `attachment; filename="${data.fileName}"`);
+  res.setHeader('Content-Length', String(data.pdf.length));
+  res.status(200).end(data.pdf);
 });
 
 const createFacility = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
@@ -495,6 +516,7 @@ export {
   getFacilityCalendar,
   getFacilities,
   getFacility,
+  getMonthlyReportPdf,
   getFacilityOrders,
   getFacilityProducts,
   getFacilityPromotions,

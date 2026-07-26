@@ -2,11 +2,11 @@
   <header class="page-header">
     <div>
       <h1>Rezervacije i treninzi</h1>
-      <p>Review attendance for {{ selectedFacilityName }} and record arrivals within the allowed time window.</p>
+      <p>Pregledajte prisustvo za {{ selectedFacilityName }} i evidentirajte dolaske u dozvoljenom vremenskom prozoru.</p>
     </div>
     <div class="header-links">
       <a [routerLink]="['/employee/facilities', facilityId]">Nazad na objekat</a>
-      <a routerLink="/employee/facilities">My facilities</a>
+      <a routerLink="/employee/facilities">Moji objekti</a>
     </div>
   </header>
 
@@ -69,7 +69,7 @@
                 <td>{{ item.endTime | date: 'medium' }}</td>
                 <td>
                   <span class="status-badge" [class.closed]="!item.canRecordAttendance">
-                    {{ item.status }}
+                    {{ getStatusLabel(item) }}
                   </span>
                 </td>
                 <td>
@@ -80,28 +80,28 @@
                           type="button"
                           (click)="markAttended(item)"
                           [disabled]="isProcessing(item.id)">
-                          {{ isProcessing(item.id) ? 'Saving...' : 'Attended' }}
+                          {{ isProcessing(item.id) ? 'Čuvanje...' : 'Prisutan' }}
                         </button>
                         <button
                           type="button"
                           class="danger-button"
                           (click)="markReservationNoShow(item)"
                           [disabled]="isProcessing(item.id)">
-                          {{ isProcessing(item.id) ? 'Saving...' : 'No Show' }}
+                          {{ isProcessing(item.id) ? 'Čuvanje...' : 'Nije došao' }}
                         </button>
                       } @else {
                         <button
                           type="button"
                           (click)="markCompleted(item)"
                           [disabled]="isProcessing(item.id)">
-                          {{ isProcessing(item.id) ? 'Saving...' : 'Completed' }}
+                          {{ isProcessing(item.id) ? 'Čuvanje...' : 'Završen' }}
                         </button>
                         <button
                           type="button"
                           class="danger-button"
                           (click)="markTrainingNoShow(item)"
                           [disabled]="isProcessing(item.id)">
-                          {{ isProcessing(item.id) ? 'Saving...' : 'No Show' }}
+                          {{ isProcessing(item.id) ? 'Čuvanje...' : 'Nije došao' }}
                         </button>
                       }
                     </div>

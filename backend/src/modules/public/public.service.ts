@@ -5,6 +5,7 @@ import { Promotion, type DiscountType } from '../../models/Promotion';
 import { Product, type IProduct } from '../../models/Product';
 import { Resource, type ResourceType } from '../../models/Resource';
 import { Review, ReviewReaction } from '../../models/Review';
+import { Sport } from '../../models/Sport';
 import { AppError } from '../../utils/AppError';
 import type {
   HomeResponse,
@@ -26,7 +27,7 @@ type PopulatedSport = {
 
 type PopulatedFacility = Omit<IFacility, 'sports'> & {
   _id: Types.ObjectId;
-  sports: PopulatedSport[];
+  sports: Array<PopulatedSport | Types.ObjectId | string>;
 };
 
 type PopulatedResource = {
@@ -73,6 +74,61 @@ const toSportSummary = (sport: PopulatedSport): PublicSport => ({
   id: sport._id.toString(),
   name: sport.name,
 });
+
+const getSportIdsFromFacility = (facility: PopulatedFacility) =>
+  (facility.sports ?? [])
+    .map((sport) => {
+      if (sport instanceof Types.ObjectId) {
+        return sport.toString();
+      }
+
+      if (typeof sport === 'string') {
+        return sport;
+      }
+
+      return sport._id.toString();
+    })
+    .filter(Boolean);
+
+const buildSportMap = async (facilities: PopulatedFacility[]) => {
+  const sportIds = Array.from(
+    new Set(
+      facilities.flatMap((facility) => getSportIdsFromFacility(facility)),
+    ),
+  );
+
+  if (sportIds.length === 0) {
+    return new Map<string, PublicSport>();
+  }
+
+  const sports = await Sport.find({
+    _id: {
+      $in: sportIds
+        .filter((sportId) => Types.ObjectId.isValid(sportId))
+        .map((sportId) => new Types.ObjectId(sportId)),
+    },
+  })
+    .select('name')
+    .lean();
+
+  return new Map(
+    sports.map((sport) => [
+      (sport._id as Types.ObjectId).toString(),
+      {
+        id: (sport._id as Types.ObjectId).toString(),
+        name: sport.name,
+      },
+    ]),
+  );
+};
+
+const getMappedFacilitySports = (
+  facility: PopulatedFacility,
+  sportMap: Map<string, PublicSport>,
+) =>
+  getSportIdsFromFacility(facility)
+    .map((sportId) => sportMap.get(sportId))
+    .filter((sport): sport is PublicSport => !!sport);
 
 const toPublicProduct = (product: PublicProductDocument): PublicProduct => ({
   id: product._id.toString(),
@@ -273,7 +329,10 @@ const getFacilities = async (
     .lean()) as unknown as PopulatedFacility[];
 
   const facilityIds = facilities.map((facility) => facility._id);
-  const reviewStatsMap = await buildReviewStatsMap(facilityIds);
+  const [reviewStatsMap, sportMap] = await Promise.all([
+    buildReviewStatsMap(facilityIds),
+    buildSportMap(facilities),
+  ]);
 
   return {
     facilities: facilities.map((facility) => {
@@ -289,7 +348,7 @@ const getFacilities = async (
         city: facility.city,
         country: facility.country,
         address: facility.address,
-        sports: facility.sports.map(toSportSummary),
+        sports: getMappedFacilitySports(facility, sportMap),
         hourlyPrice: facility.hourlyPrice,
         image: facility.images?.[0] ?? null,
         likesCount: stats.likesCount,
@@ -320,8 +379,9 @@ const getFacilityById = async (
     throw new AppError('Facility not found', 404);
   }
 
-  const [reviewStatsMap, resources, reviews] = await Promise.all([
+  const [reviewStatsMap, sportMap, resources, reviews] = await Promise.all([
     buildReviewStatsMap([facility._id]),
+    buildSportMap([facility]),
     Resource.find({
       facilityId: facility._id,
       active: true,
@@ -373,7 +433,7 @@ const getFacilityById = async (
       address: facility.address,
       description: facility.description,
       location: facility.location,
-      sports: facility.sports.map(toSportSummary),
+      sports: getMappedFacilitySports(facility, sportMap),
       images: facility.images ?? [],
       openingHours: facility.openingHours ?? [],
       hourlyPrice: facility.hourlyPrice,

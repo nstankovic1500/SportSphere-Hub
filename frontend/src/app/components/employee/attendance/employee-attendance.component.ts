@@ -66,7 +66,28 @@ export class EmployeeAttendanceComponent {
   }
 
   getTypeLabel(item: EmployeeAttendanceItem) {
-    return item.type === 'reservation' ? 'Reservation' : 'Training';
+    return item.type === 'reservation' ? 'Rezervacija' : 'Trening';
+  }
+
+  getStatusLabel(item: EmployeeAttendanceItem) {
+    switch (item.status) {
+      case 'pending':
+        return 'Na čekanju';
+      case 'confirmed':
+        return 'Potvrđena';
+      case 'cancelled':
+        return 'Otkazana';
+      case 'attended':
+        return 'Prisutan';
+      case 'no_show':
+        return 'Nije došao';
+      case 'scheduled':
+        return 'Zakazan';
+      case 'completed':
+        return 'Završen';
+      default:
+        return item.status;
+    }
   }
 
   markAttended(item: EmployeeAttendanceItem) {
@@ -82,7 +103,7 @@ export class EmployeeAttendanceComponent {
       return;
     }
 
-    if (!window.confirm(`Mark ${item.athleteName} as no-show for this reservation?`)) {
+    if (!window.confirm(`Označiti sportistu ${item.athleteName} kao da se nije pojavio za ovu rezervaciju?`)) {
       return;
     }
 
@@ -102,7 +123,7 @@ export class EmployeeAttendanceComponent {
       return;
     }
 
-    if (!window.confirm(`Mark ${item.athleteName} as no-show for this training?`)) {
+    if (!window.confirm(`Označiti sportistu ${item.athleteName} kao da se nije pojavio za ovaj trening?`)) {
       return;
     }
 
@@ -167,10 +188,10 @@ export class EmployeeAttendanceComponent {
         );
 
         this.processingIds.delete(itemId);
-        this.successMessage = 'Attendance updated successfully.';
+        this.successMessage = 'Prisustvo je uspešno ažurirano.';
 
         if (response.data.athleteBlockedInFacility) {
-          this.blockingMessage = `Athlete reached ${response.data.totalNoShows} no-shows out of ${response.data.allowedNoShows} allowed and is now blocked in this facility.`;
+          this.blockingMessage = `Sportista ima ${response.data.totalNoShows} izostanaka od dozvoljenih ${response.data.allowedNoShows} i sada je blokiran u ovom objektu.`;
         }
       },
       error: (error) => {

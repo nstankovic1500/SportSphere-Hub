@@ -2,6 +2,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { forkJoin } from 'rxjs';
 
 import type {
@@ -14,7 +15,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { PublicService } from '../../../core/services/public.service';
 import { buildUploadImageUrl } from '../../../core/utils/image.util';
 
-const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const dayNames = ['Nedelja', 'Ponedeljak', 'Utorak', 'Sreda', 'Četvrtak', 'Petak', 'Subota'];
 
 @Component({
   selector: 'app-facility-details',
@@ -30,6 +31,7 @@ export class FacilityDetailsComponent {
   private readonly publicService = inject(PublicService);
   private readonly athleteService = inject(AthleteService);
   private readonly authService = inject(AuthService);
+  private readonly sanitizer = inject(DomSanitizer);
 
   readonly reviewForm = this.formBuilder.nonNullable.group({
     reaction: ['', Validators.required],
@@ -92,6 +94,19 @@ export class FacilityDetailsComponent {
 
   getImageUrl(imagePath: string | null) {
     return buildUploadImageUrl(imagePath);
+  }
+
+  getMapUrl(): SafeResourceUrl | null {
+    if (!this.facility?.location?.coordinates || this.facility.location.coordinates.length < 2) {
+      return null;
+    }
+
+    const [longitude, latitude] = this.facility.location.coordinates;
+    const offset = 0.01;
+    const mapUrl =
+      `https://www.openstreetmap.org/export/embed.html?bbox=${longitude - offset}%2C${latitude - offset}%2C${longitude + offset}%2C${latitude + offset}&layer=mapnik&marker=${latitude}%2C${longitude}`;
+
+    return this.sanitizer.bypassSecurityTrustResourceUrl(mapUrl);
   }
 
   reserveFacility() {

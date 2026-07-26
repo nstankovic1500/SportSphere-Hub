@@ -8,7 +8,6 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { forkJoin } from 'rxjs';
 
 import type { CreateEmployeeFacilityRequest } from '../../../core/models/employee.model';
 import type { Sport } from '../../../core/models/sport.model';
@@ -49,17 +48,19 @@ export class CreateFacilityComponent {
   errorMessage = '';
   successMessage = '';
   imageErrorMessage = '';
+  jsonErrorMessage = '';
+  importedJsonFileName = '';
   selectedImageFiles: File[] = [];
   imagePreviews: string[] = [];
 
   readonly weekdays = [
-    { value: 0, label: 'Sunday' },
-    { value: 1, label: 'Monday' },
-    { value: 2, label: 'Tuesday' },
-    { value: 3, label: 'Wednesday' },
-    { value: 4, label: 'Thursday' },
-    { value: 5, label: 'Friday' },
-    { value: 6, label: 'Saturday' },
+    { value: 0, label: 'Nedelja' },
+    { value: 1, label: 'Ponedeljak' },
+    { value: 2, label: 'Utorak' },
+    { value: 3, label: 'Sreda' },
+    { value: 4, label: 'Četvrtak' },
+    { value: 5, label: 'Petak' },
+    { value: 6, label: 'Subota' },
   ];
 
   constructor() {
@@ -87,7 +88,7 @@ export class CreateFacilityComponent {
     this.selectedSports.setValue(
       checked
         ? [...currentSports, sportId]
-        : currentSports.filter((selectedSportId) => !(selectedSportId === sportId)),
+        : currentSports.filter((selectedSportId) => selectedSportId !== sportId),
     );
     this.selectedSports.updateValueAndValidity();
   }
@@ -119,12 +120,45 @@ export class CreateFacilityComponent {
     this.imagePreviews = files.map((file) => URL.createObjectURL(file));
   }
 
+  onJsonSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    this.jsonErrorMessage = '';
+    this.successMessage = '';
+
+    if (!file) {
+      this.importedJsonFileName = '';
+      return;
+    }
+
+    if (!(file.type === 'application/json' || file.name.toLowerCase().endsWith('.json'))) {
+      this.importedJsonFileName = '';
+      this.jsonErrorMessage = 'Dozvoljen je samo JSON fajl.';
+      input.value = '';
+      return;
+    }
+
+    void file.text().then((content) => {
+      try {
+        const parsed = JSON.parse(content) as Record<string, unknown>;
+        this.applyJsonData(parsed);
+        this.importedJsonFileName = file.name;
+      } catch {
+        this.importedJsonFileName = '';
+        this.jsonErrorMessage = 'JSON fajl nije ispravan.';
+        input.value = '';
+      }
+    });
+  }
+
   submit() {
     if (this.facilityForm.invalid || this.selectedSports.value.length === 0 || this.isSubmitting) {
       this.facilityForm.markAllAsTouched();
+
       if (this.selectedSports.value.length === 0) {
         this.selectedSports.setErrors({ required: true });
       }
+
       return;
     }
 
@@ -153,26 +187,27 @@ export class CreateFacilityComponent {
           error: (error) => {
             this.isSubmitting = false;
             this.isUploadingImages = false;
-            this.errorMessage = error.error?.message ?? 'Facility was created, but images could not be uploaded.';
+            this.errorMessage =
+              error.error?.message ?? 'Objekat je kreiran, ali slike nisu uspešno otpremljene.';
           },
         });
       },
       error: (error) => {
         this.isSubmitting = false;
-        this.errorMessage = error.error?.message ?? 'Unable to create facility request.';
+        this.errorMessage = error.error?.message ?? 'Nije moguće poslati zahtev za objekat.';
       },
     });
   }
 
   private loadSports() {
-    forkJoin({
-      sportsResponse: this.publicService.getSports(),
-    }).subscribe({
-      next: ({ sportsResponse }) => {
+    this.publicService.getSports().subscribe({
+      next: (sportsResponse) => {
         this.sports = sportsResponse.data.sports;
+
         if (this.openingHours.length === 0) {
           this.addOpeningHour();
         }
+
         this.isLoading = false;
       },
       error: (error) => {
@@ -182,11 +217,11 @@ export class CreateFacilityComponent {
     });
   }
 
-  private createOpeningHourGroup() {
+  private createOpeningHourGroup(day = 1, open = '', close = '') {
     return this.formBuilder.nonNullable.group({
-      day: [1, [Validators.required, Validators.min(0), Validators.max(6)]],
-      open: ['', [Validators.required, Validators.pattern(/^([01]\d|2[0-3]):([0-5]\d)$/)]],
-      close: ['', [Validators.required, Validators.pattern(/^([01]\d|2[0-3]):([0-5]\d)$/)]],
+      day: [day, [Validators.required, Validators.min(0), Validators.max(6)]],
+      open: [open, [Validators.required, Validators.pattern(/^([01]\d|2[0-3]):([0-5]\d)$/)]],
+      close: [close, [Validators.required, Validators.pattern(/^([01]\d|2[0-3]):([0-5]\d)$/)]],
     });
   }
 
@@ -214,7 +249,7 @@ export class CreateFacilityComponent {
 
   private finishSuccess() {
     this.isSubmitting = false;
-    this.successMessage = 'Facility request created successfully.';
+    this.successMessage = 'Zahtev za objekat je uspešno poslat.';
 
     window.setTimeout(() => {
       void this.router.navigate(['/employee/facilities']);
@@ -225,19 +260,161 @@ export class CreateFacilityComponent {
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
 
     if (files.length > 5) {
-      return 'You can upload at most 5 images at once.';
+      return 'Možete otpremiti najviše 5 slika odjednom.';
     }
 
     for (const file of files) {
       if (!allowedTypes.includes(file.type)) {
-        return 'Only JPG, PNG and WEBP images are allowed.';
+        return 'Dozvoljene su samo JPG, PNG i WEBP slike.';
       }
 
       if (file.size > 5 * 1024 * 1024) {
-        return 'Each image must be 5 MB or smaller.';
+        return 'Svaka slika mora biti veličine do 5 MB.';
       }
     }
 
     return '';
+  }
+
+  private applyJsonData(data: Record<string, unknown>) {
+    const sports = this.mapImportedSports(data['sports']);
+    const openingHours = this.mapImportedOpeningHours(data['openingHours']);
+    const coordinates = this.mapImportedCoordinates(data['location']);
+
+    this.facilityForm.patchValue({
+      name: this.toText(data['name']),
+      city: this.toText(data['city']),
+      country: this.toText(data['country']),
+      address: this.toText(data['address']),
+      description: this.toText(data['description']),
+      longitude: coordinates.longitude ?? this.toNumber(data['longitude']),
+      latitude: coordinates.latitude ?? this.toNumber(data['latitude']),
+      hourlyPrice: this.toNumber(data['hourlyPrice']),
+      allowedNoShows: this.toInteger(data['allowedNoShows']),
+      sports,
+    });
+
+    this.facilityForm.setControl(
+      'openingHours',
+      this.formBuilder.array<FormGroup>(
+        openingHours.length > 0
+          ? openingHours.map((row) => this.createOpeningHourGroup(row.day, row.open, row.close))
+          : [this.createOpeningHourGroup()],
+      ),
+    );
+
+    this.selectedSports.updateValueAndValidity();
+    this.facilityForm.markAsUntouched();
+    this.jsonErrorMessage = '';
+    this.successMessage = 'JSON podaci su uspešno učitani u formu.';
+  }
+
+  private mapImportedSports(value: unknown) {
+    if (!Array.isArray(value)) {
+      return [] as string[];
+    }
+
+    const availableSports = new Map<string, string>();
+
+    for (const sport of this.sports) {
+      availableSports.set(sport.id, sport.id);
+      availableSports.set(sport.name.trim().toLowerCase(), sport.id);
+    }
+
+    return [
+      ...new Set(
+        value
+          .map((sport) => {
+            if (typeof sport === 'string') {
+              const trimmedSport = sport.trim();
+
+              return (
+                availableSports.get(trimmedSport) ??
+                availableSports.get(trimmedSport.toLowerCase()) ??
+                ''
+              );
+            }
+
+            if (sport && typeof sport === 'object') {
+              const record = sport as Record<string, unknown>;
+              const candidateId = this.toText(record['id']);
+              const candidateOid = this.toText(record['$oid']);
+              const candidateName = this.toText(record['name']).toLowerCase();
+
+              return (
+                availableSports.get(candidateId) ??
+                availableSports.get(candidateOid) ??
+                availableSports.get(candidateName) ??
+                ''
+              );
+            }
+
+            return '';
+          })
+          .filter(Boolean),
+      ),
+    ];
+  }
+
+  private mapImportedOpeningHours(value: unknown) {
+    if (!Array.isArray(value)) {
+      return [] as Array<{ day: number; open: string; close: string }>;
+    }
+
+    return value
+      .map((item) => {
+        if (!item || typeof item !== 'object') {
+          return null;
+        }
+
+        const row = item as Record<string, unknown>;
+        const day = this.toInteger(row['day']);
+        const open = this.toText(row['open']);
+        const close = this.toText(row['close']);
+
+        if (day < 0 || day > 6 || !open || !close) {
+          return null;
+        }
+
+        return { day, open, close };
+      })
+      .filter((row): row is { day: number; open: string; close: string } => row !== null)
+      .sort((first, second) => first.day - second.day);
+  }
+
+  private mapImportedCoordinates(value: unknown) {
+    if (!value || typeof value !== 'object') {
+      return {
+        longitude: undefined as number | undefined,
+        latitude: undefined as number | undefined,
+      };
+    }
+
+    const location = value as Record<string, unknown>;
+    const coordinates = Array.isArray(location['coordinates']) ? location['coordinates'] : [];
+
+    return {
+      longitude: this.toOptionalNumber(coordinates[0]),
+      latitude: this.toOptionalNumber(coordinates[1]),
+    };
+  }
+
+  private toText(value: unknown) {
+    return typeof value === 'string' ? value.trim() : '';
+  }
+
+  private toNumber(value: unknown) {
+    const parsed = Number(value);
+    return Number.isNaN(parsed) ? 0 : parsed;
+  }
+
+  private toInteger(value: unknown) {
+    const parsed = Number(value);
+    return Number.isInteger(parsed) ? parsed : 0;
+  }
+
+  private toOptionalNumber(value: unknown) {
+    const parsed = Number(value);
+    return Number.isNaN(parsed) ? undefined : parsed;
   }
 }

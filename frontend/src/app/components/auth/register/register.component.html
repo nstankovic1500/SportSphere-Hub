@@ -9,7 +9,7 @@
           <label for="username">Korisničko ime</label>
           <input id="username" type="text" formControlName="username" />
           @if (username.touched && username.hasError('required')) {
-            <small class="field-error">Username is required.</small>
+            <small class="field-error">Korisničko ime je obavezno.</small>
           }
         </div>
 
@@ -17,10 +17,10 @@
           <label for="email">Imejl</label>
           <input id="email" type="email" formControlName="email" />
           @if (email.touched && email.hasError('required')) {
-            <small class="field-error">Email is required.</small>
+            <small class="field-error">Imejl je obavezan.</small>
           }
           @if (email.touched && email.hasError('email')) {
-            <small class="field-error">Enter a valid email address.</small>
+            <small class="field-error">Unesite ispravnu imejl adresu.</small>
           }
         </div>
 
@@ -28,11 +28,11 @@
           <label for="password">Lozinka</label>
           <input id="password" type="password" formControlName="password" />
           @if (password.touched && password.hasError('required')) {
-            <small class="field-error">Password is required.</small>
+            <small class="field-error">Lozinka je obavezna.</small>
           }
           @if (password.touched && password.hasError('invalidPassword')) {
             <small class="field-error">
-              Password must start with a letter, be 8-12 characters, and include an uppercase letter, a number, and a special character.
+              Lozinka mora početi slovom, imati 8-12 karaktera i sadržati veliko slovo, broj i specijalni znak.
             </small>
           }
         </div>
@@ -41,10 +41,10 @@
           <label for="confirmPassword">Potvrda lozinke</label>
           <input id="confirmPassword" type="password" formControlName="confirmPassword" />
           @if (confirmPassword.touched && confirmPassword.hasError('required')) {
-            <small class="field-error">Confirm password is required.</small>
+            <small class="field-error">Potvrda lozinke je obavezna.</small>
           }
           @if (registerForm.touched && registerForm.hasError('passwordMismatch')) {
-            <small class="field-error">Passwords must match.</small>
+            <small class="field-error">Lozinke moraju da se poklapaju.</small>
           }
         </div>
 
@@ -52,7 +52,7 @@
           <label for="firstName">Ime</label>
           <input id="firstName" type="text" formControlName="firstName" />
           @if (firstName.touched && firstName.hasError('required')) {
-            <small class="field-error">First name is required.</small>
+            <small class="field-error">Ime je obavezno.</small>
           }
         </div>
 
@@ -60,7 +60,7 @@
           <label for="lastName">Prezime</label>
           <input id="lastName" type="text" formControlName="lastName" />
           @if (lastName.touched && lastName.hasError('required')) {
-            <small class="field-error">Last name is required.</small>
+            <small class="field-error">Prezime je obavezno.</small>
           }
         </div>
 
@@ -68,7 +68,7 @@
           <label for="phone">Telefon</label>
           <input id="phone" type="text" formControlName="phone" />
           @if (phone.touched && phone.hasError('required')) {
-            <small class="field-error">Phone is required.</small>
+            <small class="field-error">Telefon je obavezan.</small>
           }
         </div>
 
@@ -84,7 +84,7 @@
       <div class="field">
         <label>Omiljeni sportovi</label>
         @if (isLoadingSports) {
-          <p class="helper-text">Loading sports...</p>
+          <p class="helper-text">Učitavanje sportova...</p>
         } @else {
           <div class="sports-grid">
             @for (sport of sports; track sport.id) {
@@ -102,20 +102,20 @@
         }
         <small class="helper-text">Izaberite do 5 sportova.</small>
         @if (favoriteSports.touched && favoriteSports.hasError('maxSelectedSports')) {
-          <small class="field-error">You can select at most 5 sports.</small>
+          <small class="field-error">Možete izabrati najviše 5 sportova.</small>
         }
       </div>
 
       @if (isEmployee) {
         <section class="employee-section" formGroupName="employeeData">
-          <h2>Employee Details</h2>
+          <h2>Podaci o zaposlenom</h2>
 
           <div class="form-grid">
             <div class="field">
               <label for="companyName">Naziv firme</label>
               <input id="companyName" type="text" formControlName="companyName" />
               @if (employeeDataGroup.controls.companyName.touched && employeeDataGroup.controls.companyName.hasError('required')) {
-                <small class="field-error">Company name is required.</small>
+                <small class="field-error">Naziv firme je obavezan.</small>
               }
             </div>
 
@@ -123,7 +123,7 @@
               <label for="headOfficeAddress">Adresa sedišta</label>
               <input id="headOfficeAddress" type="text" formControlName="headOfficeAddress" />
               @if (employeeDataGroup.controls.headOfficeAddress.touched && employeeDataGroup.controls.headOfficeAddress.hasError('required')) {
-                <small class="field-error">Head office address is required.</small>
+                <small class="field-error">Adresa sedišta je obavezna.</small>
               }
             </div>
 
@@ -131,10 +131,10 @@
               <label for="registrationNumber">Matični broj</label>
               <input id="registrationNumber" type="text" formControlName="registrationNumber" />
               @if (employeeDataGroup.controls.registrationNumber.touched && employeeDataGroup.controls.registrationNumber.hasError('required')) {
-                <small class="field-error">Registration number is required.</small>
+                <small class="field-error">Matični broj je obavezan.</small>
               }
               @if (employeeDataGroup.controls.registrationNumber.touched && employeeDataGroup.controls.registrationNumber.hasError('pattern')) {
-                <small class="field-error">Registration number must contain exactly 8 digits.</small>
+                <small class="field-error">Matični broj mora sadržati tačno 8 cifara.</small>
               }
             </div>
 
@@ -142,10 +142,10 @@
               <label for="pib">PIB</label>
               <input id="pib" type="text" formControlName="pib" />
               @if (employeeDataGroup.controls.pib.touched && employeeDataGroup.controls.pib.hasError('required')) {
-                <small class="field-error">PIB is required.</small>
+                <small class="field-error">PIB je obavezan.</small>
               }
               @if (employeeDataGroup.controls.pib.touched && employeeDataGroup.controls.pib.hasError('pattern')) {
-                <small class="field-error">PIB must contain exactly 9 digits and cannot start with 0.</small>
+                <small class="field-error">PIB mora sadržati tačno 9 cifara i ne sme početi nulom.</small>
               }
             </div>
           </div>
@@ -161,12 +161,12 @@
       }
 
       <button type="submit" [disabled]="registerForm.invalid || isSubmitting || isLoadingSports">
-        {{ isSubmitting ? 'Submitting...' : 'Register' }}
+        {{ isSubmitting ? 'Slanje...' : 'Registruj se' }}
       </button>
     </form>
 
     <p class="login-link">
-      Already have an account?
+      Već imate nalog?
       <a routerLink="/login">Nazad na prijavu</a>
     </p>
   </div>

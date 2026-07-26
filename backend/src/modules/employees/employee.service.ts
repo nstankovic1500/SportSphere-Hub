@@ -12,6 +12,7 @@ import { Trainer, type ITrainer } from '../../models/Trainer';
 import { User, UserRole, type IUser } from '../../models/User';
 import { AppError } from '../../utils/AppError';
 import { isManagedUploadPath, safeDeleteFile } from '../../utils/file-storage';
+import { buildPdfBuffer } from '../../utils/simple-pdf';
 import type {
   AttendanceItem,
   AttendanceQuery,
@@ -149,6 +150,11 @@ type EmployeeOrderDocument = {
   totalPrice: number;
   status: OrderStatus;
   createdAt?: Date;
+};
+
+type EmployeeOrderProduct = {
+  _id: Types.ObjectId;
+  name: string;
 };
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -298,22 +304,58 @@ const toEmployeeProduct = (product: ProductDocument): EmployeeProduct => ({
   active: product.active,
 });
 
-const toEmployeeOrder = (order: EmployeeOrderDocument): EmployeeOrder => ({
+const toEmployeeOrder = (
+  order: EmployeeOrderDocument,
+  productMap?: Map<string, EmployeeOrderProduct>,
+): EmployeeOrder => ({
   id: order._id.toString(),
   athleteId: order.athleteId._id.toString(),
   athleteName: `${order.athleteId.firstName} ${order.athleteId.lastName}`.trim(),
   facilityId: order.facilityId._id.toString(),
   facilityName: order.facilityId.name,
-  items: order.items.map((item) => ({
-    productId: item.productId.toString(),
-    name: item.name,
-    quantity: item.quantity,
-    priceAtPurchase: item.priceAtPurchase,
-  })),
+  items: order.items.map((item) => {
+    const fallbackProduct = productMap?.get(item.productId.toString());
+
+    return {
+      productId: item.productId.toString(),
+      name:
+        typeof item.name === 'string' && item.name.trim()
+          ? item.name.trim()
+          : fallbackProduct?.name?.trim() || 'Nepoznat proizvod',
+      quantity: item.quantity,
+      priceAtPurchase: item.priceAtPurchase,
+    };
+  }),
   totalPrice: order.totalPrice,
   status: order.status,
   createdAt: order.createdAt ?? new Date(),
 });
+
+const buildEmployeeOrderProductMap = async (orders: EmployeeOrderDocument[]) => {
+  const productIds = [
+    ...new Set(
+      orders.flatMap((order) =>
+        order.items
+          .map((item) => item.productId?.toString?.() ?? '')
+          .filter(Boolean),
+      ),
+    ),
+  ];
+
+  if (productIds.length === 0) {
+    return new Map<string, EmployeeOrderProduct>();
+  }
+
+  const products = await Product.find({
+    _id: { $in: productIds.map((productId) => new Types.ObjectId(productId)) },
+  })
+    .select('name')
+    .lean();
+
+  return new Map(
+    products.map((product) => [product._id!.toString(), product as EmployeeOrderProduct]),
+  );
+};
 
 const getEmployee = async (employeeId: string) => {
   const user = (await User.findById(employeeId)
@@ -802,6 +844,29 @@ const validatePromotionDate = (value: unknown, fieldName: string) => {
   }
 
   return parsedDate;
+};
+
+const parseMonthValue = (value: string | undefined) => {
+  const month = typeof value === 'string' ? value.trim() : '';
+
+  if (!/^\d{4}-\d{2}$/.test(month)) {
+    throw new AppError('month must be in YYYY-MM format', 400);
+  }
+
+  const startDate = new Date(`${month}-01T00:00:00.000Z`);
+
+  if (Number.isNaN(startDate.getTime())) {
+    throw new AppError('month must be in YYYY-MM format', 400);
+  }
+
+  const endDate = new Date(startDate);
+  endDate.setUTCMonth(endDate.getUTCMonth() + 1);
+
+  return {
+    month,
+    startDate,
+    endDate,
+  };
 };
 
 const validateProductDescription = (value: unknown) => {
@@ -2202,9 +2267,231 @@ const getFacilityOrders = async (employeeId: string, facilityId: string) => {
     })
     .sort({ createdAt: -1 })
     .lean()) as unknown as EmployeeOrderDocument[];
+  const productMap = await buildEmployeeOrderProductMap(orders);
 
   return {
-    orders: orders.map((order) => toEmployeeOrder(order)),
+    orders: orders.map((order) => toEmployeeOrder(order, productMap)),
+  };
+};
+
+const getDaysInMonth = (startDate: Date, endDate: Date) => {
+  const days: Date[] = [];
+  const current = new Date(startDate);
+
+  while (current.getTime() < endDate.getTime()) {
+    days.push(new Date(current));
+    current.setUTCDate(current.getUTCDate() + 1);
+  }
+
+  return days;
+};
+
+const getDurationHours = (startTime: Date, endTime: Date) =>
+  (endTime.getTime() - startTime.getTime()) / (60 * 60 * 1000);
+
+const formatMonthLabel = (month: string) => {
+  const [year, monthNumber] = month.split('-');
+  return `${monthNumber}.${year}.`;
+};
+
+const formatPercentage = (value: number) => `${value.toFixed(2)}%`;
+
+const getMonthlyOccupancyPdf = async (employeeId: string, facilityId: string, month: string) => {
+  const facility = await getFacilityByEmployee(employeeId, facilityId);
+  const { startDate, endDate } = parseMonthValue(month);
+
+  const resources = (await Resource.find({
+    facilityId: facility._id,
+  })
+    .populate({
+      path: 'sportId',
+      select: 'name',
+    })
+    .sort({ name: 1 })
+    .lean()) as unknown as PopulatedResource[];
+
+  const [reservations, appointments] = await Promise.all([
+    Reservation.find({
+      facilityId: facility._id,
+      status: { $ne: ReservationStatus.Cancelled },
+      startTime: { $lt: endDate },
+      endTime: { $gt: startDate },
+    }).lean(),
+    Appointment.find({
+      facilityId: facility._id,
+      status: { $ne: AppointmentStatus.Cancelled },
+      startTime: { $lt: endDate },
+      endTime: { $gt: startDate },
+    }).lean(),
+  ]);
+
+  const resourceRows = resources.map((resource) => {
+    const availableHours = getDaysInMonth(startDate, endDate).reduce((total, currentDay) => {
+      const openingHours = (facility.openingHours ?? []).find(
+        (item) => item.day === currentDay.getUTCDay(),
+      );
+
+      if (!openingHours) {
+        return total;
+      }
+
+      const dayStart = toDateTimeFromDayAndTime(currentDay, openingHours.open);
+      const dayEnd = toDateTimeFromDayAndTime(currentDay, openingHours.close);
+
+      return total + getDurationHours(dayStart, dayEnd);
+    }, 0);
+
+    const occupiedIntervals = [...reservations, ...appointments].filter(
+      (item) => item.resourceId.toString() === resource._id.toString(),
+    );
+
+    const occupiedHours = occupiedIntervals.reduce((total, item) => {
+      const boundedStart = new Date(Math.max(item.startTime.getTime(), startDate.getTime()));
+      const boundedEnd = new Date(Math.min(item.endTime.getTime(), endDate.getTime()));
+      return total + getDurationHours(boundedStart, boundedEnd);
+    }, 0);
+
+    const occupancyPercentage =
+      availableHours > 0 ? (occupiedHours / availableHours) * 100 : 0;
+
+    return {
+      name: resource.name,
+      type: resource.type,
+      sportName: resource.sportId.name,
+      availableHours,
+      occupiedHours,
+      occupancyPercentage,
+    };
+  });
+
+  const lines = [
+    `Mesecni izvestaj popunjenosti - ${facility.name}`,
+    `Mesec: ${formatMonthLabel(month)}`,
+    '',
+    'Popunjenost po resursu:',
+    '',
+  ];
+
+  if (resourceRows.length === 0) {
+    lines.push('Nema resursa za izabrani objekat.');
+  } else {
+    for (const row of resourceRows) {
+      lines.push(
+        `${row.name} | tip: ${row.type} | sport: ${row.sportName} | zauzeto: ${row.occupiedHours.toFixed(2)}h / ${row.availableHours.toFixed(2)}h | ${formatPercentage(row.occupancyPercentage)}`,
+      );
+    }
+  }
+
+  const pdf = buildPdfBuffer([lines]);
+
+  return {
+    fileName: `occupancy-report-${facility._id.toString()}-${month}.pdf`,
+    pdf,
+  };
+};
+
+const getMonthlyEquipmentPdf = async (employeeId: string, facilityId: string, month: string) => {
+  const facility = await getFacilityByEmployee(employeeId, facilityId);
+  const { startDate, endDate } = parseMonthValue(month);
+
+  const orders = await Order.find({
+    facilityId: facility._id,
+    status: { $ne: OrderStatus.Cancelled },
+    createdAt: {
+      $gte: startDate,
+      $lt: endDate,
+    },
+  }).lean();
+
+  const productIds = [
+    ...new Set(
+      orders.flatMap((order) =>
+        (Array.isArray(order.items) ? order.items : [])
+          .map((item) =>
+            item?.productId && typeof item.productId.toString === 'function'
+              ? item.productId.toString()
+              : '',
+          )
+          .filter(Boolean),
+      ),
+    ),
+  ];
+  const products = await Product.find({
+    _id: { $in: productIds.map((productId) => new Types.ObjectId(productId)) },
+  }).select('name price');
+  const productMap = new Map(products.map((product) => [product._id!.toString(), product]));
+
+  const summaryMap = new Map<
+    string,
+    { name: string; quantity: number; revenue: number }
+  >();
+
+  for (const order of orders) {
+    const items = Array.isArray(order.items) ? order.items : [];
+
+    for (const item of items) {
+      const key =
+        item?.productId && typeof item.productId.toString === 'function'
+          ? item.productId.toString()
+          : `legacy-${summaryMap.size + 1}`;
+      const currentProduct = productMap.get(key);
+      const itemName =
+        typeof item?.name === 'string' && item.name.trim()
+          ? item.name.trim()
+          : currentProduct?.name?.trim()
+            ? currentProduct.name.trim()
+          : 'Nepoznat proizvod';
+      const quantity =
+        typeof item?.quantity === 'number' && Number.isFinite(item.quantity) && item.quantity > 0
+          ? item.quantity
+          : 0;
+      const priceAtPurchase =
+        typeof item?.priceAtPurchase === 'number' && Number.isFinite(item.priceAtPurchase)
+          ? item.priceAtPurchase
+          : currentProduct?.price ?? 0;
+      const current = summaryMap.get(key) ?? {
+        name: itemName,
+        quantity: 0,
+        revenue: 0,
+      };
+
+      current.quantity += quantity;
+      current.revenue += quantity * priceAtPurchase;
+      summaryMap.set(key, current);
+    }
+  }
+
+  const summaryRows = [...summaryMap.values()].sort((first, second) =>
+    (first.name || '').localeCompare(second.name || ''),
+  );
+
+  const totalRevenue = summaryRows.reduce((sum, row) => sum + row.revenue, 0);
+  const totalQuantity = summaryRows.reduce((sum, row) => sum + row.quantity, 0);
+
+  const lines = [
+    `Mesecni izvestaj prometa opreme - ${facility.name}`,
+    `Mesec: ${formatMonthLabel(month)}`,
+    `Broj porudzbina: ${orders.length}`,
+    `Ukupno prodatih komada: ${totalQuantity}`,
+    `Ukupan promet: ${totalRevenue.toFixed(2)} RSD`,
+    '',
+    'Promet po proizvodu:',
+    '',
+  ];
+
+  if (summaryRows.length === 0) {
+    lines.push('Nema porudzbina za izabrani mesec.');
+  } else {
+    for (const row of summaryRows) {
+      lines.push(`${row.name} | kolicina: ${row.quantity} | promet: ${row.revenue.toFixed(2)} RSD`);
+    }
+  }
+
+  const pdf = buildPdfBuffer([lines]);
+
+  return {
+    fileName: `equipment-report-${facility._id.toString()}-${month}.pdf`,
+    pdf,
   };
 };
 
@@ -2246,9 +2533,10 @@ const updateOrderStatus = async (
   if (!updatedOrder) {
     throw new AppError('Order not found', 404);
   }
+  const productMap = await buildEmployeeOrderProductMap([updatedOrder]);
 
   return {
-    order: toEmployeeOrder(updatedOrder),
+    order: toEmployeeOrder(updatedOrder, productMap),
   };
 };
 
@@ -2470,6 +2758,8 @@ export {
   deleteFacilityImage,
   getAttendance,
   getFacilityCalendar,
+  getMonthlyEquipmentPdf,
+  getMonthlyOccupancyPdf,
   getFacilityOrders,
   getFacilityProducts,
   getFacilityPromotions,

@@ -43,6 +43,11 @@ form {
   gap: 8px;
 }
 
+.helper-text,
+.field-error {
+  font-size: 0.95rem;
+}
+
 .wide-field {
   grid-column: 1 / -1;
 }

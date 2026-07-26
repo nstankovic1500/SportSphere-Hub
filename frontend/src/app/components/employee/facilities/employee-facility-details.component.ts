@@ -1,15 +1,20 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import type { HttpErrorResponse } from '@angular/common/http';
 
-import type { EmployeeFacility } from '../../../core/models/employee.model';
+import type {
+  EmployeeFacility,
+  EmployeeMonthlyReportType,
+} from '../../../core/models/employee.model';
 import { EmployeeService } from '../../../core/services/employee.service';
 import { buildUploadImageUrl } from '../../../core/utils/image.util';
 
 @Component({
   selector: 'app-employee-facility-details',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './employee-facility-details.component.html',
   styleUrl: './employee-facility-details.component.css',
 })
@@ -21,9 +26,13 @@ export class EmployeeFacilityDetailsComponent {
   isLoading = true;
   isUploadingImages = false;
   isDeletingImage = false;
+  isDownloadingReport = false;
   errorMessage = '';
   successMessage = '';
   imageErrorMessage = '';
+  reportErrorMessage = '';
+  reportSuccessMessage = '';
+  selectedReportMonth = this.getCurrentMonthValue();
   selectedImageFiles: File[] = [];
   imagePreviews: string[] = [];
 
@@ -85,17 +94,17 @@ export class EmployeeFacilityDetailsComponent {
         this.isUploadingImages = false;
         this.selectedImageFiles = [];
         this.imagePreviews = [];
-        this.successMessage = 'Facility images uploaded successfully.';
+        this.successMessage = 'Slike objekta su uspešno otpremljene.';
       },
       error: (error) => {
         this.isUploadingImages = false;
-        this.imageErrorMessage = error.error?.message ?? 'Unable to upload facility images.';
+        this.imageErrorMessage = error.error?.message ?? 'Nije moguće otpremiti slike objekta.';
       },
     });
   }
 
   deleteImage(imagePath: string) {
-    if (!this.facility || !window.confirm('Delete this facility image?') || this.isDeletingImage) {
+    if (!this.facility || !window.confirm('Obrisati ovu sliku objekta?') || this.isDeletingImage) {
       return;
     }
 
@@ -113,13 +122,56 @@ export class EmployeeFacilityDetailsComponent {
         }
 
         this.isDeletingImage = false;
-        this.successMessage = 'Facility image deleted successfully.';
+        this.successMessage = 'Slika objekta je uspešno obrisana.';
       },
       error: (error) => {
         this.isDeletingImage = false;
-        this.imageErrorMessage = error.error?.message ?? 'Unable to delete facility image.';
+        this.imageErrorMessage = error.error?.message ?? 'Nije moguće obrisati sliku objekta.';
       },
     });
+  }
+
+  downloadMonthlyReport(type: EmployeeMonthlyReportType) {
+    if (!this.facility || !this.selectedReportMonth || this.isDownloadingReport) {
+      return;
+    }
+
+    this.isDownloadingReport = true;
+    this.reportErrorMessage = '';
+    this.reportSuccessMessage = '';
+
+    this.employeeService
+      .downloadMonthlyReportPdf(this.facility.id, this.selectedReportMonth, type)
+      .subscribe({
+        next: (response) => {
+          const fileBlob = response.body;
+
+          if (!fileBlob) {
+            this.isDownloadingReport = false;
+            this.reportErrorMessage = 'PDF izveštaj nije dostupan.';
+            return;
+          }
+
+          const objectUrl = URL.createObjectURL(fileBlob);
+          const link = document.createElement('a');
+          const reportLabel = type === 'occupancy' ? 'popunjenost' : 'promet-opreme';
+
+          link.href = objectUrl;
+          link.download = `${reportLabel}-${this.facility?.id}-${this.selectedReportMonth}.pdf`;
+          link.click();
+          URL.revokeObjectURL(objectUrl);
+
+          this.isDownloadingReport = false;
+          this.reportSuccessMessage =
+            type === 'occupancy'
+              ? 'PDF izveštaj o popunjenosti je uspešno generisan.'
+              : 'PDF izveštaj o prometu opreme je uspešno generisan.';
+        },
+        error: async (error: HttpErrorResponse) => {
+          this.isDownloadingReport = false;
+          this.reportErrorMessage = await this.extractReportErrorMessage(error);
+        },
+      });
   }
 
   private loadFacility() {
@@ -138,7 +190,34 @@ export class EmployeeFacilityDetailsComponent {
   }
 
   private getDayLabel(day: number) {
-    return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][day] ?? String(day);
+    return ['Ned', 'Pon', 'Uto', 'Sre', 'Čet', 'Pet', 'Sub'][day] ?? String(day);
+  }
+
+  private getCurrentMonthValue() {
+    return new Date().toISOString().slice(0, 7);
+  }
+
+  private async extractReportErrorMessage(error: HttpErrorResponse) {
+    if (error.error instanceof Blob) {
+      try {
+        const text = await error.error.text();
+        const parsed = JSON.parse(text) as { message?: string };
+        return parsed.message ?? 'Nije moguće generisati mesečni PDF izveštaj.';
+      } catch {
+        return 'Nije moguće generisati mesečni PDF izveštaj.';
+      }
+    }
+
+    if (
+      error.error &&
+      typeof error.error === 'object' &&
+      'message' in error.error &&
+      typeof error.error.message === 'string'
+    ) {
+      return error.error.message;
+    }
+
+    return 'Nije moguće generisati mesečni PDF izveštaj.';
   }
 
   private validateImageFiles(files: File[]) {
@@ -146,20 +225,20 @@ export class EmployeeFacilityDetailsComponent {
     const currentCount = this.facility?.images.length ?? 0;
 
     if (files.length > 5) {
-      return 'You can upload at most 5 images at once.';
+      return 'Možete otpremiti najviše 5 slika odjednom.';
     }
 
     if (currentCount + files.length > 10) {
-      return 'A facility can contain at most 10 images in total.';
+      return 'Objekat može sadržati najviše 10 slika ukupno.';
     }
 
     for (const file of files) {
       if (!allowedTypes.includes(file.type)) {
-        return 'Only JPG, PNG and WEBP images are allowed.';
+        return 'Dozvoljene su samo JPG, PNG i WEBP slike.';
       }
 
       if (file.size > 5 * 1024 * 1024) {
-        return 'Each image must be 5 MB or smaller.';
+        return 'Svaka slika mora biti veličine do 5 MB.';
       }
     }
 

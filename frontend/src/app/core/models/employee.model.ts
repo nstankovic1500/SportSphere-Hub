@@ -211,6 +211,8 @@ export interface MoveEmployeeScheduleRequest {
   endTime: string;
 }
 
+export type EmployeeMonthlyReportType = 'occupancy' | 'equipment';
+
 export interface EmployeePromotion {
   id: string;
   name: string;

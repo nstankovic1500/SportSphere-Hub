@@ -1,13 +1,13 @@
 <section class="page">
-  <h1>Employee Dashboard</h1>
-  <p>Welcome, {{ user?.firstName }}</p>
-  <p>Role: {{ user?.role }}</p>
+  <h1>Kontrolna tabla zaposlenog</h1>
+  <p>Dobrodošli, {{ user?.firstName }}</p>
+  <p>Uloga: zaposleni</p>
   <div class="dashboard-links">
     <a class="dashboard-link" routerLink="/employee/profile">
-      Profile
+      Profil
     </a>
     <a class="dashboard-link" routerLink="/employee/facilities">
-      My Facilities
+      Moji objekti
     </a>
   </div>
   <button type="button" (click)="logout()">Odjava</button>

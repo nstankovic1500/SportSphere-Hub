@@ -2,7 +2,7 @@
   <header class="page-header">
     <div>
       <h1>Upravljanje porudžbinama</h1>
-      <p>@if (facility) { Orders for {{ facility.name }}. } @else { Orders for the selected facility. }</p>
+      <p>@if (facility) { Porudžbine za {{ facility.name }}. } @else { Porudžbine za izabrani objekat. }</p>
     </div>
     <div class="header-links">
       <a [routerLink]="['/employee/facilities', facilityId]">Nazad na objekat</a>
@@ -31,11 +31,11 @@
         <table>
           <thead>
             <tr>
-              <th>Reference</th>
+              <th>Referenca</th>
               <th>Sportista</th>
-              <th>Created</th>
-              <th>Items</th>
-              <th>Total</th>
+              <th>Kreirano</th>
+              <th>Stavke</th>
+              <th>Ukupno</th>
               <th>Status</th>
               <th>Akcije</th>
             </tr>
@@ -54,11 +54,11 @@
                   </ul>
                 </td>
                 <td>{{ formatCurrency(order.totalPrice) }}</td>
-                <td>{{ order.status }}</td>
+                <td>{{ getStatusLabel(order.status) }}</td>
                 <td>
                   <div class="actions-cell">
                     @if (getAvailableActions(order).length === 0) {
-                      <span>No actions</span>
+                      <span>Nema akcija</span>
                     } @else {
                       @for (action of getAvailableActions(order); track action) {
                         <button
@@ -66,7 +66,7 @@
                           class="secondary-button"
                           [disabled]="isUpdating(order.id)"
                           (click)="updateStatus(order, action)">
-                          {{ isUpdating(order.id) ? 'Updating...' : action }}
+                          {{ isUpdating(order.id) ? 'Ažuriranje...' : getActionLabel(action) }}
                         </button>
                       }
                     }

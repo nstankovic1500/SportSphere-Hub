@@ -40,6 +40,36 @@ export class EmployeeOrdersComponent {
     return orderId.slice(-8).toUpperCase();
   }
 
+  getStatusLabel(status: EmployeeOrder['status']) {
+    switch (status) {
+      case 'pending':
+        return 'Na čekanju';
+      case 'processing':
+        return 'U obradi';
+      case 'completed':
+        return 'Završena';
+      case 'cancelled':
+        return 'Otkazana';
+      default:
+        return status;
+    }
+  }
+
+  getActionLabel(action: UpdateEmployeeOrderStatusRequest['status']) {
+    switch (action) {
+      case 'processing':
+        return 'Obradi';
+      case 'completed':
+        return 'Završi';
+      case 'cancelled':
+        return 'Otkaži';
+      case 'pending':
+        return 'Na čekanju';
+      default:
+        return action;
+    }
+  }
+
   getAvailableActions(order: EmployeeOrder) {
     const actions: Array<'pending' | 'processing' | 'completed' | 'cancelled'> = [];
 
@@ -63,7 +93,7 @@ export class EmployeeOrdersComponent {
       return;
     }
 
-    if (status === 'cancelled' && !window.confirm(`Cancel order ${this.getShortReference(order.id)}?`)) {
+    if (status === 'cancelled' && !window.confirm(`Otkazati porudžbinu ${this.getShortReference(order.id)}?`)) {
       return;
     }
 
@@ -77,7 +107,7 @@ export class EmployeeOrdersComponent {
           currentOrder.id === order.id ? response.data.order : currentOrder,
         );
         this.updatingIds.delete(order.id);
-        this.successMessage = `Order ${this.getShortReference(order.id)} updated successfully.`;
+        this.successMessage = `Porudžbina ${this.getShortReference(order.id)} je uspešno ažurirana.`;
       },
       error: (error) => {
         this.updatingIds.delete(order.id);

@@ -7,13 +7,13 @@
       <label for="username">Korisničko ime</label>
       <input id="username" type="text" formControlName="username" />
       @if (username?.touched && username?.invalid) {
-        <small class="field-error">Username is required.</small>
+        <small class="field-error">Korisničko ime je obavezno.</small>
       }
 
       <label for="password">Lozinka</label>
       <input id="password" type="password" formControlName="password" />
       @if (password?.touched && password?.invalid) {
-        <small class="field-error">Password is required.</small>
+        <small class="field-error">Lozinka je obavezna.</small>
       }
 
       @if (errorMessage) {
@@ -21,12 +21,12 @@
       }
 
       <button type="submit" [disabled]="loginForm.invalid || isLoading">
-        {{ isLoading ? 'Signing in...' : 'Login' }}
+        {{ isLoading ? 'Prijavljivanje...' : 'Prijava' }}
       </button>
     </form>
 
     <p class="register-link">
-      Need an account?
+      Nemate nalog?
       <a routerLink="/register">Registracija</a>
     </p>
   </div>

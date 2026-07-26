@@ -69,10 +69,10 @@
 
     <div class="form-actions">
       <button type="submit" [disabled]="isSearching">
-        {{ isSearching ? 'Searching...' : 'Apply Filters' }}
+        {{ isSearching ? 'Pretraga...' : 'Primeni filtere' }}
       </button>
       <button type="button" class="secondary-button" (click)="resetFilters()" [disabled]="isSearching">
-        Reset
+        Resetuj
       </button>
     </div>
   </form>
@@ -95,8 +95,8 @@
             <th>Sportovi</th>
             <th>Cena</th>
             <th>Slika</th>
-            <th>Likes</th>
-            <th>Dislikes</th>
+            <th>Sviđanja</th>
+            <th>Nesviđanja</th>
             <th></th>
           </tr>
         </thead>

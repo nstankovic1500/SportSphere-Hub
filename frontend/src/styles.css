@@ -1,19 +1,19 @@
 /* You can add global styles to this file, and also import other style files */
 
 :root {
-  color-scheme: dark;
-  --bg-app: #23262b;
-  --bg-surface: #2d3138;
-  --bg-surface-soft: #383d45;
-  --bg-surface-muted: #444a53;
-  --border-color: #565d67;
-  --text-primary: #f1f3f5;
-  --text-secondary: #c8cdd3;
-  --text-muted: #a4acb5;
-  --button-primary: #5a6068;
-  --button-primary-hover: #686f78;
-  --button-secondary: #464b53;
-  --button-secondary-hover: #545a63;
+  color-scheme: light;
+  --bg-app: #f4f7fb;
+  --bg-surface: #ffffff;
+  --bg-surface-soft: #f8fbff;
+  --bg-surface-muted: #eef3f8;
+  --border-color: #d7dee7;
+  --text-primary: #1f2a37;
+  --text-secondary: #5b6b7f;
+  --text-muted: #7a8899;
+  --button-primary: #0f6bff;
+  --button-primary-hover: #0b57d0;
+  --button-secondary: #e8eef6;
+  --button-secondary-hover: #dbe5f0;
 }
 
 html,
@@ -25,31 +25,19 @@ body {
 body {
   margin: 0;
   color: var(--text-primary);
+  font-family: Georgia, 'Times New Roman', serif;
 }
 
 a {
-  color: var(--text-primary);
-}
-
-h1,
-h2,
-h3,
-p,
-span,
-small,
-label,
-td,
-th,
-div {
-  color: var(--text-primary);
+  color: #0f6bff;
 }
 
 input,
 select,
 textarea {
-  background: var(--bg-surface-soft) !important;
+  background: #ffffff !important;
   color: var(--text-primary) !important;
-  border-color: var(--border-color) !important;
+  border: 1px solid var(--border-color) !important;
 }
 
 input::placeholder,
@@ -59,7 +47,8 @@ textarea::placeholder {
 
 button {
   background: var(--button-primary) !important;
-  color: var(--text-primary) !important;
+  color: #ffffff !important;
+  border: 1px solid transparent;
 }
 
 button:hover {
@@ -71,6 +60,7 @@ a.secondary-button,
 .secondary-button {
   background: var(--button-secondary) !important;
   color: var(--text-primary) !important;
+  border: 1px solid var(--border-color) !important;
 }
 
 button.secondary-button:hover,
@@ -90,9 +80,9 @@ table,
 .message,
 .state-message,
 .dashboard-link {
-  background: var(--bg-surface) !important;
-  color: var(--text-primary) !important;
-  border-color: var(--border-color) !important;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border-color: var(--border-color);
 }
 
 th,
@@ -116,11 +106,11 @@ th,
 .field-error,
 .message.error,
 .state-message.error {
-  color: #f0d0d0 !important;
+  color: #c62828 !important;
 }
 
 .message.success {
-  color: #dde4dd !important;
+  color: #1f7a38 !important;
 }
 
 table th,

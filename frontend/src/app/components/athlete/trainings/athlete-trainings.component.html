@@ -2,11 +2,11 @@
   <header class="page-header">
     <div>
       <h1>Moji treninzi</h1>
-      <p>Review scheduled, completed, cancelled, and no-show training appointments.</p>
+      <p>Pregled zakazanih, završenih, otkazanih i propuštenih termina treninga.</p>
     </div>
     <nav class="page-links">
-      <a routerLink="/athlete">Dashboard</a>
-      <a routerLink="/athlete/trainers">Find Trainers</a>
+      <a routerLink="/athlete">Kontrolna tabla</a>
+      <a routerLink="/athlete/trainers">Pronađi trenere</a>
     </nav>
   </header>
 
@@ -15,24 +15,24 @@
   }
 
   @if (isLoading) {
-    <p class="state-message">Loading training history...</p>
+    <p class="state-message">Učitavanje istorije treninga...</p>
   } @else if (errorMessage) {
     <p class="state-message error">{{ errorMessage }}</p>
   } @else if (appointments.length === 0) {
-    <p class="state-message">No training appointments found.</p>
+    <p class="state-message">Nema pronađenih termina treninga.</p>
   } @else {
     <div class="table-wrapper">
       <table>
         <thead>
           <tr>
-            <th>Trainer</th>
+            <th>Trener</th>
             <th>Objekat</th>
             <th>Grad</th>
             <th>Sport</th>
             <th>Početak</th>
             <th>Kraj</th>
             <th>Status</th>
-            <th>Action</th>
+            <th>Akcija</th>
           </tr>
         </thead>
         <tbody>
@@ -46,7 +46,7 @@
               <td>{{ appointment.endTime | date: 'medium' }}</td>
               <td>
                 <span class="status-badge" [class.cancelled]="appointment.status === 'cancelled'">
-                  {{ appointment.status }}
+                  {{ getStatusLabel(appointment.status) }}
                 </span>
               </td>
               <td>
@@ -56,7 +56,7 @@
                     class="cancel-button"
                     (click)="cancelAppointment(appointment)"
                     [disabled]="isCancelling(appointment.id)">
-                    {{ isCancelling(appointment.id) ? 'Cancelling...' : 'Cancel' }}
+                    {{ isCancelling(appointment.id) ? 'Otkazivanje...' : 'Otkaži' }}
                   </button>
                 } @else {
                   <span class="muted">-</span>

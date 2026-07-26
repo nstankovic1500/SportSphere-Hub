@@ -1,17 +1,17 @@
 <section class="page">
   <header class="page-header">
     <div>
-      <h1>Edit Facility</h1>
-      <p>Update the selected facility information.</p>
+      <h1>Izmeni objekat</h1>
+      <p>Ažurirajte podatke izabranog objekta.</p>
     </div>
     <div class="header-links">
-      <a [routerLink]="['/employee/facilities', facilityId]">Back to details</a>
-      <a routerLink="/employee/facilities">My facilities</a>
+      <a [routerLink]="['/employee/facilities', facilityId]">Nazad na detalje</a>
+      <a routerLink="/employee/facilities">Moji objekti</a>
     </div>
   </header>
 
   @if (isLoading) {
-    <p class="state-message">Loading facility form...</p>
+    <p class="state-message">Učitavanje forme objekta...</p>
   } @else {
     <section class="panel">
       @if (successMessage) { <p class="message success">{{ successMessage }}</p> }
@@ -24,10 +24,10 @@
           <div class="field"><label for="country">Država</label><input id="country" type="text" formControlName="country" /></div>
           <div class="field"><label for="address">Adresa</label><input id="address" type="text" formControlName="address" /></div>
           <div class="field wide-field"><label for="description">Opis</label><textarea id="description" formControlName="description" rows="4"></textarea></div>
-          <div class="field"><label for="longitude">Longitude</label><input id="longitude" type="number" step="any" formControlName="longitude" /></div>
-          <div class="field"><label for="latitude">Latitude</label><input id="latitude" type="number" step="any" formControlName="latitude" /></div>
+          <div class="field"><label for="longitude">Geografska dužina</label><input id="longitude" type="number" step="any" formControlName="longitude" /></div>
+          <div class="field"><label for="latitude">Geografska širina</label><input id="latitude" type="number" step="any" formControlName="latitude" /></div>
           <div class="field"><label for="hourlyPrice">Cena po satu</label><input id="hourlyPrice" type="number" min="0" step="0.01" formControlName="hourlyPrice" /></div>
-          <div class="field"><label for="allowedNoShows">Max Missed Reservations</label><input id="allowedNoShows" type="number" min="0" step="1" formControlName="allowedNoShows" /></div>
+          <div class="field"><label for="allowedNoShows">Maksimalan broj propuštenih rezervacija</label><input id="allowedNoShows" type="number" min="0" step="1" formControlName="allowedNoShows" /></div>
         </div>
 
         <div class="field">
@@ -45,7 +45,7 @@
         <div class="field">
           <div class="section-header">
             <label>Radno vreme</label>
-            <button type="button" class="secondary-button" (click)="addOpeningHour()">Add Row</button>
+            <button type="button" class="secondary-button" (click)="addOpeningHour()">Dodaj red</button>
           </div>
           <div formArrayName="openingHours" class="opening-hours-list">
             @for (row of openingHourRows; track $index) {
@@ -64,7 +64,7 @@
         </div>
 
         <div class="field wide-field">
-          <label for="facilityImages">Add Facility Images</label>
+          <label for="facilityImages">Dodaj slike objekta</label>
           <input
             id="facilityImages"
             type="file"
@@ -72,7 +72,7 @@
             accept="image/jpeg,image/png,image/webp"
             (change)="onImagesSelected($event)"
           />
-          <small class="helper-text">Upload up to 5 JPG, PNG or WEBP images per request, maximum 10 total.</small>
+          <small class="helper-text">Otpremite do 5 JPG, PNG ili WEBP slika po zahtevu, maksimalno 10 ukupno.</small>
           @if (imageErrorMessage) {
             <small class="field-error">{{ imageErrorMessage }}</small>
           }
@@ -87,13 +87,13 @@
 
         @if (galleryImages.length > 0) {
           <div class="field wide-field">
-            <label>Current Gallery</label>
+            <label>Trenutna galerija</label>
             <div class="image-preview-grid">
               @for (imagePath of galleryImages; track imagePath) {
                 <div class="gallery-card">
-                  <img class="image-preview" [src]="getImageUrl(imagePath)" alt="Facility image" />
+                  <img class="image-preview" [src]="getImageUrl(imagePath)" alt="Slika objekta" />
                   <button type="button" class="secondary-button" [disabled]="isDeletingImage" (click)="deleteImage(imagePath)">
-                    {{ isDeletingImage ? 'Deleting...' : 'Delete Image' }}
+                    {{ isDeletingImage ? 'Brisanje...' : 'Obriši sliku' }}
                   </button>
                 </div>
               }
@@ -102,7 +102,7 @@
         }
 
         <button type="submit" [disabled]="facilityForm.invalid || isSubmitting">
-          {{ isSubmitting ? (isUploadingImages ? 'Uploading Images...' : 'Saving...') : 'Save Changes' }}
+          {{ isSubmitting ? (isUploadingImages ? 'Otpremanje slika...' : 'Čuvanje...') : 'Sačuvaj izmene' }}
         </button>
       </form>
     </section>

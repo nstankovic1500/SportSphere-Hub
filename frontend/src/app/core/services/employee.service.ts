@@ -1,6 +1,5 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams, type HttpResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { HttpParams } from '@angular/common/http';
 
 import { environment } from '../../../environments/environment';
 import type {
@@ -28,6 +27,7 @@ import type {
 } from '../models/api-response.model';
 import type {
   CreateEmployeeFacilityRequest,
+  EmployeeMonthlyReportType,
   EmployeeOrder,
   EmployeeProductRequest,
   CreateEmployeePromotionRequest,
@@ -313,5 +313,22 @@ export class EmployeeService {
       `${environment.apiUrl}/employees/products/${productId}/image`,
       formData,
     );
+  }
+
+  downloadMonthlyReportPdf(
+    facilityId: string,
+    month: string,
+    type: EmployeeMonthlyReportType,
+  ) {
+    const params = new HttpParams().set('month', month).set('type', type);
+
+    return this.http.get<Blob>(
+      `${environment.apiUrl}/employees/facilities/${facilityId}/reports/monthly-pdf`,
+      {
+        params,
+        responseType: 'blob' as 'json',
+        observe: 'response',
+      },
+    ) as unknown as import('rxjs').Observable<HttpResponse<Blob>>;
   }
 }

@@ -10,6 +10,10 @@
 .detail-item-wide { grid-column: 1 / -1; }
 .detail-label { color: var(--text-secondary); font-weight: 600; }
 .upload-panel { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 16px; }
+.report-panel { display: flex; gap: 16px; flex-wrap: wrap; align-items: end; }
+.report-field { display: grid; gap: 8px; min-width: 220px; }
+.report-field input { padding: 10px 12px; border-radius: 12px; border: 1px solid #d0d7de; font: inherit; }
+.report-actions { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
 .gallery-grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
 .preview-grid { margin-bottom: 16px; }
 .gallery-card { display: grid; gap: 10px; }

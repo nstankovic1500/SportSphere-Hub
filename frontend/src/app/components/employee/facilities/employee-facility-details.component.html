@@ -1,20 +1,20 @@
 <section class="page">
   <header class="page-header">
     <div>
-      <h1>Facility Details</h1>
-      <p>Review all information for this facility.</p>
+      <h1>Detalji objekta</h1>
+      <p>Pregled svih informacija za ovaj objekat.</p>
     </div>
     <div class="header-links">
       <a routerLink="/employee/facilities">Nazad na objekte</a>
       @if (facility) {
-        <a [routerLink]="['/employee/facilities', facility.id, 'edit']">Edit Facility</a>
+        <a [routerLink]="['/employee/facilities', facility.id, 'edit']">Izmeni objekat</a>
         <a [routerLink]="['/employee/facilities', facility.id, 'attendance']">Rezervacije i treninzi</a>
-        <a [routerLink]="['/employee/facilities', facility.id, 'calendar']">Calendar</a>
+        <a [routerLink]="['/employee/facilities', facility.id, 'calendar']">Kalendar</a>
         <a [routerLink]="['/employee/facilities', facility.id, 'orders']">Upravljanje porudžbinama</a>
-        <a [routerLink]="['/employee/facilities', facility.id, 'promotions']">Manage Promotions</a>
-        <a [routerLink]="['/employee/facilities', facility.id, 'products']">Manage Products</a>
-        <a [routerLink]="['/employee/facilities', facility.id, 'resources']">Manage Resources</a>
-        <a [routerLink]="['/employee/facilities', facility.id, 'trainers']">Manage Trainers</a>
+        <a [routerLink]="['/employee/facilities', facility.id, 'promotions']">Upravljanje promocijama</a>
+        <a [routerLink]="['/employee/facilities', facility.id, 'products']">Upravljanje proizvodima</a>
+        <a [routerLink]="['/employee/facilities', facility.id, 'resources']">Upravljanje resursima</a>
+        <a [routerLink]="['/employee/facilities', facility.id, 'trainers']">Upravljanje trenerima</a>
       }
     </div>
   </header>
@@ -22,7 +22,7 @@
   @if (isLoading) {
     <p class="state-message">Učitavanje detalja objekta...</p>
   } @else if (!facility) {
-    <p class="state-message error">{{ errorMessage || 'Facility not found.' }}</p>
+    <p class="state-message error">{{ errorMessage || 'Objekat nije pronađen.' }}</p>
   } @else {
     @if (successMessage) {
       <p class="state-message success">{{ successMessage }}</p>
@@ -36,9 +36,9 @@
         <div class="detail-item"><span class="detail-label">Adresa</span><span>{{ facility.address }}</span></div>
         <div class="detail-item detail-item-wide"><span class="detail-label">Opis</span><span>{{ facility.description }}</span></div>
         <div class="detail-item"><span class="detail-label">Status</span><span>{{ facility.status }}</span></div>
-        <div class="detail-item"><span class="detail-label">Aktivno</span><span>{{ facility.active ? 'Yes' : 'No' }}</span></div>
+        <div class="detail-item"><span class="detail-label">Aktivno</span><span>{{ facility.active ? 'Da' : 'Ne' }}</span></div>
         <div class="detail-item"><span class="detail-label">Cena po satu</span><span>{{ facility.hourlyPrice }}</span></div>
-        <div class="detail-item"><span class="detail-label">Max Missed Reservations</span><span>{{ facility.allowedNoShows }}</span></div>
+        <div class="detail-item"><span class="detail-label">Maksimalan broj propuštenih rezervacija</span><span>{{ facility.allowedNoShows }}</span></div>
         <div class="detail-item detail-item-wide"><span class="detail-label">Sportovi</span><span>{{ getSportsLabel() }}</span></div>
         <div class="detail-item detail-item-wide"><span class="detail-label">Radno vreme</span><span>{{ getOpeningHoursLabel() }}</span></div>
         <div class="detail-item detail-item-wide"><span class="detail-label">Lokacija</span><span>{{ facility.location?.coordinates?.[1] }}, {{ facility.location?.coordinates?.[0] }}</span></div>
@@ -48,8 +48,46 @@
     <section class="panel">
       <div class="section-header">
         <div>
-          <h2>Facility Gallery</h2>
-          <p>Upload up to 5 images per request, maximum 10 total.</p>
+          <h2>Mesečni PDF izveštaji</h2>
+          <p>Preuzmite izveštaj o popunjenosti resursa ili prometu opreme za izabrani mesec.</p>
+        </div>
+      </div>
+
+      @if (reportSuccessMessage) {
+        <p class="state-message success">{{ reportSuccessMessage }}</p>
+      }
+
+      @if (reportErrorMessage) {
+        <p class="state-message error">{{ reportErrorMessage }}</p>
+      }
+
+      <div class="report-panel">
+        <label class="report-field">
+          <span>Mesec</span>
+          <input type="month" [(ngModel)]="selectedReportMonth" />
+        </label>
+
+        <div class="report-actions">
+          <button type="button" [disabled]="!selectedReportMonth || isDownloadingReport" (click)="downloadMonthlyReport('occupancy')">
+            {{ isDownloadingReport ? 'Generisanje...' : 'PDF popunjenosti' }}
+          </button>
+          <button
+            type="button"
+            class="secondary-button"
+            [disabled]="!selectedReportMonth || isDownloadingReport"
+            (click)="downloadMonthlyReport('equipment')"
+          >
+            {{ isDownloadingReport ? 'Generisanje...' : 'PDF prometa opreme' }}
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="section-header">
+        <div>
+          <h2>Galerija objekta</h2>
+          <p>Otpremite do 5 slika po zahtevu, maksimalno 10 ukupno.</p>
         </div>
       </div>
 
@@ -66,7 +104,7 @@
           (change)="onImagesSelected($event)"
         />
         <button type="button" [disabled]="selectedImageFiles.length === 0 || isUploadingImages" (click)="uploadImages()">
-          {{ isUploadingImages ? 'Uploading...' : 'Upload Images' }}
+          {{ isUploadingImages ? 'Otpremanje...' : 'Otpremi slike' }}
         </button>
       </div>
 
@@ -83,14 +121,14 @@
       }
 
       @if (facility.images.length === 0) {
-        <p class="state-message">No images uploaded yet.</p>
+        <p class="state-message">Još nema otpremljenih slika.</p>
       } @else {
         <div class="gallery-grid">
           @for (imagePath of facility.images; track imagePath) {
             <div class="gallery-card">
               <img [src]="getImageUrl(imagePath)" [alt]="facility.name" />
               <button type="button" class="secondary-button" [disabled]="isDeletingImage" (click)="deleteImage(imagePath)">
-                {{ isDeletingImage ? 'Deleting...' : 'Delete Image' }}
+                {{ isDeletingImage ? 'Brisanje...' : 'Obriši sliku' }}
               </button>
             </div>
           }

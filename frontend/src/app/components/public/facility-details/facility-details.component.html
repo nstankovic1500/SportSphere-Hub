@@ -11,11 +11,11 @@
         <h1>{{ facility.name }}</h1>
         <p>{{ facility.city }}, {{ facility.country }}</p>
         <p>{{ facility.address }}</p>
-        <p>{{ facility.hourlyPrice }} per hour</p>
-        <p>{{ likesCount }} likes · {{ dislikesCount }} dislikes</p>
+        <p>{{ facility.hourlyPrice }} po satu</p>
+        <p>{{ likesCount }} sviđanja · {{ dislikesCount }} nesviđanja</p>
         @if (canReserve) {
           <button type="button" class="reserve-link" (click)="reserveFacility()">
-            Reserve
+            Rezerviši
           </button>
         }
       </div>
@@ -62,8 +62,22 @@
 
     <section class="panel">
       <h2>Lokacija</h2>
-      <p>Longitude: {{ facility.location.coordinates[0] }}</p>
-      <p>Latitude: {{ facility.location.coordinates[1] }}</p>
+      <div class="location-details">
+        <p>Geografska dužina: {{ facility.location.coordinates[0] }}</p>
+        <p>Geografska širina: {{ facility.location.coordinates[1] }}</p>
+      </div>
+
+      @if (getMapUrl(); as mapUrl) {
+        <div class="map-wrapper">
+          <iframe
+            class="facility-map"
+            [src]="mapUrl"
+            title="Mapa objekta"
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade">
+          </iframe>
+        </div>
+      }
     </section>
 
     <section class="panel">
@@ -78,7 +92,7 @@
                 <th>Naziv</th>
                 <th>Tip</th>
                 <th>Kapacitet</th>
-                <th>Equipment</th>
+                <th>Oprema</th>
                 <th>Sport</th>
               </tr>
             </thead>
@@ -109,7 +123,7 @@
               <div class="comment-header">
                 <strong>{{ commentItem.athleteName }}</strong>
                 <span class="reaction-badge" [class.dislike]="commentItem.reaction === 'dislike'">
-                  {{ commentItem.reaction }}
+                  {{ commentItem.reaction === 'like' ? 'Sviđa mi se' : 'Ne sviđa mi se' }}
                 </span>
               </div>
               <p>{{ commentItem.comment }}</p>
@@ -147,24 +161,24 @@
               </label>
             </div>
             @if (reaction.touched && reaction.hasError('required')) {
-              <small class="field-error">Reaction is required.</small>
+              <small class="field-error">Reakcija je obavezna.</small>
             }
           </div>
 
           <div class="field">
             <label for="comment">Komentar</label>
             <textarea id="comment" rows="5" formControlName="comment" maxlength="500"></textarea>
-            <small class="helper-text">{{ comment.value.length }}/500 characters</small>
+            <small class="helper-text">{{ comment.value.length }}/500 karaktera</small>
             @if (comment.touched && comment.hasError('required')) {
-              <small class="field-error">Comment is required.</small>
+              <small class="field-error">Komentar je obavezan.</small>
             }
             @if (comment.touched && comment.hasError('maxlength')) {
-              <small class="field-error">Comment can contain at most 500 characters.</small>
+              <small class="field-error">Komentar može sadržati najviše 500 karaktera.</small>
             }
           </div>
 
           <button type="submit" [disabled]="reviewForm.invalid || isSubmittingReview">
-            {{ isSubmittingReview ? 'Submitting...' : 'Submit Review' }}
+            {{ isSubmittingReview ? 'Slanje...' : 'Pošalji recenziju' }}
           </button>
         </form>
       </section>

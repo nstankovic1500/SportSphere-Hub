@@ -2,12 +2,12 @@
   <header class="page-header">
     <div>
       <h1>Moji objekti</h1>
-      <p>Review the facilities assigned to your employee account.</p>
+      <p>Pregledajte objekte dodeljene vašem nalogu zaposlenog.</p>
     </div>
     <div class="header-links">
       <a routerLink="/employee">Nazad na kontrolnu tablu</a>
       <a routerLink="/employee/profile">Profil</a>
-      <a class="secondary-button link-button" routerLink="/employee/facilities/new">Create Facility</a>
+      <a class="secondary-button link-button" routerLink="/employee/facilities/new">Kreiraj objekat</a>
     </div>
   </header>
 
@@ -17,7 +17,7 @@
     <p class="state-message error">{{ errorMessage }}</p>
   } @else if (facilities.length === 0) {
     <section class="panel">
-      <p class="state-message">No facilities are assigned to your account.</p>
+      <p class="state-message">Nijedan objekat nije dodeljen vašem nalogu.</p>
     </section>
   } @else {
     <section class="panel">
@@ -33,7 +33,7 @@
               <th>Aktivno</th>
               <th>Cena po satu</th>
               <th>Sportovi</th>
-              <th>Action</th>
+              <th>Akcija</th>
             </tr>
           </thead>
           <tbody>
@@ -44,7 +44,7 @@
                 <td>{{ facility.country }}</td>
                 <td>{{ facility.address }}</td>
                 <td>{{ facility.status }}</td>
-                <td>{{ facility.active ? 'Yes' : 'No' }}</td>
+                <td>{{ facility.active ? 'Da' : 'Ne' }}</td>
                 <td>{{ facility.hourlyPrice }}</td>
                 <td>{{ getSportsLabel(facility) }}</td>
                 <td>
