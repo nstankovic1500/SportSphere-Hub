@@ -111,7 +111,7 @@ export class EmployeeCalendarComponent {
         }
       },
       error: (error) => {
-        this.errorMessage = error.error?.message ?? 'Unable to load employee facilities.';
+        this.errorMessage = error.error?.message ?? 'Nije moguće učitati objekte zaposlenog.';
         this.isLoadingFacilities = false;
       },
     });
@@ -134,7 +134,7 @@ export class EmployeeCalendarComponent {
         this.isLoadingFacility = false;
         this.isLoadingResources = false;
         this.isLoadingCalendar = false;
-        this.errorMessage = error.error?.message ?? 'Unable to load facility details.';
+        this.errorMessage = error.error?.message ?? 'Nije moguće učitati detalje objekta.';
       },
     });
 
@@ -162,7 +162,7 @@ export class EmployeeCalendarComponent {
         this.resources = [];
         this.isLoadingResources = false;
         this.isLoadingCalendar = false;
-        this.errorMessage = error.error?.message ?? 'Unable to load facility resources.';
+        this.errorMessage = error.error?.message ?? 'Nije moguće učitati resurse objekta.';
         this.syncCalendarEvents([]);
       },
     });
@@ -231,7 +231,7 @@ export class EmployeeCalendarComponent {
         this.selectedCalendarResourceName = '';
         this.selectedCalendarResourceSport = '';
         this.isLoadingCalendar = false;
-        this.errorMessage = error.error?.message ?? 'Unable to load calendar.';
+        this.errorMessage = error.error?.message ?? 'Nije moguće učitati kalendar.';
         this.syncCalendarEvents([]);
       },
     });
@@ -272,7 +272,7 @@ export class EmployeeCalendarComponent {
       },
       error: (error) => {
         this.isMovingEvent = false;
-        this.errorMessage = error.error?.message ?? 'Unable to move calendar event.';
+        this.errorMessage = error.error?.message ?? 'Nije moguće pomeriti događaj u kalendaru.';
         info.revert();
       },
     });

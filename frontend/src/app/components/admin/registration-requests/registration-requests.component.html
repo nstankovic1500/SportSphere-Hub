@@ -1,7 +1,7 @@
 <section class="page">
   <div class="page-header">
     <div>
-      <h1>Registration Requests</h1>
+      <h1>Zahtevi za registraciju</h1>
       <p>Review pending athlete and employee registrations.</p>
     </div>
   </div>
@@ -15,26 +15,26 @@
   }
 
   @if (isLoading) {
-    <p class="state-message">Loading registration requests...</p>
+    <p class="state-message">Učitavanje zahteva za registraciju...</p>
   } @else if (requests.length === 0) {
-    <p class="state-message">No pending registration requests.</p>
+    <p class="state-message">Nema zahteva za registraciju na čekanju.</p>
   } @else {
     <div class="table-wrapper">
       <table>
         <thead>
           <tr>
-            <th>Username</th>
-            <th>First Name</th>
-            <th>Last Name</th>
-            <th>Email</th>
-            <th>Phone</th>
-            <th>Role</th>
-            <th>Favorite Sports</th>
-            <th>Company Name</th>
-            <th>Registration Number</th>
+            <th>Korisničko ime</th>
+            <th>Ime</th>
+            <th>Prezime</th>
+            <th>Imejl</th>
+            <th>Telefon</th>
+            <th>Uloga</th>
+            <th>Omiljeni sportovi</th>
+            <th>Naziv firme</th>
+            <th>Matični broj</th>
             <th>PIB</th>
-            <th>Created At</th>
-            <th>Actions</th>
+            <th>Kreirano</th>
+            <th>Akcije</th>
           </tr>
         </thead>
         <tbody>

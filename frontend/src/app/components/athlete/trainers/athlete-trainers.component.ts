@@ -71,7 +71,7 @@ export class AthleteTrainersComponent {
         this.fetchTrainers(false);
       },
       error: (error) => {
-        this.errorMessage = error.error?.message ?? 'Unable to load trainer filters.';
+        this.errorMessage = error.error?.message ?? 'Nije moguće učitati filtere trenera.';
         this.isLoading = false;
       },
     });
@@ -98,7 +98,7 @@ export class AthleteTrainersComponent {
         this.isFiltering = false;
       },
       error: (error) => {
-        this.errorMessage = error.error?.message ?? 'Unable to load trainers.';
+        this.errorMessage = error.error?.message ?? 'Nije moguće učitati trenere.';
         this.isLoading = false;
         this.isFiltering = false;
       },

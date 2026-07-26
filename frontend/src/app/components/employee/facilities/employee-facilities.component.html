@@ -1,18 +1,18 @@
 <section class="page">
   <header class="page-header">
     <div>
-      <h1>My Facilities</h1>
+      <h1>Moji objekti</h1>
       <p>Review the facilities assigned to your employee account.</p>
     </div>
     <div class="header-links">
-      <a routerLink="/employee">Back to dashboard</a>
-      <a routerLink="/employee/profile">Profile</a>
+      <a routerLink="/employee">Nazad na kontrolnu tablu</a>
+      <a routerLink="/employee/profile">Profil</a>
       <a class="secondary-button link-button" routerLink="/employee/facilities/new">Create Facility</a>
     </div>
   </header>
 
   @if (isLoading) {
-    <p class="state-message">Loading facilities...</p>
+    <p class="state-message">Učitavanje objekata...</p>
   } @else if (errorMessage) {
     <p class="state-message error">{{ errorMessage }}</p>
   } @else if (facilities.length === 0) {
@@ -25,14 +25,14 @@
         <table>
           <thead>
             <tr>
-              <th>Name</th>
-              <th>City</th>
-              <th>Country</th>
-              <th>Address</th>
+              <th>Naziv</th>
+              <th>Grad</th>
+              <th>Država</th>
+              <th>Adresa</th>
               <th>Status</th>
-              <th>Active</th>
-              <th>Hourly Price</th>
-              <th>Sports</th>
+              <th>Aktivno</th>
+              <th>Cena po satu</th>
+              <th>Sportovi</th>
               <th>Action</th>
             </tr>
           </thead>
@@ -48,7 +48,7 @@
                 <td>{{ facility.hourlyPrice }}</td>
                 <td>{{ getSportsLabel(facility) }}</td>
                 <td>
-                  <a class="secondary-button link-button" [routerLink]="['/employee/facilities', facility.id]">Details</a>
+                  <a class="secondary-button link-button" [routerLink]="['/employee/facilities', facility.id]">Detalji</a>
                 </td>
               </tr>
             }

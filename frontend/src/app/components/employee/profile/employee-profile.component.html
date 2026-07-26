@@ -1,22 +1,22 @@
 <section class="page">
   <header class="page-header">
     <div>
-      <h1>Employee Profile</h1>
+      <h1>Profil zaposlenog</h1>
       <p>Manage your personal and company information.</p>
     </div>
     <div class="header-links">
-      <a routerLink="/employee">Back to dashboard</a>
+      <a routerLink="/employee">Nazad na kontrolnu tablu</a>
       <a routerLink="/employee/facilities">My facilities</a>
     </div>
   </header>
 
   @if (isLoading) {
-    <p class="state-message">Loading employee profile...</p>
+    <p class="state-message">Učitavanje profila zaposlenog...</p>
   } @else if (errorMessage && !profile) {
     <p class="state-message error">{{ errorMessage }}</p>
   } @else {
     <section class="panel">
-      <h2>Personal Data</h2>
+      <h2>Lični podaci</h2>
 
       <div class="profile-image-section">
         <div class="profile-image-card">
@@ -28,9 +28,9 @@
         </div>
 
         <div class="profile-image-actions">
-          <label for="profileImage">Profile Image</label>
+          <label for="profileImage">Profilna slika</label>
           <input id="profileImage" type="file" accept="image/jpeg,image/png,image/webp" (change)="onProfileImageChange($event)" />
-          <small class="helper-text">Allowed formats: JPG, PNG, WEBP. Maximum size: 5 MB.</small>
+          <small class="helper-text">Dozvoljeni formati: JPG, PNG, WEBP. Maksimalna veličina: 5 MB.</small>
           @if (imageErrorMessage) {
             <p class="message error">{{ imageErrorMessage }}</p>
           }
@@ -51,12 +51,12 @@
       <form [formGroup]="profileForm" (ngSubmit)="saveProfile()">
         <div class="form-grid">
           <div class="field">
-            <label for="username">Username</label>
+            <label for="username">Korisničko ime</label>
             <input id="username" type="text" formControlName="username" readonly />
           </div>
 
           <div class="field">
-            <label for="email">Email</label>
+            <label for="email">Imejl</label>
             <input id="email" type="email" formControlName="email" />
             @if (email.touched && email.hasError('required')) {
               <small class="field-error">Email is required.</small>
@@ -67,7 +67,7 @@
           </div>
 
           <div class="field">
-            <label for="firstName">First Name</label>
+            <label for="firstName">Ime</label>
             <input id="firstName" type="text" formControlName="firstName" />
             @if (firstName.touched && firstName.hasError('required')) {
               <small class="field-error">First name is required.</small>
@@ -75,7 +75,7 @@
           </div>
 
           <div class="field">
-            <label for="lastName">Last Name</label>
+            <label for="lastName">Prezime</label>
             <input id="lastName" type="text" formControlName="lastName" />
             @if (lastName.touched && lastName.hasError('required')) {
               <small class="field-error">Last name is required.</small>
@@ -83,7 +83,7 @@
           </div>
 
           <div class="field">
-            <label for="phone">Phone</label>
+            <label for="phone">Telefon</label>
             <input id="phone" type="text" formControlName="phone" />
             @if (phone.touched && phone.hasError('required')) {
               <small class="field-error">Phone is required.</small>
@@ -91,7 +91,7 @@
           </div>
 
           <div class="field">
-            <label for="companyName">Company Name</label>
+            <label for="companyName">Naziv firme</label>
             <input id="companyName" type="text" formControlName="companyName" />
             @if (companyName.touched && companyName.hasError('required')) {
               <small class="field-error">Company name is required.</small>
@@ -107,7 +107,7 @@
           </div>
 
           <div class="field">
-            <label for="registrationNumber">Registration Number</label>
+            <label for="registrationNumber">Matični broj</label>
             <input id="registrationNumber" type="text" formControlName="registrationNumber" readonly />
           </div>
 
@@ -117,12 +117,12 @@
           </div>
 
           <div class="field static-field">
-            <label>Created At</label>
+            <label>Kreirano</label>
             <p>{{ profile?.createdAt | date: 'medium' }}</p>
           </div>
 
           <div class="field static-field">
-            <label>Role</label>
+            <label>Uloga</label>
             <p>{{ profile?.role }}</p>
           </div>
 
@@ -133,7 +133,7 @@
         </div>
 
         <div class="field">
-          <label>Favorite Sports</label>
+          <label>Omiljeni sportovi</label>
           <div class="sports-grid">
             @for (sport of sports; track sport.id) {
               <label class="sport-option">
@@ -147,7 +147,7 @@
               </label>
             }
           </div>
-          <small class="helper-text">Choose up to 5 sports.</small>
+          <small class="helper-text">Izaberite do 5 sportova.</small>
           @if (favoriteSports.touched && favoriteSports.hasError('maxSelectedSports')) {
             <small class="field-error">You can select at most 5 sports.</small>
           }

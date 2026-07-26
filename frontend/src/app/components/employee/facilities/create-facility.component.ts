@@ -176,7 +176,7 @@ export class CreateFacilityComponent {
         this.isLoading = false;
       },
       error: (error) => {
-        this.errorMessage = error.error?.message ?? 'Unable to load sports.';
+        this.errorMessage = error.error?.message ?? 'Nije moguće učitati sportove.';
         this.isLoading = false;
       },
     });

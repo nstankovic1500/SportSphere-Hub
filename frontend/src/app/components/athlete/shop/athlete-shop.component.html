@@ -1,19 +1,19 @@
 <section class="page">
   <header class="page-header">
     <div>
-      <h1>Shop</h1>
+      <h1>Prodavnica</h1>
       <p>Browse active products across available facilities.</p>
     </div>
     <div class="header-links">
-      <a routerLink="/athlete/cart">Cart</a>
-      <a routerLink="/athlete/orders">My Orders</a>
+      <a routerLink="/athlete/cart">Korpa</a>
+      <a routerLink="/athlete/orders">Moje porudžbine</a>
     </div>
   </header>
 
   <section class="panel filter-panel">
     <form [formGroup]="filterForm" class="filter-form">
       <div class="field">
-        <label for="facilityId">Facility</label>
+        <label for="facilityId">Objekat</label>
         <select id="facilityId" formControlName="facilityId">
           <option value="">All facilities</option>
           @for (facility of facilities; track facility.id) {
@@ -23,7 +23,7 @@
       </div>
 
       <div class="field">
-        <label for="category">Category</label>
+        <label for="category">Kategorija</label>
         <select id="category" formControlName="category">
           <option value="">All categories</option>
           @for (category of categories; track category) {
@@ -33,8 +33,8 @@
       </div>
 
       <div class="field">
-        <label for="name">Search</label>
-        <input id="name" type="text" formControlName="name" placeholder="Name or description" />
+        <label for="name">Pretraži</label>
+        <input id="name" type="text" formControlName="name" placeholder="Naziv ili opis" />
       </div>
     </form>
   </section>
@@ -44,12 +44,12 @@
   }
 
   @if (isLoading) {
-    <p class="state-message">Loading products...</p>
+    <p class="state-message">Učitavanje proizvoda...</p>
   } @else if (errorMessage && filteredProducts.length === 0) {
     <p class="state-message error">{{ errorMessage }}</p>
   } @else if (filteredProducts.length === 0) {
     <section class="panel">
-      <p class="state-message">No products found.</p>
+      <p class="state-message">Nema pronađenih proizvoda.</p>
     </section>
   } @else {
     @if (errorMessage) {
@@ -76,7 +76,7 @@
             <p><strong>Stock:</strong> {{ product.stock }}</p>
 
             <div class="quantity-row">
-              <label [for]="'quantity-' + product.id">Quantity</label>
+              <label [for]="'quantity-' + product.id">Količina</label>
               <input
                 [id]="'quantity-' + product.id"
                 type="number"

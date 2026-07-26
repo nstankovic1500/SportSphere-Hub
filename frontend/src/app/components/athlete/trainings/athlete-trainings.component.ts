@@ -46,7 +46,7 @@ export class AthleteTrainingsComponent {
       },
       error: (error) => {
         this.cancellingIds.delete(appointment.id);
-        this.errorMessage = error.error?.message ?? 'Unable to cancel training appointment.';
+        this.errorMessage = error.error?.message ?? 'Nije moguće otkazati termin treninga.';
       },
     });
   }
@@ -62,7 +62,7 @@ export class AthleteTrainingsComponent {
         this.isLoading = false;
       },
       error: (error) => {
-        this.errorMessage = error.error?.message ?? 'Unable to load training history.';
+        this.errorMessage = error.error?.message ?? 'Nije moguće učitati istoriju treninga.';
         this.isLoading = false;
       },
     });

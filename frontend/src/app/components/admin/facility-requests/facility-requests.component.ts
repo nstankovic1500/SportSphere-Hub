@@ -89,7 +89,7 @@ export class FacilityRequestsComponent {
         this.isLoading = false;
       },
       error: (error) => {
-        this.errorMessage = error.error?.message ?? 'Unable to load facility requests.';
+        this.errorMessage = error.error?.message ?? 'Nije moguće učitati zahteve za objekte.';
         this.isLoading = false;
       },
     });

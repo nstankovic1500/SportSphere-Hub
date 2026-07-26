@@ -5,8 +5,8 @@
       <p>Review trainer information, load free terms, and book a whole-hour training session.</p>
     </div>
     <nav class="page-links">
-      <a routerLink="/athlete/trainers">Back to trainers</a>
-      <a routerLink="/athlete/trainings">My Trainings</a>
+      <a routerLink="/athlete/trainers">Nazad na trenere</a>
+      <a routerLink="/athlete/trainings">Moji treninzi</a>
     </nav>
   </header>
 
@@ -42,7 +42,7 @@
           }
 
           <label>
-            <span>Resource</span>
+            <span>Resurs</span>
             <select formControlName="resourceId">
               <option value="">Select a resource</option>
               @for (resource of availableResources; track resource.id) {
@@ -52,7 +52,7 @@
           </label>
 
           <label>
-            <span>Date</span>
+            <span>Datum</span>
             <input type="date" formControlName="date" />
           </label>
 

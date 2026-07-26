@@ -210,7 +210,7 @@ export class TrainerBookingComponent {
 
         if (this.isBlockedInTrainerFacility) {
           this.errorMessage =
-            'You are blocked in this facility and cannot create new reservations or training appointments.';
+            'Blokirani ste u ovom objektu i ne možete kreirati nove rezervacije ili treninge.';
           this.isLoadingTrainer = false;
 
           window.setTimeout(() => {

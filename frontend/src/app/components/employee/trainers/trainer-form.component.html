@@ -5,13 +5,13 @@
       <p>{{ isEditMode ? 'Update trainer information.' : 'Create a new trainer for this facility.' }}</p>
     </div>
     <div class="header-links">
-      <a [routerLink]="['/employee/facilities', facilityId, 'trainers']">Back to trainers</a>
+      <a [routerLink]="['/employee/facilities', facilityId, 'trainers']">Nazad na trenere</a>
       <a [routerLink]="['/employee/facilities', facilityId]">Facility details</a>
     </div>
   </header>
 
   @if (isLoading) {
-    <p class="state-message">Loading trainer form...</p>
+    <p class="state-message">Učitavanje forme trenera...</p>
   } @else {
     <section class="panel">
       @if (successMessage) {
@@ -24,21 +24,21 @@
       <form [formGroup]="trainerForm" (ngSubmit)="submit()">
         <div class="form-grid">
           <div class="field">
-            <label for="firstName">First Name</label>
+            <label for="firstName">Ime</label>
             <input id="firstName" type="text" formControlName="firstName" />
             @if (firstNameControl.touched && firstNameControl.hasError('required')) {
               <p class="field-error">First name is required.</p>
             }
           </div>
           <div class="field">
-            <label for="lastName">Last Name</label>
+            <label for="lastName">Prezime</label>
             <input id="lastName" type="text" formControlName="lastName" />
             @if (lastNameControl.touched && lastNameControl.hasError('required')) {
               <p class="field-error">Last name is required.</p>
             }
           </div>
           <div class="field">
-            <label for="email">Email</label>
+            <label for="email">Imejl</label>
             <input id="email" type="email" formControlName="email" />
             @if (emailControl.touched && emailControl.hasError('required')) {
               <p class="field-error">Email is required.</p>
@@ -48,7 +48,7 @@
             }
           </div>
           <div class="field">
-            <label for="phone">Phone</label>
+            <label for="phone">Telefon</label>
             <input id="phone" type="text" formControlName="phone" />
             @if (phoneControl.touched && phoneControl.hasError('required')) {
               <p class="field-error">Phone is required.</p>
@@ -58,7 +58,7 @@
             }
           </div>
           <div class="field">
-            <label for="pricePerHour">Price/Hour</label>
+            <label for="pricePerHour">Cena po satu</label>
             <input id="pricePerHour" type="number" min="0" step="0.01" formControlName="pricePerHour" />
             @if (pricePerHourControl.touched && pricePerHourControl.hasError('required')) {
               <p class="field-error">Price per hour is required.</p>
@@ -70,11 +70,11 @@
           @if (isEditMode) {
             <label class="checkbox-field">
               <input type="checkbox" formControlName="active" />
-              <span>Active</span>
+              <span>Aktivno</span>
             </label>
           }
           <div class="field wide-field">
-            <label for="biography">Biography</label>
+            <label for="biography">Biografija</label>
             <textarea id="biography" rows="5" formControlName="biography"></textarea>
             @if (biographyControl.touched && biographyControl.hasError('required')) {
               <p class="field-error">Biography is required.</p>
@@ -86,7 +86,7 @@
         </div>
 
         <div class="field">
-          <label>Sports</label>
+          <label>Sportovi</label>
           <div class="sports-grid">
             @for (sport of supportedSports; track sport.id) {
               <label class="sport-option">

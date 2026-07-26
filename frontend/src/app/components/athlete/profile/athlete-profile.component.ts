@@ -135,12 +135,12 @@ export class AthleteProfileComponent {
           this.profile = response.data.athlete;
           this.patchForm(response.data.athlete);
           this.isSaving = false;
-          this.successMessage = 'Profile updated successfully.';
+          this.successMessage = 'Profil je uspešno ažuriran.';
           this.authService.loadCurrentUser().subscribe();
         },
         error: (error) => {
           this.isSaving = false;
-          this.errorMessage = error.error?.message ?? 'Unable to update profile.';
+          this.errorMessage = error.error?.message ?? 'Nije moguće ažurirati profil.';
         },
       });
   }
@@ -189,14 +189,14 @@ export class AthleteProfileComponent {
         }
 
         this.isUploadingImage = false;
-        this.successMessage = 'Profile image updated successfully.';
+        this.successMessage = 'Profilna slika je uspešno ažurirana.';
         this.selectedProfileImageFile = null;
         this.profileImagePreview = '';
         this.authService.loadCurrentUser().subscribe();
       },
       error: (error) => {
         this.isUploadingImage = false;
-        this.imageErrorMessage = error.error?.message ?? 'Unable to upload profile image.';
+        this.imageErrorMessage = error.error?.message ?? 'Nije moguće otpremiti profilnu sliku.';
       },
     });
   }
@@ -227,7 +227,7 @@ export class AthleteProfileComponent {
       error: (error) => {
         this.isCancellingIds.delete(reservation.id);
         this.reservationsErrorMessage =
-          error.error?.message ?? 'Unable to cancel reservation.';
+          error.error?.message ?? 'Nije moguće otkazati rezervaciju.';
       },
     });
   }
@@ -246,7 +246,7 @@ export class AthleteProfileComponent {
         this.isLoading = false;
       },
       error: (error) => {
-        this.errorMessage = error.error?.message ?? 'Unable to load athlete profile.';
+        this.errorMessage = error.error?.message ?? 'Nije moguće učitati profil sportiste.';
         this.isLoading = false;
       },
     });

@@ -168,7 +168,7 @@ export class ReservationComponent {
       },
       error: (error) => {
         this.isSubmitting = false;
-        this.backendError = error.error?.message ?? 'Unable to create reservation.';
+        this.backendError = error.error?.message ?? 'Nije moguće kreirati rezervaciju.';
       },
     });
   }
@@ -197,7 +197,7 @@ export class ReservationComponent {
         }
       },
       error: (error) => {
-        this.backendError = error.error?.message ?? 'Unable to load facility details.';
+        this.backendError = error.error?.message ?? 'Nije moguće učitati detalje objekta.';
         this.isLoadingFacility = false;
       },
     });
@@ -318,7 +318,7 @@ export class ReservationComponent {
 
           for (const interval of availability.occupiedIntervals) {
             newEvents.push({
-              title: 'Reserved',
+              title: 'Rezervisano',
               start: interval.startTime,
               end: interval.endTime,
               editable: false,
@@ -339,7 +339,7 @@ export class ReservationComponent {
       },
       error: (error) => {
         this.isLoadingAvailability = false;
-        this.backendError = error.error?.message ?? 'Unable to load calendar availability.';
+        this.backendError = error.error?.message ?? 'Nije moguće učitati dostupnost kalendara.';
         this.availabilityMap = {};
         this.reservedEvents = [];
         this.lastLoadedRange = '';
@@ -382,38 +382,38 @@ export class ReservationComponent {
     const availability = this.availabilityMap[date];
 
     if (!availability) {
-      return this.showSelectionError('Availability is not loaded for the selected day.', silent);
+      return this.showSelectionError('Dostupnost nije učitana za izabrani datum.', silent);
     }
 
     if (!(this.formatDate(start) === this.formatDate(end))) {
-      return this.showSelectionError('Reservation must start and end on the same date.', silent);
+      return this.showSelectionError('Rezervacija mora početi i završiti se istog datuma.', silent);
     }
 
     if (!this.isWholeHour(start) || !this.isWholeHour(end)) {
-      return this.showSelectionError('Reservation must start and end on full hours.', silent);
+      return this.showSelectionError('Rezervacija mora početi i završiti se punim satima.', silent);
     }
 
     if (end <= start) {
-      return this.showSelectionError('Reservation must last at least 1 hour.', silent);
+      return this.showSelectionError('Rezervacija mora trajati najmanje 1 sat.', silent);
     }
 
     if (this.getDurationInHours(start, end) < 1) {
-      return this.showSelectionError('Reservation must last at least 1 hour.', silent);
+      return this.showSelectionError('Rezervacija mora trajati najmanje 1 sat.', silent);
     }
 
     if (start <= new Date()) {
-      return this.showSelectionError('Reservation must be in the future.', silent);
+      return this.showSelectionError('Rezervacija mora biti u budućnosti.', silent);
     }
 
     const opening = this.makeDate(availability.date, availability.openingTime);
     const closing = this.makeDate(availability.date, availability.closingTime);
 
     if (start < opening || end > closing) {
-      return this.showSelectionError('Reservation must stay inside facility opening hours.', silent);
+      return this.showSelectionError('Rezervacija mora biti unutar radnog vremena objekta.', silent);
     }
 
     if (this.overlapsReservedTime(availability, start, end)) {
-      return this.showSelectionError('Reservation overlaps an occupied interval.', silent);
+      return this.showSelectionError('Rezervacija se preklapa sa zauzetim terminom.', silent);
     }
 
     return true;

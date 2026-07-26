@@ -90,7 +90,7 @@ export class FacilitiesComponent {
         this.fetchFacilities(false);
       },
       error: (error) => {
-        this.errorMessage = error.error?.message ?? 'Unable to load filters.';
+        this.errorMessage = error.error?.message ?? 'Nije moguće učitati filtere.';
         this.isLoading = false;
       },
     });
@@ -124,7 +124,7 @@ export class FacilitiesComponent {
           this.isSearching = false;
         },
         error: (error) => {
-          this.errorMessage = error.error?.message ?? 'Unable to load facilities.';
+          this.errorMessage = error.error?.message ?? 'Nije moguće učitati objekte.';
           this.isLoading = false;
           this.isSearching = false;
         },

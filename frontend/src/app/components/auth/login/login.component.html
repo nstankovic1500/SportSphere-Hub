@@ -1,16 +1,16 @@
 <section class="login-page">
   <div class="login-window">
-    <h1>Sign In</h1>
-    <p>Use your SportSphere account credentials.</p>
+    <h1>Prijava</h1>
+    <p>Koristite podatke svog SportSphere naloga.</p>
 
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-      <label for="username">Username</label>
+      <label for="username">Korisničko ime</label>
       <input id="username" type="text" formControlName="username" />
       @if (username?.touched && username?.invalid) {
         <small class="field-error">Username is required.</small>
       }
 
-      <label for="password">Password</label>
+      <label for="password">Lozinka</label>
       <input id="password" type="password" formControlName="password" />
       @if (password?.touched && password?.invalid) {
         <small class="field-error">Password is required.</small>
@@ -27,7 +27,7 @@
 
     <p class="register-link">
       Need an account?
-      <a routerLink="/register">Register</a>
+      <a routerLink="/register">Registracija</a>
     </p>
   </div>
 </section>

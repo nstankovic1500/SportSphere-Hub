@@ -34,7 +34,7 @@ export class EmployeeFacilitiesComponent {
         this.isLoading = false;
       },
       error: (error) => {
-        this.errorMessage = error.error?.message ?? 'Unable to load employee facilities.';
+        this.errorMessage = error.error?.message ?? 'Nije moguće učitati objekte zaposlenog.';
         this.isLoading = false;
       },
     });

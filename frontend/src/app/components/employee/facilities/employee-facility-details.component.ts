@@ -131,7 +131,7 @@ export class EmployeeFacilityDetailsComponent {
         this.isLoading = false;
       },
       error: (error) => {
-        this.errorMessage = error.error?.message ?? 'Unable to load facility details.';
+        this.errorMessage = error.error?.message ?? 'Nije moguće učitati detalje objekta.';
         this.isLoading = false;
       },
     });

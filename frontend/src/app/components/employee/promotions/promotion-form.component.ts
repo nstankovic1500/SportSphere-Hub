@@ -95,7 +95,7 @@ export class PromotionFormComponent {
       },
       error: (error) => {
         this.isSubmitting = false;
-        this.errorMessage = error.error?.message ?? 'Unable to save promotion.';
+        this.errorMessage = error.error?.message ?? 'Nije moguće sačuvati promociju.';
       },
     });
   }
@@ -134,7 +134,7 @@ export class PromotionFormComponent {
         this.isLoading = false;
       },
       error: (error) => {
-        this.errorMessage = error.error?.message ?? 'Unable to load promotion form.';
+        this.errorMessage = error.error?.message ?? 'Nije moguće učitati formu promocije.';
         this.isLoading = false;
       },
     });

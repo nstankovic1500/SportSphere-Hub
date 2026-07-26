@@ -40,7 +40,7 @@ export class EmployeeResourcesComponent {
       },
       error: (error) => {
         this.deletingIds.delete(resource.id);
-        this.errorMessage = error.error?.message ?? 'Unable to delete resource.';
+        this.errorMessage = error.error?.message ?? 'Nije moguće obrisati resurs.';
       },
     });
   }
@@ -54,7 +54,7 @@ export class EmployeeResourcesComponent {
         this.isLoading = false;
       },
       error: (error) => {
-        this.errorMessage = error.error?.message ?? 'Unable to load resources.';
+        this.errorMessage = error.error?.message ?? 'Nije moguće učitati resurse.';
         this.isLoading = false;
       },
     });

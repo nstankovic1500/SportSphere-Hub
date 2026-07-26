@@ -290,7 +290,7 @@ export class RegisterComponent {
 
         error: () => {
           this.errorMessage =
-            'Unable to load sports.';
+            'Nije moguće učitati sportove.';
 
           this.isLoadingSports = false;
         },

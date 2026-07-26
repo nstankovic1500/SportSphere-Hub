@@ -5,7 +5,7 @@
       <p>Select a resource and choose one or more free whole-hour slots on the calendar.</p>
     </div>
     <div class="header-links">
-      <a routerLink="/facilities">Browse facilities</a>
+      <a routerLink="/facilities">Pregledaj objekte</a>
       <a routerLink="/athlete/profile">Back to profile</a>
     </div>
   </header>
@@ -26,7 +26,7 @@
       <h2>Active Resources</h2>
 
       @if (!hasResources) {
-        <p class="state-message">No active resources available.</p>
+        <p class="state-message">Nema dostupnih aktivnih resursa.</p>
       } @else {
         <div class="resource-toolbar">
           <button type="button" class="secondary-button" [disabled]="!hasPreviousResource" (click)="goToPreviousResource()">
@@ -34,7 +34,7 @@
           </button>
 
           <div class="field resource-field">
-            <label for="resourceId">Resource</label>
+            <label for="resourceId">Resurs</label>
             <select id="resourceId" [formControl]="resourceId">
               @for (resource of activeResources; track resource.id) {
                 <option [value]="resource.id">
@@ -53,10 +53,10 @@
           <table>
             <thead>
               <tr>
-                <th>Name</th>
+                <th>Naziv</th>
                 <th>Sport</th>
-                <th>Type</th>
-                <th>Capacity</th>
+                <th>Tip</th>
+                <th>Kapacitet</th>
               </tr>
             </thead>
             <tbody>

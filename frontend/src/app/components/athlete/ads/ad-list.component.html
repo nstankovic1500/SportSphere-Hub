@@ -5,7 +5,7 @@
       <p>Browse active ads, filter by sport, city, and date, or manage your own ads.</p>
     </div>
     <div class="header-links">
-      <a routerLink="/athlete">Back to dashboard</a>
+      <a routerLink="/athlete">Nazad na kontrolnu tablu</a>
       <a routerLink="/athlete/ads/new">Create ad</a>
     </div>
   </header>
@@ -16,7 +16,7 @@
         <div class="field">
           <label for="sportId">Sport</label>
           <select id="sportId" formControlName="sportId">
-            <option value="">All sports</option>
+            <option value="">Svi sportovi</option>
             @for (sport of sports; track sport.id) {
               <option [value]="sport.id">{{ sport.name }}</option>
             }
@@ -24,7 +24,7 @@
         </div>
 
         <div class="field">
-          <label for="city">City</label>
+          <label for="city">Grad</label>
           <select id="city" formControlName="city">
             <option value="">All cities</option>
             @for (city of cities; track city) {
@@ -34,7 +34,7 @@
         </div>
 
         <div class="field">
-          <label for="date">Date</label>
+          <label for="date">Datum</label>
           <input id="date" type="date" formControlName="date" />
         </div>
       </div>
@@ -71,8 +71,8 @@
           <thead>
             <tr>
               <th>Sport</th>
-              <th>City</th>
-              <th>Date</th>
+              <th>Grad</th>
+              <th>Datum</th>
               <th>Time</th>
               <th>Author</th>
               <th>Missing players</th>

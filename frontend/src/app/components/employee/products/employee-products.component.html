@@ -1,12 +1,12 @@
 <section class="page">
   <header class="page-header">
     <div>
-      <h1>Products</h1>
+      <h1>Proizvodi</h1>
       <p>Manage products for the selected facility.</p>
     </div>
     <div class="header-links">
-      <a [routerLink]="['/employee/facilities', facilityId]">Back to facility</a>
-      <a [routerLink]="['/employee/facilities', facilityId, 'products', 'new']">Create Product</a>
+      <a [routerLink]="['/employee/facilities', facilityId]">Nazad na objekat</a>
+      <a [routerLink]="['/employee/facilities', facilityId, 'products', 'new']">Kreiraj proizvod</a>
     </div>
   </header>
 
@@ -19,7 +19,7 @@
       <div class="field">
         <label for="active">Active Filter</label>
         <select id="active" formControlName="active">
-          <option value="all">All</option>
+          <option value="all">Sve</option>
           <option value="true">Active only</option>
           <option value="false">Inactive only</option>
         </select>
@@ -28,12 +28,12 @@
   </section>
 
   @if (isLoading) {
-    <p class="state-message">Loading products...</p>
+    <p class="state-message">Učitavanje proizvoda...</p>
   } @else if (errorMessage && products.length === 0) {
     <p class="state-message error">{{ errorMessage }}</p>
   } @else if (products.length === 0) {
     <section class="panel">
-      <p class="state-message">No products found.</p>
+      <p class="state-message">Nema pronađenih proizvoda.</p>
     </section>
   } @else {
     @if (errorMessage) {
@@ -45,13 +45,13 @@
         <table>
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Category</th>
-              <th>Description</th>
-              <th>Price</th>
-              <th>Stock</th>
-              <th>Active</th>
-              <th>Actions</th>
+              <th>Naziv</th>
+              <th>Kategorija</th>
+              <th>Opis</th>
+              <th>Cena</th>
+              <th>Zaliha</th>
+              <th>Aktivno</th>
+              <th>Akcije</th>
             </tr>
           </thead>
           <tbody>

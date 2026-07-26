@@ -1,12 +1,12 @@
 <section class="page">
   <header class="page-header">
     <div>
-      <h1>Cart</h1>
+      <h1>Korpa</h1>
       <p>Review your selected products before checkout.</p>
     </div>
     <div class="header-links">
       <a routerLink="/athlete/shop">Back to shop</a>
-      <a routerLink="/athlete/orders">My Orders</a>
+      <a routerLink="/athlete/orders">Moje porudžbine</a>
     </div>
   </header>
 
@@ -15,7 +15,7 @@
   }
 
   @if (isLoading) {
-    <p class="state-message">Loading cart...</p>
+    <p class="state-message">Učitavanje korpe...</p>
   } @else if (errorMessage && items.length === 0) {
     <p class="state-message error">{{ errorMessage }}</p>
   } @else if (items.length === 0) {
@@ -33,11 +33,11 @@
           <thead>
             <tr>
               <th>Product</th>
-              <th>Facility</th>
+              <th>Objekat</th>
               <th>Unit Price</th>
-              <th>Quantity</th>
+              <th>Količina</th>
               <th>Subtotal</th>
-              <th>Actions</th>
+              <th>Akcije</th>
             </tr>
           </thead>
           <tbody>

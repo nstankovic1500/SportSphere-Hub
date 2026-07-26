@@ -133,7 +133,7 @@ export class ProductFormComponent {
       },
       error: (error) => {
         this.isSubmitting = false;
-        this.errorMessage = error.error?.message ?? 'Unable to save product.';
+        this.errorMessage = error.error?.message ?? 'Nije moguće sačuvati proizvod.';
       },
     });
   }
@@ -172,7 +172,7 @@ export class ProductFormComponent {
         this.isLoading = false;
       },
       error: (error) => {
-        this.errorMessage = error.error?.message ?? 'Unable to load product form.';
+        this.errorMessage = error.error?.message ?? 'Nije moguće učitati formu proizvoda.';
         this.isLoading = false;
       },
     });
@@ -199,8 +199,8 @@ export class ProductFormComponent {
   private finishSuccess() {
     this.isSubmitting = false;
     this.successMessage = this.isEditMode
-      ? 'Product updated successfully.'
-      : 'Product created successfully.';
+      ? 'Proizvod je uspešno ažuriran.'
+      : 'Proizvod je uspešno kreiran.';
 
     window.setTimeout(() => {
       void this.router.navigate(['/employee/facilities', this.facilityId, 'products']);

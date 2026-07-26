@@ -19,13 +19,13 @@
 
       <form [formGroup]="resourceForm" (ngSubmit)="submit()">
         <div class="form-grid">
-          <div class="field"><label for="name">Name</label><input id="name" type="text" formControlName="name" /></div>
+          <div class="field"><label for="name">Naziv</label><input id="name" type="text" formControlName="name" /></div>
           <div class="field">
-            <label for="type">Type</label>
+            <label for="type">Tip</label>
             <select id="type" formControlName="type">
-              <option value="outdoor">Outdoor</option>
-              <option value="indoor">Indoor</option>
-              <option value="team_hall">Team hall</option>
+              <option value="outdoor">Otvoreni</option>
+              <option value="indoor">Zatvoreni</option>
+              <option value="team_hall">Timska hala</option>
             </select>
           </div>
           <div class="field">
@@ -37,12 +37,12 @@
               }
             </select>
           </div>
-          <div class="field"><label for="capacity">Capacity</label><input id="capacity" type="number" min="1" step="1" formControlName="capacity" /></div>
-          <div class="field wide-field"><label for="equipmentDescription">Equipment Description</label><textarea id="equipmentDescription" rows="4" formControlName="equipmentDescription"></textarea></div>
+          <div class="field"><label for="capacity">Kapacitet</label><input id="capacity" type="number" min="1" step="1" formControlName="capacity" /></div>
+          <div class="field wide-field"><label for="equipmentDescription">Opis opreme</label><textarea id="equipmentDescription" rows="4" formControlName="equipmentDescription"></textarea></div>
           @if (isEditMode) {
             <label class="checkbox-field">
               <input type="checkbox" formControlName="active" />
-              <span>Active</span>
+              <span>Aktivno</span>
             </label>
           }
         </div>

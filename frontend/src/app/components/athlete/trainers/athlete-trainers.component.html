@@ -6,13 +6,13 @@
     </div>
     <nav class="page-links">
       <a routerLink="/athlete">Dashboard</a>
-      <a routerLink="/athlete/trainings">My Trainings</a>
+      <a routerLink="/athlete/trainings">Moji treninzi</a>
     </nav>
   </header>
 
   <form class="filters" [formGroup]="filterForm" (ngSubmit)="applyFilters()">
     <label>
-      <span>Facility</span>
+      <span>Objekat</span>
       <select formControlName="facilityId">
         <option value="">All facilities</option>
         @for (facility of facilities; track facility.id) {
@@ -24,7 +24,7 @@
     <label>
       <span>Sport</span>
       <select formControlName="sportId">
-        <option value="">All sports</option>
+        <option value="">Svi sportovi</option>
         @for (sport of sports; track sport.id) {
           <option [value]="sport.id">{{ sport.name }}</option>
         }

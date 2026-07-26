@@ -61,7 +61,7 @@ export class RegistrationRequestsComponent {
       },
       error: (error) => {
         this.errorMessage =
-          error.error?.message ?? 'Unable to load registration requests.';
+          error.error?.message ?? 'Nije moguće učitati zahteve za registraciju.';
         this.isLoading = false;
       },
     });

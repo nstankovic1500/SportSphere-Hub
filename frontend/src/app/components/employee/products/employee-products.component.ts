@@ -54,7 +54,7 @@ export class EmployeeProductsComponent {
       },
       error: (error) => {
         this.deletingIds.delete(product.id);
-        this.errorMessage = error.error?.message ?? 'Unable to delete product.';
+        this.errorMessage = error.error?.message ?? 'Nije moguće obrisati proizvod.';
       },
     });
   }

@@ -1,12 +1,12 @@
 <section class="page">
   <header class="page-header">
     <div>
-      <h1>My Orders</h1>
+      <h1>Moje porudžbine</h1>
       <p>Track active orders and previous order history.</p>
     </div>
     <div class="header-links">
-      <a routerLink="/athlete/shop">Shop</a>
-      <a routerLink="/athlete/cart">Cart</a>
+      <a routerLink="/athlete/shop">Prodavnica</a>
+      <a routerLink="/athlete/cart">Korpa</a>
     </div>
   </header>
 
@@ -15,12 +15,12 @@
   }
 
   @if (isLoading) {
-    <p class="state-message">Loading orders...</p>
+    <p class="state-message">Učitavanje porudžbina...</p>
   } @else if (errorMessage && orders.length === 0) {
     <p class="state-message error">{{ errorMessage }}</p>
   } @else if (orders.length === 0) {
     <section class="panel">
-      <p class="state-message">No orders found.</p>
+      <p class="state-message">Nema pronađenih porudžbina.</p>
     </section>
   } @else {
     @if (errorMessage) {
@@ -28,9 +28,9 @@
     }
 
     <section class="panel">
-      <h2>Active Orders</h2>
+      <h2>Aktivne porudžbine</h2>
       @if (activeOrders.length === 0) {
-        <p class="state-message">No active orders.</p>
+        <p class="state-message">Nema aktivnih porudžbina.</p>
       } @else {
         <div class="orders-grid">
           @for (order of activeOrders; track order.id) {
@@ -57,9 +57,9 @@
     </section>
 
     <section class="panel">
-      <h2>Order History</h2>
+      <h2>Istorija porudžbina</h2>
       @if (orderHistory.length === 0) {
-        <p class="state-message">No historical orders.</p>
+        <p class="state-message">Nema prethodnih porudžbina.</p>
       } @else {
         <div class="orders-grid">
           @for (order of orderHistory; track order.id) {

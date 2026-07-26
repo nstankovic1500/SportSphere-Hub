@@ -66,14 +66,14 @@ export class EmployeeResourceFormComponent {
     request$.subscribe({
       next: () => {
         this.isSubmitting = false;
-        this.successMessage = this.isEditMode ? 'Resource updated successfully.' : 'Resource created successfully.';
+        this.successMessage = this.isEditMode ? 'Resurs je uspešno ažuriran.' : 'Resurs je uspešno kreiran.';
         window.setTimeout(() => {
           void this.router.navigate(['/employee/facilities', this.facilityId, 'resources']);
         }, 1200);
       },
       error: (error) => {
         this.isSubmitting = false;
-        this.errorMessage = error.error?.message ?? 'Unable to save resource.';
+        this.errorMessage = error.error?.message ?? 'Nije moguće sačuvati resurs.';
       },
     });
   }
@@ -111,7 +111,7 @@ export class EmployeeResourceFormComponent {
         this.isLoading = false;
       },
       error: (error) => {
-        this.errorMessage = error.error?.message ?? 'Unable to load resource form.';
+        this.errorMessage = error.error?.message ?? 'Nije moguće učitati formu resursa.';
         this.isLoading = false;
       },
     });

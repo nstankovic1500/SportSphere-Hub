@@ -78,7 +78,7 @@ export class AdListComponent {
       },
       error: (error) => {
         this.applyingIds.delete(ad.id);
-        this.errorMessage = error.error?.message ?? 'Unable to send apply request.';
+        this.errorMessage = error.error?.message ?? 'Nije moguće poslati prijavu.';
       },
     });
   }
@@ -100,7 +100,7 @@ export class AdListComponent {
       },
       error: (error) => {
         this.closingIds.delete(ad.id);
-        this.errorMessage = error.error?.message ?? 'Unable to close ad.';
+        this.errorMessage = error.error?.message ?? 'Nije moguće zatvoriti oglas.';
       },
     });
   }
@@ -128,7 +128,7 @@ export class AdListComponent {
         this.fetchAds(false);
       },
       error: (error) => {
-        this.errorMessage = error.error?.message ?? 'Unable to load ad filters.';
+        this.errorMessage = error.error?.message ?? 'Nije moguće učitati filtere oglasa.';
         this.isLoading = false;
       },
     });
@@ -157,7 +157,7 @@ export class AdListComponent {
         this.isFiltering = false;
       },
       error: (error) => {
-        this.errorMessage = error.error?.message ?? 'Unable to load ads.';
+        this.errorMessage = error.error?.message ?? 'Nije moguće učitati oglase.';
         this.isLoading = false;
         this.isFiltering = false;
       },

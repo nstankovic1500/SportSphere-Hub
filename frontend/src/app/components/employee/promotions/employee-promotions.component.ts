@@ -56,7 +56,7 @@ export class EmployeePromotionsComponent {
       },
       error: (error) => {
         this.deletingIds.delete(promotion.id);
-        this.errorMessage = error.error?.message ?? 'Unable to delete promotion.';
+        this.errorMessage = error.error?.message ?? 'Nije moguće obrisati promociju.';
       },
     });
   }
@@ -72,7 +72,7 @@ export class EmployeePromotionsComponent {
         this.isLoading = false;
       },
       error: (error) => {
-        this.errorMessage = error.error?.message ?? 'Unable to load promotions.';
+        this.errorMessage = error.error?.message ?? 'Nije moguće učitati promocije.';
         this.isLoading = false;
       },
     });

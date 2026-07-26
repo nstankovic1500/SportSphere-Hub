@@ -110,7 +110,7 @@ export class AthleteShopComponent {
       },
       error: (error) => {
         this.addingIds.delete(product.id);
-        this.errorMessage = error.error?.message ?? 'Unable to add item to cart.';
+        this.errorMessage = error.error?.message ?? 'Nije moguće dodati stavku u korpu.';
       },
     });
   }

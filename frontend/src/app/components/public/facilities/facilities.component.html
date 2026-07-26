@@ -1,23 +1,23 @@
 <section class="public-page">
   <header class="page-header">
     <div>
-      <h1>Facilities</h1>
-      <p>Search approved sports facilities by city, sport, and resource type.</p>
+      <h1>Objekti</h1>
+      <p>Pretražite odobrene sportske objekte po gradu, sportu i tipu resursa.</p>
     </div>
-    <a routerLink="/">Back home</a>
+    <a routerLink="/">Nazad na početnu</a>
   </header>
 
   <form class="filters" [formGroup]="filterForm" (ngSubmit)="applyFilters()">
     <div class="filter-grid">
       <div class="field">
-        <label for="name">Facility Name</label>
+        <label for="name">Naziv objekta</label>
         <input id="name" type="text" formControlName="name" />
       </div>
 
       <div class="field">
         <label for="sportId">Sport</label>
         <select id="sportId" formControlName="sportId">
-          <option value="">All sports</option>
+          <option value="">Svi sportovi</option>
           @for (sport of sports; track sport.id) {
             <option [value]="sport.id">{{ sport.name }}</option>
           }
@@ -25,34 +25,34 @@
       </div>
 
       <div class="field">
-        <label for="resourceType">Resource Type</label>
+        <label for="resourceType">Tip resursa</label>
         <select id="resourceType" formControlName="resourceType">
-          <option value="">All types</option>
-          <option value="outdoor">Outdoor</option>
-          <option value="indoor">Indoor</option>
-          <option value="team_hall">Team hall</option>
+          <option value="">Svi tipovi</option>
+          <option value="outdoor">Otvoreni</option>
+          <option value="indoor">Zatvoreni</option>
+          <option value="team_hall">Timska hala</option>
         </select>
       </div>
 
       <div class="field">
-        <label for="sortBy">Sort By</label>
+        <label for="sortBy">Sortiraj po</label>
         <select id="sortBy" formControlName="sortBy">
-          <option value="name">Name</option>
-          <option value="city">City</option>
+          <option value="name">Naziv</option>
+          <option value="city">Grad</option>
         </select>
       </div>
 
       <div class="field">
-        <label for="sortOrder">Sort Order</label>
+        <label for="sortOrder">Redosled sortiranja</label>
         <select id="sortOrder" formControlName="sortOrder">
-          <option value="asc">Ascending</option>
-          <option value="desc">Descending</option>
+          <option value="asc">Rastuće</option>
+          <option value="desc">Opadajuće</option>
         </select>
       </div>
     </div>
 
     <div class="city-section">
-      <label>Cities</label>
+      <label>Gradovi</label>
       <div class="city-options">
         @for (city of cities; track city) {
           <label class="city-option">
@@ -78,23 +78,23 @@
   </form>
 
   @if (isLoading) {
-    <p class="state-message">Loading facilities...</p>
+    <p class="state-message">Učitavanje objekata...</p>
   } @else if (errorMessage) {
     <p class="state-message error">{{ errorMessage }}</p>
   } @else if (facilities.length === 0) {
-    <p class="state-message">No facilities match the selected filters.</p>
+    <p class="state-message">Nijedan objekat ne odgovara izabranim filterima.</p>
   } @else {
     <div class="table-wrapper">
       <table>
         <thead>
           <tr>
-            <th>Name</th>
-            <th>City</th>
-            <th>Country</th>
-            <th>Address</th>
-            <th>Sports</th>
-            <th>Price</th>
-            <th>Image</th>
+            <th>Naziv</th>
+            <th>Grad</th>
+            <th>Država</th>
+            <th>Adresa</th>
+            <th>Sportovi</th>
+            <th>Cena</th>
+            <th>Slika</th>
             <th>Likes</th>
             <th>Dislikes</th>
             <th></th>
@@ -119,7 +119,7 @@
               <td>{{ facility.likesCount }}</td>
               <td>{{ facility.dislikesCount }}</td>
               <td>
-                <a class="details-link" [routerLink]="['/facilities', facility.id]">Details</a>
+                <a class="details-link" [routerLink]="['/facilities', facility.id]">Detalji</a>
               </td>
             </tr>
           }

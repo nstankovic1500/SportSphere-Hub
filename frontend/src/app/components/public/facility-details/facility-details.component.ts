@@ -101,7 +101,7 @@ export class FacilityDetailsComponent {
 
     if (this.isBlockedInCurrentFacility) {
       this.errorMessage =
-        'You are blocked in this facility and cannot create new reservations or training appointments.';
+        'Blokirani ste u ovom objektu i ne možete kreirati nove rezervacije ili treninge.';
       return;
     }
 
@@ -128,7 +128,7 @@ export class FacilityDetailsComponent {
     }).subscribe({
       next: () => {
         this.isSubmittingReview = false;
-        this.reviewSuccessMessage = 'Review submitted successfully.';
+        this.reviewSuccessMessage = 'Recenzija je uspešno poslata.';
         this.reviewForm.reset({
           reaction: '',
           comment: '',
@@ -137,7 +137,7 @@ export class FacilityDetailsComponent {
       },
       error: (error) => {
         this.isSubmittingReview = false;
-        this.reviewErrorMessage = error.error?.message ?? 'Unable to submit review.';
+        this.reviewErrorMessage = error.error?.message ?? 'Nije moguće poslati recenziju.';
       },
     });
   }
@@ -155,7 +155,7 @@ export class FacilityDetailsComponent {
         this.isLoading = false;
       },
       error: (error) => {
-        this.errorMessage = error.error?.message ?? 'Unable to load facility details.';
+        this.errorMessage = error.error?.message ?? 'Nije moguće učitati detalje objekta.';
         this.isLoading = false;
       },
     });
@@ -169,7 +169,7 @@ export class FacilityDetailsComponent {
         this.comments = response.data.comments;
       },
       error: (error) => {
-        this.reviewErrorMessage = error.error?.message ?? 'Unable to load reviews.';
+        this.reviewErrorMessage = error.error?.message ?? 'Nije moguće učitati recenzije.';
       },
     });
   }

@@ -39,7 +39,7 @@ export class HomeComponent {
         this.isLoading = false;
       },
       error: (error) => {
-        this.errorMessage = error.error?.message ?? 'Unable to load home page.';
+        this.errorMessage = error.error?.message ?? 'Nije moguće učitati početnu stranicu.';
         this.isLoading = false;
       },
     });

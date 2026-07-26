@@ -1,8 +1,8 @@
 <section class="public-page">
-  <a class="back-link" routerLink="/facilities">Back to facilities</a>
+  <a class="back-link" routerLink="/facilities">Nazad na objekte</a>
 
   @if (isLoading) {
-    <p class="state-message">Loading facility details...</p>
+    <p class="state-message">Učitavanje detalja objekta...</p>
   } @else if (errorMessage) {
     <p class="state-message error">{{ errorMessage }}</p>
   } @else if (facility) {
@@ -27,14 +27,14 @@
     </header>
 
     <section class="panel">
-      <h2>Description</h2>
+      <h2>Opis</h2>
       <p>{{ facility.description }}</p>
     </section>
 
     <section class="panel">
-      <h2>Gallery</h2>
+      <h2>Galerija</h2>
       @if (facility.images.length === 0) {
-        <p class="state-message">No images available.</p>
+        <p class="state-message">Nema dostupnih slika.</p>
       } @else {
         <div class="gallery">
           @for (image of facility.images; track image) {
@@ -45,9 +45,9 @@
     </section>
 
     <section class="panel">
-      <h2>Opening Hours</h2>
+      <h2>Radno vreme</h2>
       @if (facility.openingHours.length === 0) {
-        <p class="state-message">No opening hours available.</p>
+        <p class="state-message">Nema dostupnog radnog vremena.</p>
       } @else {
         <div class="hours-list">
           @for (openingHour of facility.openingHours; track openingHour.day) {
@@ -61,23 +61,23 @@
     </section>
 
     <section class="panel">
-      <h2>Location</h2>
+      <h2>Lokacija</h2>
       <p>Longitude: {{ facility.location.coordinates[0] }}</p>
       <p>Latitude: {{ facility.location.coordinates[1] }}</p>
     </section>
 
     <section class="panel">
-      <h2>Resources</h2>
+      <h2>Resursi</h2>
       @if (facility.resources.length === 0) {
-        <p class="state-message">No active resources available.</p>
+        <p class="state-message">Nema dostupnih aktivnih resursa.</p>
       } @else {
         <div class="table-wrapper">
           <table>
             <thead>
               <tr>
-                <th>Name</th>
-                <th>Type</th>
-                <th>Capacity</th>
+                <th>Naziv</th>
+                <th>Tip</th>
+                <th>Kapacitet</th>
                 <th>Equipment</th>
                 <th>Sport</th>
               </tr>
@@ -99,9 +99,9 @@
     </section>
 
     <section class="panel">
-      <h2>Latest Comments</h2>
+      <h2>Najnoviji komentari</h2>
       @if (comments.length === 0) {
-        <p class="state-message">No comments available.</p>
+        <p class="state-message">Nema dostupnih komentara.</p>
       } @else {
         <div class="comment-list">
           @for (commentItem of comments; track commentItem.id) {
@@ -122,7 +122,7 @@
 
     @if (canReview) {
       <section class="panel">
-        <h2>Leave a Review</h2>
+        <h2>Ostavite recenziju</h2>
 
         @if (reviewSuccessMessage) {
           <p class="message success">{{ reviewSuccessMessage }}</p>
@@ -134,16 +134,16 @@
 
         <form [formGroup]="reviewForm" (ngSubmit)="submitReview()">
           <div class="field">
-            <label>Reaction</label>
+            <label>Reakcija</label>
             <div class="radio-group">
               <label class="radio-option">
                 <input type="radio" value="like" formControlName="reaction" />
-                <span>Like</span>
+                <span>Sviđa mi se</span>
               </label>
 
               <label class="radio-option">
                 <input type="radio" value="dislike" formControlName="reaction" />
-                <span>Dislike</span>
+                <span>Ne sviđa mi se</span>
               </label>
             </div>
             @if (reaction.touched && reaction.hasError('required')) {
@@ -152,7 +152,7 @@
           </div>
 
           <div class="field">
-            <label for="comment">Comment</label>
+            <label for="comment">Komentar</label>
             <textarea id="comment" rows="5" formControlName="comment" maxlength="500"></textarea>
             <small class="helper-text">{{ comment.value.length }}/500 characters</small>
             @if (comment.touched && comment.hasError('required')) {

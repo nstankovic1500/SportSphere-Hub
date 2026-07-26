@@ -1,12 +1,12 @@
 <section class="page">
   <header class="page-header">
     <div>
-      <h1>Facility Requests</h1>
+      <h1>Zahtevi za objekte</h1>
       <p>Review pending facility requests submitted by employees.</p>
     </div>
     <div class="header-links">
-      <a routerLink="/admin">Back to dashboard</a>
-      <a routerLink="/admin/registration-requests">Registration Requests</a>
+      <a routerLink="/admin">Nazad na kontrolnu tablu</a>
+      <a routerLink="/admin/registration-requests">Zahtevi za registraciju</a>
     </div>
   </header>
 
@@ -15,12 +15,12 @@
   }
 
   @if (isLoading) {
-    <p class="state-message">Loading facility requests...</p>
+    <p class="state-message">Učitavanje zahteva za objekte...</p>
   } @else if (errorMessage) {
     <p class="state-message error">{{ errorMessage }}</p>
   } @else if (requests.length === 0) {
     <section class="panel">
-      <p class="state-message">No pending facility requests found.</p>
+      <p class="state-message">Nema zahteva za objekte na čekanju.</p>
     </section>
   } @else {
     <section class="panel">
@@ -37,35 +37,35 @@
 
             <div class="details-grid">
               <div class="detail-item">
-                <span class="detail-label">Address</span>
+                <span class="detail-label">Adresa</span>
                 <span>{{ request.address }}</span>
               </div>
               <div class="detail-item">
-                <span class="detail-label">Company</span>
+                <span class="detail-label">Firma</span>
                 <span>{{ getCompaniesLabel(request) }}</span>
               </div>
               <div class="detail-item">
-                <span class="detail-label">Employee</span>
+                <span class="detail-label">Zaposleni</span>
                 <span>{{ getEmployeesLabel(request) }}</span>
               </div>
               <div class="detail-item">
-                <span class="detail-label">Sports</span>
+                <span class="detail-label">Sportovi</span>
                 <span>{{ getSportsLabel(request) }}</span>
               </div>
               <div class="detail-item">
-                <span class="detail-label">Hourly Price</span>
+                <span class="detail-label">Cena po satu</span>
                 <span>{{ request.hourlyPrice }}</span>
               </div>
               <div class="detail-item">
-                <span class="detail-label">Allowed No-Shows</span>
+                <span class="detail-label">Dozvoljeni izostanci</span>
                 <span>{{ request.allowedNoShows }}</span>
               </div>
               <div class="detail-item detail-item-wide">
-                <span class="detail-label">Opening Hours</span>
+                <span class="detail-label">Radno vreme</span>
                 <span>{{ getOpeningHoursLabel(request) }}</span>
               </div>
               <div class="detail-item">
-                <span class="detail-label">Created At</span>
+                <span class="detail-label">Kreirano</span>
                 <span>{{ request.createdAt | date: 'medium' }}</span>
               </div>
             </div>
@@ -74,26 +74,26 @@
               <button
                 type="button"
                 class="approve-button"
-                title="Approve request"
+                title="Odobri zahtev"
                 aria-label="Approve request"
                 [disabled]="isProcessing(request.id)"
                 (click)="approve(request)"
               >
                 @if (isProcessing(request.id)) {
-                  <span>Processing...</span>
+                  <span>Obrada...</span>
                 } @else {
-                  <span>Approve</span>
+                  <span>Odobri</span>
                 }
               </button>
               <button
                 type="button"
                 class="secondary-button"
-                title="Reject request"
+                title="Odbij zahtev"
                 aria-label="Reject request"
                 [disabled]="isProcessing(request.id)"
                 (click)="reject(request)"
               >
-                <span>Reject</span>
+                <span>Odbij</span>
               </button>
             </div>
           </article>

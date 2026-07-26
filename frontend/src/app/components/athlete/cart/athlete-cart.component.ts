@@ -57,7 +57,7 @@ export class AthleteCartComponent {
       },
       error: (error) => {
         this.updatingIds.delete(item.id);
-        this.errorMessage = error.error?.message ?? 'Unable to update cart item.';
+        this.errorMessage = error.error?.message ?? 'Nije moguće ažurirati stavku u korpi.';
       },
     });
   }
@@ -80,7 +80,7 @@ export class AthleteCartComponent {
       },
       error: (error) => {
         this.updatingIds.delete(item.id);
-        this.errorMessage = error.error?.message ?? 'Unable to remove cart item.';
+        this.errorMessage = error.error?.message ?? 'Nije moguće ukloniti stavku iz korpe.';
       },
     });
   }
@@ -121,7 +121,7 @@ export class AthleteCartComponent {
       },
       error: (error) => {
         this.isCheckingOut = false;
-        this.errorMessage = error.error?.message ?? 'Unable to complete checkout.';
+        this.errorMessage = error.error?.message ?? 'Nije moguće završiti kupovinu.';
       },
     });
   }
@@ -146,7 +146,7 @@ export class AthleteCartComponent {
         this.isLoading = false;
       },
       error: (error) => {
-        this.errorMessage = error.error?.message ?? 'Unable to load cart.';
+        this.errorMessage = error.error?.message ?? 'Nije moguće učitati korpu.';
         this.isLoading = false;
       },
     });

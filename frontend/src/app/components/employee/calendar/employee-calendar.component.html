@@ -1,22 +1,22 @@
 <section class="page">
   <header class="page-header">
     <div>
-      <h1>Facility Calendar</h1>
-      <p>Choose an object and an individual court or hall from the dropdown lists, then drag reservations and trainings inside closed halls where moving is allowed.</p>
+      <h1>Kalendar objekta</h1>
+      <p>Izaberite objekat i pojedinačni teren ili halu iz padajućih lista, a zatim prevucite rezervacije i treninge unutar zatvorenih hala gde je pomeranje dozvoljeno.</p>
     </div>
     <div class="header-links">
-      <a [routerLink]="['/employee/facilities', filterForm.controls.facilityId.value || facility?.id]">Back to facility</a>
-      <a [routerLink]="['/employee/facilities', filterForm.controls.facilityId.value || facility?.id, 'attendance']">Attendance</a>
-      <a [routerLink]="['/employee/facilities', filterForm.controls.facilityId.value || facility?.id, 'resources']">Resources</a>
+      <a [routerLink]="['/employee/facilities', filterForm.controls.facilityId.value || facility?.id]">Nazad na objekat</a>
+      <a [routerLink]="['/employee/facilities', filterForm.controls.facilityId.value || facility?.id, 'attendance']">Prisustvo</a>
+      <a [routerLink]="['/employee/facilities', filterForm.controls.facilityId.value || facility?.id, 'resources']">Resursi</a>
     </div>
   </header>
 
   <section class="panel filters-panel">
     <form [formGroup]="filterForm" class="filters">
       <label>
-        <span>Facility</span>
+        <span>Objekat</span>
         <select formControlName="facilityId">
-          <option value="">Select facility</option>
+          <option value="">Izaberi objekat</option>
           @for (facilityOption of facilities; track facilityOption.id) {
             <option [value]="facilityOption.id">
               {{ facilityOption.name }} - {{ facilityOption.city }}
@@ -26,9 +26,9 @@
       </label>
 
       <label>
-        <span>Resource</span>
+        <span>Resurs</span>
         <select formControlName="resourceId">
-          <option value="">Select resource</option>
+          <option value="">Izaberi resurs</option>
           @for (resource of resources; track resource.id) {
             <option [value]="resource.id">
               {{ resource.name }} - {{ resource.sport.name }} ({{ resource.type }})
@@ -38,11 +38,11 @@
       </label>
 
       <label>
-        <span>Type</span>
+        <span>Tip</span>
         <select formControlName="type">
-          <option value="all">All</option>
-          <option value="reservations">Reservations</option>
-          <option value="trainings">Trainings</option>
+          <option value="all">Sve</option>
+          <option value="reservations">Rezervacije</option>
+          <option value="trainings">Treninzi</option>
         </select>
       </label>
     </form>
@@ -57,20 +57,20 @@
   }
 
   @if (isLoadingFacilities || isLoadingFacility || isLoadingResources) {
-    <p class="state-message">Loading facility calendar...</p>
+    <p class="state-message">Učitavanje kalendara objekta...</p>
   } @else if (facilities.length === 0) {
-    <p class="state-message">No facilities found for this employee.</p>
+    <p class="state-message">Nema objekata za ovog zaposlenog.</p>
   } @else if (resources.length === 0) {
-    <p class="state-message">No active resources found for this facility.</p>
+    <p class="state-message">Nema aktivnih resursa za ovaj objekat.</p>
   } @else {
     <section class="panel summary-panel">
       <div class="summary-grid">
         <div>
-          <span class="summary-label">Facility</span>
+          <span class="summary-label">Objekat</span>
           <strong>{{ selectedFacilityName }}</strong>
         </div>
         <div>
-          <span class="summary-label">Selected Resource</span>
+          <span class="summary-label">Izabrani resurs</span>
           <strong>{{ selectedCalendarResourceName || 'Choose a resource' }}</strong>
         </div>
         <div>
@@ -81,7 +81,7 @@
     </section>
 
     @if (isLoadingCalendar) {
-      <p class="state-message">Loading calendar events...</p>
+      <p class="state-message">Učitavanje događaja u kalendaru...</p>
     }
 
     <section class="panel calendar-panel">
@@ -93,7 +93,7 @@
         <span class="legend-item"><span class="legend-color reservation"></span> Reservation</span>
         <span class="legend-item"><span class="legend-color training"></span> Training</span>
       </div>
-      <p class="legend-note">If the backend rejects a move, the event returns to its original slot automatically.</p>
+      <p class="legend-note">Ako backend odbije pomeranje, događaj se automatski vraća na prvobitni termin.</p>
     </section>
   }
 </section>

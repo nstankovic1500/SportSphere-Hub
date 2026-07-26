@@ -81,7 +81,7 @@ export class EmployeeOrdersComponent {
       },
       error: (error) => {
         this.updatingIds.delete(order.id);
-        this.errorMessage = error.error?.message ?? 'Unable to update order status.';
+        this.errorMessage = error.error?.message ?? 'Nije moguće ažurirati status porudžbine.';
       },
     });
   }
@@ -106,7 +106,7 @@ export class EmployeeOrdersComponent {
         this.isLoading = false;
       },
       error: (error) => {
-        this.errorMessage = error.error?.message ?? 'Unable to load orders.';
+        this.errorMessage = error.error?.message ?? 'Nije moguće učitati porudžbine.';
         this.isLoading = false;
       },
     });

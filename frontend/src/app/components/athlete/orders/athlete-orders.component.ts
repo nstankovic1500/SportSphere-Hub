@@ -72,7 +72,7 @@ export class AthleteOrdersComponent {
       },
       error: (error) => {
         this.updatingIds.delete(order.id);
-        this.errorMessage = error.error?.message ?? 'Unable to cancel order.';
+        this.errorMessage = error.error?.message ?? 'Nije moguće otkazati porudžbinu.';
       },
     });
   }
@@ -88,7 +88,7 @@ export class AthleteOrdersComponent {
         this.isLoading = false;
       },
       error: (error) => {
-        this.errorMessage = error.error?.message ?? 'Unable to load orders.';
+        this.errorMessage = error.error?.message ?? 'Nije moguće učitati porudžbine.';
         this.isLoading = false;
       },
     });

@@ -1,16 +1,16 @@
 <section class="login-page">
   <div class="login-window">
-    <h1>Admin Login</h1>
+    <h1>Prijava administratora</h1>
     <p>Enter administrator credentials.</p>
 
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-      <label for="username">Username</label>
+      <label for="username">Korisničko ime</label>
       <input id="username" type="text" formControlName="username" />
       @if (username?.touched && username?.invalid) {
         <small class="field-error">Username is required.</small>
       }
 
-      <label for="password">Password</label>
+      <label for="password">Lozinka</label>
       <input id="password" type="password" formControlName="password" />
       @if (password?.touched && password?.invalid) {
         <small class="field-error">Password is required.</small>

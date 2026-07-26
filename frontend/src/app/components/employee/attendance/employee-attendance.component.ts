@@ -116,7 +116,7 @@ export class EmployeeAttendanceComponent {
         this.isLoadingFacility = false;
       },
       error: (error) => {
-        this.errorMessage = error.error?.message ?? 'Unable to load facility details.';
+        this.errorMessage = error.error?.message ?? 'Nije moguće učitati detalje objekta.';
         this.isLoadingFacility = false;
       },
     });
@@ -139,7 +139,7 @@ export class EmployeeAttendanceComponent {
         this.isLoadingAttendance = false;
       },
       error: (error) => {
-        this.errorMessage = error.error?.message ?? 'Unable to load attendance items.';
+        this.errorMessage = error.error?.message ?? 'Nije moguće učitati stavke prisustva.';
         this.items = [];
         this.isLoadingAttendance = false;
       },
@@ -175,7 +175,7 @@ export class EmployeeAttendanceComponent {
       },
       error: (error) => {
         this.processingIds.delete(itemId);
-        this.errorMessage = error.error?.message ?? 'Unable to update attendance.';
+        this.errorMessage = error.error?.message ?? 'Nije moguće ažurirati prisustvo.';
       },
     });
   }

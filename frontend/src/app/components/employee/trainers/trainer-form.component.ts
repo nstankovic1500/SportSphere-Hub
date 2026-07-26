@@ -150,14 +150,14 @@ export class TrainerFormComponent {
     request$.subscribe({
       next: () => {
         this.isSubmitting = false;
-        this.successMessage = this.isEditMode ? 'Trainer updated successfully.' : 'Trainer created successfully.';
+        this.successMessage = this.isEditMode ? 'Trener je uspešno ažuriran.' : 'Trener je uspešno kreiran.';
         window.setTimeout(() => {
           void this.router.navigate(['/employee/facilities', this.facilityId, 'trainers']);
         }, 1200);
       },
       error: (error) => {
         this.isSubmitting = false;
-        this.errorMessage = error.error?.message ?? 'Unable to save trainer.';
+        this.errorMessage = error.error?.message ?? 'Nije moguće sačuvati trenera.';
       },
     });
   }
@@ -190,7 +190,7 @@ export class TrainerFormComponent {
         this.isLoading = false;
       },
       error: (error) => {
-        this.errorMessage = error.error?.message ?? 'Unable to load trainer form.';
+        this.errorMessage = error.error?.message ?? 'Nije moguće učitati formu trenera.';
         this.isLoading = false;
       },
     });

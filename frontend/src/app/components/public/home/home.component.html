@@ -2,37 +2,37 @@
   <header class="hero">
     <div>
       <p class="eyebrow">SportSphere Hub</p>
-      <h1>Discover approved sports facilities in one place.</h1>
+      <h1>Otkrijte odobrene sportske objekte na jednom mestu.</h1>
       <p class="hero-copy">
         Browse venues, explore current promotions, and inspect facility details before signing in.
       </p>
     </div>
 
     <nav class="hero-actions">
-      <a routerLink="/facilities">Browse facilities</a>
-      <a routerLink="/login">Login</a>
-      <a routerLink="/register">Register</a>
+      <a routerLink="/facilities">Pregledaj objekte</a>
+      <a routerLink="/login">Prijava</a>
+      <a routerLink="/register">Registracija</a>
     </nav>
   </header>
 
   @if (isLoading) {
-    <p class="state-message">Loading home page...</p>
+    <p class="state-message">Učitavanje početne stranice...</p>
   } @else if (errorMessage) {
     <p class="state-message error">{{ errorMessage }}</p>
   } @else {
     <section class="stats-card">
-      <h2>Active Facilities</h2>
+      <h2>Aktivni objekti</h2>
       <p class="stats-value">{{ activeFacilitiesCount }}</p>
     </section>
 
     <section class="content-section">
       <div class="section-heading">
-        <h2>Top Facilities</h2>
-        <a routerLink="/facilities">View all</a>
+        <h2>Najbolji objekti</h2>
+        <a routerLink="/facilities">Prikaži sve</a>
       </div>
 
       @if (topFacilities.length === 0) {
-        <p class="state-message">No featured facilities available.</p>
+        <p class="state-message">Trenutno nema izdvojenih objekata.</p>
       } @else {
         <div class="card-grid">
           @for (facility of topFacilities; track facility.id) {
@@ -47,7 +47,7 @@
                 <h3>{{ facility.name }}</h3>
                 <p>{{ facility.city }}, {{ facility.country }}</p>
                 <p>{{ facility.likesCount }} likes</p>
-                <a [routerLink]="['/facilities', facility.id]">Details</a>
+                <a [routerLink]="['/facilities', facility.id]">Detalji</a>
               </div>
             </article>
           }
@@ -57,11 +57,11 @@
 
     <section class="content-section">
       <div class="section-heading">
-        <h2>Active Promotions</h2>
+        <h2>Aktivne promocije</h2>
       </div>
 
       @if (promotions.length === 0) {
-        <p class="state-message">No active promotions right now.</p>
+        <p class="state-message">Trenutno nema aktivnih promocija.</p>
       } @else {
         <div class="promotion-list">
           @for (promotion of promotions; track promotion.id) {

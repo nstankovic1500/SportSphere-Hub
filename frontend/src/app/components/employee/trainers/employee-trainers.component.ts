@@ -52,7 +52,7 @@ export class EmployeeTrainersComponent {
       },
       error: (error) => {
         this.deletingIds.delete(trainer.id);
-        this.errorMessage = error.error?.message ?? 'Unable to delete trainer.';
+        this.errorMessage = error.error?.message ?? 'Nije moguće obrisati trenera.';
       },
     });
   }
@@ -68,7 +68,7 @@ export class EmployeeTrainersComponent {
         this.isLoading = false;
       },
       error: (error) => {
-        this.errorMessage = error.error?.message ?? 'Unable to load trainers.';
+        this.errorMessage = error.error?.message ?? 'Nije moguće učitati trenere.';
         this.isLoading = false;
       },
     });

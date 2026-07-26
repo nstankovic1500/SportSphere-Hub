@@ -5,7 +5,7 @@
       <p>Create a new ad and invite other athletes to apply for your team.</p>
     </div>
     <div class="header-links">
-      <a routerLink="/athlete">Back to dashboard</a>
+      <a routerLink="/athlete">Nazad na kontrolnu tablu</a>
       <a routerLink="/athlete/ads">Back to ads</a>
     </div>
   </header>
@@ -37,7 +37,7 @@
         </div>
 
         <div class="field">
-          <label for="city">City</label>
+          <label for="city">Grad</label>
           <select id="city" formControlName="city">
             <option value="">Select a city</option>
             @for (currentCity of cities; track currentCity) {
@@ -50,7 +50,7 @@
         </div>
 
         <div class="field">
-          <label for="date">Date</label>
+          <label for="date">Datum</label>
           <input id="date" type="date" formControlName="date" />
           @if (date.touched && date.hasError('required')) {
             <small class="field-error">Date is required.</small>
