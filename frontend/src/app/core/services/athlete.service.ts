@@ -39,6 +39,16 @@ export class AthleteService {
     );
   }
 
+  uploadProfileImage(file: File) {
+    const formData = new FormData();
+    formData.append('profileImage', file);
+
+    return this.http.patch<ApiResponse<{ imagePath: string }>>(
+      `${environment.apiUrl}/users/profile-image`,
+      formData,
+    );
+  }
+
   getReservations() {
     return this.http.get<ApiResponse<{ reservations: AthleteReservation[] }>>(
       `${environment.apiUrl}/athletes/reservations`,

@@ -38,7 +38,7 @@
       } @else {
         <div class="gallery">
           @for (image of facility.images; track image) {
-            <img [src]="image" [alt]="facility.name" />
+            <img [src]="getImageUrl(image)" [alt]="facility.name" />
           }
         </div>
       }

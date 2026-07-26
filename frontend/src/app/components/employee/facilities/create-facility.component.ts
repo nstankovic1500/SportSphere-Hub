@@ -45,8 +45,12 @@ export class CreateFacilityComponent {
   sports: Sport[] = [];
   isLoading = true;
   isSubmitting = false;
+  isUploadingImages = false;
   errorMessage = '';
   successMessage = '';
+  imageErrorMessage = '';
+  selectedImageFiles: File[] = [];
+  imagePreviews: string[] = [];
 
   readonly weekdays = [
     { value: 0, label: 'Sunday' },
@@ -96,6 +100,25 @@ export class CreateFacilityComponent {
     this.openingHours.removeAt(index);
   }
 
+  onImagesSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const files = Array.from(input.files ?? []);
+    this.imageErrorMessage = '';
+
+    const validationError = this.validateImageFiles(files);
+
+    if (validationError) {
+      input.value = '';
+      this.selectedImageFiles = [];
+      this.imagePreviews = [];
+      this.imageErrorMessage = validationError;
+      return;
+    }
+
+    this.selectedImageFiles = files;
+    this.imagePreviews = files.map((file) => URL.createObjectURL(file));
+  }
+
   submit() {
     if (this.facilityForm.invalid || this.selectedSports.value.length === 0 || this.isSubmitting) {
       this.facilityForm.markAllAsTouched();
@@ -112,13 +135,27 @@ export class CreateFacilityComponent {
     const payload = this.buildPayload();
 
     this.employeeService.createFacility(payload).subscribe({
-      next: () => {
-        this.isSubmitting = false;
-        this.successMessage = 'Facility request created successfully.';
+      next: (response) => {
+        const facilityId = response.data.facility.id;
 
-        window.setTimeout(() => {
-          void this.router.navigate(['/employee/facilities']);
-        }, 1200);
+        if (this.selectedImageFiles.length === 0) {
+          this.finishSuccess();
+          return;
+        }
+
+        this.isUploadingImages = true;
+
+        this.employeeService.uploadFacilityImages(facilityId, this.selectedImageFiles).subscribe({
+          next: () => {
+            this.isUploadingImages = false;
+            this.finishSuccess();
+          },
+          error: (error) => {
+            this.isSubmitting = false;
+            this.isUploadingImages = false;
+            this.errorMessage = error.error?.message ?? 'Facility was created, but images could not be uploaded.';
+          },
+        });
       },
       error: (error) => {
         this.isSubmitting = false;
@@ -173,5 +210,34 @@ export class CreateFacilityComponent {
       hourlyPrice: Number(formValue.hourlyPrice),
       allowedNoShows: Number(formValue.allowedNoShows),
     };
+  }
+
+  private finishSuccess() {
+    this.isSubmitting = false;
+    this.successMessage = 'Facility request created successfully.';
+
+    window.setTimeout(() => {
+      void this.router.navigate(['/employee/facilities']);
+    }, 1200);
+  }
+
+  private validateImageFiles(files: File[]) {
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+
+    if (files.length > 5) {
+      return 'You can upload at most 5 images at once.';
+    }
+
+    for (const file of files) {
+      if (!allowedTypes.includes(file.type)) {
+        return 'Only JPG, PNG and WEBP images are allowed.';
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        return 'Each image must be 5 MB or smaller.';
+      }
+    }
+
+    return '';
   }
 }

@@ -38,7 +38,7 @@
           @for (facility of topFacilities; track facility.id) {
             <article class="facility-card">
               @if (facility.image) {
-                <img [src]="facility.image" [alt]="facility.name" />
+                <img [src]="getImageUrl(facility.image)" [alt]="facility.name" />
               } @else {
                 <div class="image-placeholder">No image</div>
               }

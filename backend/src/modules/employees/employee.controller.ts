@@ -28,6 +28,7 @@ import {
   createPromotion as createPromotionService,
   createResource as createResourceService,
   createTrainer as createTrainerService,
+  deleteFacilityImage as deleteFacilityImageService,
   deleteProduct as deleteProductService,
   deletePromotion as deletePromotionService,
   deleteResource as deleteResourceService,
@@ -49,10 +50,12 @@ import {
   updateFacility as updateFacilityService,
   updateOrderStatus as updateOrderStatusService,
   updateProduct as updateProductService,
+  updateProductImage as updateProductImageService,
   updatePromotion as updatePromotionService,
   updateProfile as updateProfileService,
   updateResource as updateResourceService,
   updateTrainer as updateTrainerService,
+  uploadFacilityImages as uploadFacilityImagesService,
 } from './employee.service';
 
 const getProfile = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
@@ -191,6 +194,18 @@ const createProduct = asyncHandler(async (req: AuthenticatedRequest, res: Respon
   });
 });
 
+const uploadFacilityImages = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const employeeId = String(req.auth?.userId);
+  const facilityId = String(req.params.facilityId);
+  const files = Array.isArray(req.files) ? req.files : undefined;
+  const data = await uploadFacilityImagesService(employeeId, facilityId, files);
+
+  res.status(201).json({
+    success: true,
+    data,
+  });
+});
+
 const updateFacility = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const employeeId = String(req.auth?.userId);
   const facilityId = String(req.params.facilityId);
@@ -220,6 +235,17 @@ const updateProduct = asyncHandler(async (req: AuthenticatedRequest, res: Respon
   const productId = String(req.params.productId);
   const body = req.body as EmployeeProductBody;
   const data = await updateProductService(employeeId, productId, body);
+
+  res.status(200).json({
+    success: true,
+    data,
+  });
+});
+
+const updateProductImage = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const employeeId = String(req.auth?.userId);
+  const productId = String(req.params.productId);
+  const data = await updateProductImageService(employeeId, productId, req.file);
 
   res.status(200).json({
     success: true,
@@ -331,6 +357,18 @@ const deleteProduct = asyncHandler(async (req: AuthenticatedRequest, res: Respon
     success: true,
     message: data.message,
     data: {},
+  });
+});
+
+const deleteFacilityImage = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const employeeId = String(req.auth?.userId);
+  const facilityId = String(req.params.facilityId);
+  const imagePath = typeof req.body.imagePath === 'string' ? req.body.imagePath : '';
+  const data = await deleteFacilityImageService(employeeId, facilityId, imagePath);
+
+  res.status(200).json({
+    success: true,
+    data,
   });
 });
 
@@ -447,6 +485,8 @@ export {
   createPromotion,
   createResource,
   createTrainer,
+  uploadFacilityImages,
+  deleteFacilityImage,
   deleteProduct,
   deletePromotion,
   deleteResource,
@@ -470,6 +510,7 @@ export {
   updateFacility,
   updateOrderStatus,
   updateProduct,
+  updateProductImage,
   updatePromotion,
   updateProfile,
   updateResource,

@@ -7,6 +7,7 @@ import { forkJoin } from 'rxjs';
 import type { FacilityListItem } from '../../../core/models/public.model';
 import type { Sport } from '../../../core/models/sport.model';
 import { PublicService } from '../../../core/services/public.service';
+import { buildUploadImageUrl } from '../../../core/utils/image.util';
 
 @Component({
   selector: 'app-facilities',
@@ -72,6 +73,10 @@ export class FacilitiesComponent {
 
   getSportsLabel(facility: FacilityListItem) {
     return facility.sports.map((sport) => sport.name).join(', ');
+  }
+
+  getImageUrl(imagePath: string | null) {
+    return buildUploadImageUrl(imagePath);
   }
 
   private loadPageData() {

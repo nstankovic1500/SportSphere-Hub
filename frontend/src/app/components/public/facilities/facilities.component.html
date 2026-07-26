@@ -111,7 +111,7 @@
               <td>{{ facility.hourlyPrice }}</td>
               <td>
                 @if (facility.image) {
-                  <img class="table-image" [src]="facility.image" [alt]="facility.name" />
+                  <img class="table-image" [src]="getImageUrl(facility.image)" [alt]="facility.name" />
                 } @else {
                   <span>-</span>
                 }

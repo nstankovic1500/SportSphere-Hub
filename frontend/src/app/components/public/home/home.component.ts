@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 
 import type { HomeFacility, HomePromotion } from '../../../core/models/public.model';
 import { PublicService } from '../../../core/services/public.service';
+import { buildUploadImageUrl } from '../../../core/utils/image.util';
 
 @Component({
   selector: 'app-home',
@@ -23,6 +24,10 @@ export class HomeComponent {
 
   constructor() {
     this.loadHomeData();
+  }
+
+  getImageUrl(imagePath: string | null) {
+    return buildUploadImageUrl(imagePath);
   }
 
   private loadHomeData() {

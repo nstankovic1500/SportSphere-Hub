@@ -4,10 +4,11 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { forkJoin } from 'rxjs';
 
-import type { UpdateEmployeeFacilityRequest } from '../../../core/models/employee.model';
+import type { EmployeeFacility, UpdateEmployeeFacilityRequest } from '../../../core/models/employee.model';
 import type { Sport } from '../../../core/models/sport.model';
 import { EmployeeService } from '../../../core/services/employee.service';
 import { PublicService } from '../../../core/services/public.service';
+import { buildUploadImageUrl } from '../../../core/utils/image.util';
 
 @Component({
   selector: 'app-edit-facility',
@@ -38,10 +39,16 @@ export class EditFacilityComponent {
   });
 
   sports: Sport[] = [];
+  facility: EmployeeFacility | null = null;
   isLoading = true;
   isSubmitting = false;
+  isUploadingImages = false;
+  isDeletingImage = false;
   errorMessage = '';
   successMessage = '';
+  imageErrorMessage = '';
+  selectedImageFiles: File[] = [];
+  imagePreviews: string[] = [];
   readonly facilityId = this.route.snapshot.paramMap.get('facilityId') ?? '';
   readonly weekdays = [
     { value: 0, label: 'Sunday' }, { value: 1, label: 'Monday' }, { value: 2, label: 'Tuesday' },
@@ -56,6 +63,10 @@ export class EditFacilityComponent {
 
   isSportSelected(sportId: string) { return this.selectedSports.value.includes(sportId); }
 
+  get galleryImages() {
+    return this.facility?.images ?? [];
+  }
+
   onSportChange(sportId: string, checked: boolean) {
     const currentSports = this.selectedSports.value;
     this.selectedSports.setValue(
@@ -66,6 +77,57 @@ export class EditFacilityComponent {
 
   addOpeningHour() { this.openingHours.push(this.createOpeningHourGroup()); }
   removeOpeningHour(index: number) { this.openingHours.removeAt(index); }
+
+  onImagesSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const files = Array.from(input.files ?? []);
+    this.imageErrorMessage = '';
+
+    const validationError = this.validateImageFiles(files);
+
+    if (validationError) {
+      input.value = '';
+      this.selectedImageFiles = [];
+      this.imagePreviews = [];
+      this.imageErrorMessage = validationError;
+      return;
+    }
+
+    this.selectedImageFiles = files;
+    this.imagePreviews = files.map((file) => URL.createObjectURL(file));
+  }
+
+  getImageUrl(imagePath: string) {
+    return buildUploadImageUrl(imagePath);
+  }
+
+  deleteImage(imagePath: string) {
+    if (!window.confirm('Delete this facility image?') || this.isDeletingImage) {
+      return;
+    }
+
+    this.isDeletingImage = true;
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    this.employeeService.deleteFacilityImage(this.facilityId, imagePath).subscribe({
+      next: () => {
+        if (this.facility) {
+          this.facility = {
+            ...this.facility,
+            images: this.facility.images.filter((currentImagePath) => currentImagePath !== imagePath),
+          };
+        }
+
+        this.isDeletingImage = false;
+        this.successMessage = 'Facility image deleted successfully.';
+      },
+      error: (error) => {
+        this.isDeletingImage = false;
+        this.errorMessage = error.error?.message ?? 'Unable to delete facility image.';
+      },
+    });
+  }
 
   submit() {
     if (this.facilityForm.invalid || this.selectedSports.value.length === 0 || this.isSubmitting) {
@@ -81,12 +143,34 @@ export class EditFacilityComponent {
     this.successMessage = '';
 
     this.employeeService.updateFacility(this.facilityId, this.buildPayload()).subscribe({
-      next: () => {
-        this.isSubmitting = false;
-        this.successMessage = 'Facility updated successfully.';
-        window.setTimeout(() => {
-          void this.router.navigate(['/employee/facilities', this.facilityId]);
-        }, 1200);
+      next: (response) => {
+        this.facility = response.data.facility;
+
+        if (this.selectedImageFiles.length === 0) {
+          this.finishSuccess();
+          return;
+        }
+
+        this.isUploadingImages = true;
+
+        this.employeeService.uploadFacilityImages(this.facilityId, this.selectedImageFiles).subscribe({
+          next: (uploadResponse) => {
+            if (this.facility) {
+              this.facility = {
+                ...this.facility,
+                images: [...this.facility.images, ...uploadResponse.data.imagePaths],
+              };
+            }
+
+            this.isUploadingImages = false;
+            this.finishSuccess();
+          },
+          error: (error) => {
+            this.isSubmitting = false;
+            this.isUploadingImages = false;
+            this.errorMessage = error.error?.message ?? 'Facility was updated, but images could not be uploaded.';
+          },
+        });
       },
       error: (error) => {
         this.isSubmitting = false;
@@ -103,6 +187,7 @@ export class EditFacilityComponent {
       next: ({ sportsResponse, facilityResponse }) => {
         this.sports = sportsResponse.data.sports;
         const facility = facilityResponse.data.facility;
+        this.facility = facility;
         this.patchForm(facility);
         this.isLoading = false;
       },
@@ -121,7 +206,7 @@ export class EditFacilityComponent {
     });
   }
 
-  private patchForm(facility: any) {
+  private patchForm(facility: EmployeeFacility) {
     this.openingHours.clear();
     for (const openingHour of facility.openingHours ?? []) {
       this.openingHours.push(this.formBuilder.nonNullable.group({
@@ -166,5 +251,38 @@ export class EditFacilityComponent {
       hourlyPrice: Number(formValue.hourlyPrice),
       allowedNoShows: Number(formValue.allowedNoShows),
     };
+  }
+
+  private finishSuccess() {
+    this.isSubmitting = false;
+    this.successMessage = 'Facility updated successfully.';
+
+    window.setTimeout(() => {
+      void this.router.navigate(['/employee/facilities', this.facilityId]);
+    }, 1200);
+  }
+
+  private validateImageFiles(files: File[]) {
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+
+    if (files.length > 5) {
+      return 'You can upload at most 5 images at once.';
+    }
+
+    if (this.galleryImages.length + files.length > 10) {
+      return 'A facility can contain at most 10 images in total.';
+    }
+
+    for (const file of files) {
+      if (!allowedTypes.includes(file.type)) {
+        return 'Only JPG, PNG and WEBP images are allowed.';
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        return 'Each image must be 5 MB or smaller.';
+      }
+    }
+
+    return '';
   }
 }

@@ -23,6 +23,8 @@ import type {
   EmployeeProfileApiResponse,
   EmployeeResourcesApiResponse,
   EmployeeTrainersApiResponse,
+  UploadImageApiResponse,
+  UploadImagesApiResponse,
 } from '../models/api-response.model';
 import type {
   CreateEmployeeFacilityRequest,
@@ -276,6 +278,40 @@ export class EmployeeService {
     return this.http.patch<EmployeeCalendarMoveApiResponse>(
       `${environment.apiUrl}/employees/training-appointments/${appointmentId}/move`,
       payload,
+    );
+  }
+
+  uploadFacilityImages(facilityId: string, files: File[]) {
+    const formData = new FormData();
+
+    for (const file of files) {
+      formData.append('images', file);
+    }
+
+    return this.http.post<UploadImagesApiResponse>(
+      `${environment.apiUrl}/employees/facilities/${facilityId}/images`,
+      formData,
+    );
+  }
+
+  deleteFacilityImage(facilityId: string, imagePath: string) {
+    return this.http.delete<UploadImageApiResponse>(
+      `${environment.apiUrl}/employees/facilities/${facilityId}/images`,
+      {
+        body: {
+          imagePath,
+        },
+      },
+    );
+  }
+
+  uploadProductImage(productId: string, file: File) {
+    const formData = new FormData();
+    formData.append('image', file);
+
+    return this.http.patch<UploadImageApiResponse>(
+      `${environment.apiUrl}/employees/products/${productId}/image`,
+      formData,
     );
   }
 }

@@ -10,6 +10,7 @@ import type {
   EmployeeProductRequest,
 } from '../../../core/models/employee.model';
 import { EmployeeService } from '../../../core/services/employee.service';
+import { buildUploadImageUrl } from '../../../core/utils/image.util';
 
 @Component({
   selector: 'app-product-form',
@@ -42,11 +43,44 @@ export class ProductFormComponent {
   product: EmployeeProduct | null = null;
   isLoading = true;
   isSubmitting = false;
+  isUploadingImage = false;
   errorMessage = '';
   successMessage = '';
+  imageErrorMessage = '';
+  selectedImageFile: File | null = null;
+  imagePreview = '';
+
+  get productImageUrl() {
+    return this.imagePreview || buildUploadImageUrl(this.product?.image);
+  }
 
   constructor() {
     this.loadPageData();
+  }
+
+  onImageSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0] ?? null;
+    this.imageErrorMessage = '';
+
+    if (!file) {
+      this.selectedImageFile = null;
+      this.imagePreview = '';
+      return;
+    }
+
+    const validationError = this.validateImageFile(file);
+
+    if (validationError) {
+      input.value = '';
+      this.selectedImageFile = null;
+      this.imagePreview = '';
+      this.imageErrorMessage = validationError;
+      return;
+    }
+
+    this.selectedImageFile = file;
+    this.imagePreview = URL.createObjectURL(file);
   }
 
   submit() {
@@ -67,14 +101,35 @@ export class ProductFormComponent {
       : this.employeeService.createProduct(this.facilityId, this.makePayload(this.isEditMode));
 
     request$.subscribe({
-      next: () => {
-        this.isSubmitting = false;
-        this.successMessage = this.isEditMode
-          ? 'Product updated successfully.'
-          : 'Product created successfully.';
-        window.setTimeout(() => {
-          void this.router.navigate(['/employee/facilities', this.facilityId, 'products']);
-        }, 1200);
+      next: (response) => {
+        const savedProductId = response.data.product.id;
+        this.product = response.data.product;
+
+        if (!this.selectedImageFile) {
+          this.finishSuccess();
+          return;
+        }
+
+        this.isUploadingImage = true;
+
+        this.employeeService.uploadProductImage(savedProductId, this.selectedImageFile).subscribe({
+          next: (uploadResponse) => {
+            if (this.product) {
+              this.product = {
+                ...this.product,
+                image: uploadResponse.data.imagePath,
+              };
+            }
+
+            this.isUploadingImage = false;
+            this.finishSuccess();
+          },
+          error: (error) => {
+            this.isSubmitting = false;
+            this.isUploadingImage = false;
+            this.errorMessage = error.error?.message ?? 'Product was saved, but the image could not be uploaded.';
+          },
+        });
       },
       error: (error) => {
         this.isSubmitting = false;
@@ -108,7 +163,7 @@ export class ProductFormComponent {
               category: this.product.category,
               price: this.product.price,
               stock: this.product.stock,
-              image: this.product.image ?? '',
+              image: '',
               active: this.product.active,
             });
           }
@@ -139,5 +194,30 @@ export class ProductFormComponent {
     }
 
     return payload;
+  }
+
+  private finishSuccess() {
+    this.isSubmitting = false;
+    this.successMessage = this.isEditMode
+      ? 'Product updated successfully.'
+      : 'Product created successfully.';
+
+    window.setTimeout(() => {
+      void this.router.navigate(['/employee/facilities', this.facilityId, 'products']);
+    }, 1200);
+  }
+
+  private validateImageFile(file: File) {
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+
+    if (!allowedTypes.includes(file.type)) {
+      return 'Only JPG, PNG and WEBP images are allowed.';
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      return 'Image size must not exceed 5 MB.';
+    }
+
+    return '';
   }
 }

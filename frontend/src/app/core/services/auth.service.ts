@@ -78,6 +78,16 @@ export class AuthService {
     );
   }
 
+  uploadProfileImage(file: File) {
+    const formData = new FormData();
+    formData.append('profileImage', file);
+
+    return this.http.patch<ApiResponse<{ imagePath: string }>>(
+      `${environment.apiUrl}/users/profile-image`,
+      formData,
+    );
+  }
+
   logout(): void {
     this.clearSession();
     void this.router.navigate(['/']);
@@ -89,6 +99,10 @@ export class AuthService {
 
   getCurrentUser(): User | null {
     return this.currentUserSubject.value;
+  }
+
+  setCurrentUser(user: User | null): void {
+    this.currentUserSubject.next(user);
   }
 
   private saveSession(token: string, user: User): void {

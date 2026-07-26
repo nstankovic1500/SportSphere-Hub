@@ -120,8 +120,30 @@
           </div>
         </div>
 
+        <div class="field wide-field">
+          <label for="facilityImages">Facility Images</label>
+          <input
+            id="facilityImages"
+            type="file"
+            multiple
+            accept="image/jpeg,image/png,image/webp"
+            (change)="onImagesSelected($event)"
+          />
+          <small class="helper-text">Upload up to 5 JPG, PNG or WEBP images per request.</small>
+          @if (imageErrorMessage) {
+            <small class="field-error">{{ imageErrorMessage }}</small>
+          }
+          @if (imagePreviews.length > 0) {
+            <div class="image-preview-grid">
+              @for (preview of imagePreviews; track preview) {
+                <img class="image-preview" [src]="preview" alt="Facility preview" />
+              }
+            </div>
+          }
+        </div>
+
         <button type="submit" [disabled]="facilityForm.invalid || isSubmitting">
-          {{ isSubmitting ? 'Submitting...' : 'Submit Facility Request' }}
+          {{ isSubmitting ? (isUploadingImages ? 'Uploading Images...' : 'Submitting...') : 'Submit Facility Request' }}
         </button>
       </form>
     </section>

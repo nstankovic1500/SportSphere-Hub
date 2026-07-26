@@ -16,7 +16,7 @@ type PopulatedReview = IReview & {
     _id: Types.ObjectId;
     firstName: string;
     lastName: string;
-  };
+  } | null;
 };
 
 const IS_QUALIFIED = [
@@ -39,9 +39,13 @@ const ensureFacilityExists = async (facilityId: string) => {
 };
 
 const toReviewComment = (review: PopulatedReview): ReviewComment => {
+  const athleteName = review.athleteId
+    ? `${review.athleteId.firstName} ${review.athleteId.lastName}`.trim()
+    : 'Unknown athlete';
+
   return {
     id: review._id.toString(),
-    athleteName: `${review.athleteId.firstName} ${review.athleteId.lastName}`.trim(),
+    athleteName,
     reaction: review.reaction,
     comment: review.comment,
     createdAt: review.createdAt ?? new Date(),

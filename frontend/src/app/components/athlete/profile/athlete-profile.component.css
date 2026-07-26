@@ -47,6 +47,39 @@
   margin: 0 0 16px;
 }
 
+.profile-image-section {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 20px;
+  align-items: start;
+  margin-bottom: 24px;
+}
+
+.profile-image-card {
+  display: flex;
+  justify-content: center;
+}
+
+.profile-image {
+  width: 160px;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 20px;
+  border: 1px solid #dde7f2;
+  background: #f8fbff;
+}
+
+.profile-image.placeholder {
+  display: grid;
+  place-items: center;
+  color: #607086;
+}
+
+.profile-image-actions {
+  display: grid;
+  gap: 10px;
+}
+
 form {
   display: grid;
   gap: 20px;
@@ -180,5 +213,9 @@ th {
 
   .page-header {
     flex-direction: column;
+  }
+
+  .profile-image-section {
+    grid-template-columns: 1fr;
   }
 }

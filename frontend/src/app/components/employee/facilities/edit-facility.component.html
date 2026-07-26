@@ -63,8 +63,46 @@
           </div>
         </div>
 
+        <div class="field wide-field">
+          <label for="facilityImages">Add Facility Images</label>
+          <input
+            id="facilityImages"
+            type="file"
+            multiple
+            accept="image/jpeg,image/png,image/webp"
+            (change)="onImagesSelected($event)"
+          />
+          <small class="helper-text">Upload up to 5 JPG, PNG or WEBP images per request, maximum 10 total.</small>
+          @if (imageErrorMessage) {
+            <small class="field-error">{{ imageErrorMessage }}</small>
+          }
+          @if (imagePreviews.length > 0) {
+            <div class="image-preview-grid">
+              @for (preview of imagePreviews; track preview) {
+                <img class="image-preview" [src]="preview" alt="Facility preview" />
+              }
+            </div>
+          }
+        </div>
+
+        @if (galleryImages.length > 0) {
+          <div class="field wide-field">
+            <label>Current Gallery</label>
+            <div class="image-preview-grid">
+              @for (imagePath of galleryImages; track imagePath) {
+                <div class="gallery-card">
+                  <img class="image-preview" [src]="getImageUrl(imagePath)" alt="Facility image" />
+                  <button type="button" class="secondary-button" [disabled]="isDeletingImage" (click)="deleteImage(imagePath)">
+                    {{ isDeletingImage ? 'Deleting...' : 'Delete Image' }}
+                  </button>
+                </div>
+              }
+            </div>
+          </div>
+        }
+
         <button type="submit" [disabled]="facilityForm.invalid || isSubmitting">
-          {{ isSubmitting ? 'Saving...' : 'Save Changes' }}
+          {{ isSubmitting ? (isUploadingImages ? 'Uploading Images...' : 'Saving...') : 'Save Changes' }}
         </button>
       </form>
     </section>

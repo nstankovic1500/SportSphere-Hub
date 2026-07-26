@@ -4,6 +4,7 @@ import { Router, RouterLink } from '@angular/router';
 
 import type { AthleteCartItem } from '../../../core/models/athlete.model';
 import { AthleteService } from '../../../core/services/athlete.service';
+import { buildUploadImageUrl } from '../../../core/utils/image.util';
 
 @Component({
   selector: 'app-athlete-cart',
@@ -131,6 +132,10 @@ export class AthleteCartComponent {
 
   onImageError(event: Event) {
     (event.target as HTMLImageElement).src = 'https://placehold.co/120x120?text=Product';
+  }
+
+  getImageUrl(imagePath: string | null) {
+    return buildUploadImageUrl(imagePath);
   }
 
   private loadCart() {

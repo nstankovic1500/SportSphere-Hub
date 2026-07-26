@@ -19,6 +19,7 @@ import { publicRouter } from '../modules/public/public.routes';
 import { reviewRouter } from '../modules/reviews/review.routes';
 import { sportRouter } from '../modules/sports/sport.routes';
 import { trainerRouter } from '../modules/trainers/trainer.routes';
+import { userRouter } from '../modules/users/user.routes';
 
 const router = Router();
 
@@ -42,6 +43,7 @@ router.use('/apply-requests', applyRequestRouter);
 router.use('/public', publicRouter);
 router.use('/sports', sportRouter);
 router.use('/trainers', trainerRouter);
+router.use('/users', userRouter);
 router.get('/products', getProducts);
 router.get('/products/:id', getProduct);
 router.post('/cart/items', authMiddleware, roleMiddleware(UserRole.Athlete), addCartItem);

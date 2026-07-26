@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from 'express';
 import mongoose from 'mongoose';
+import multer from 'multer';
 
 import { AppError } from '../utils/AppError';
 
@@ -29,6 +30,14 @@ const errorMiddleware = (
     res.status(400).json({
       success: false,
       message: 'Invalid resource identifier',
+    });
+    return;
+  }
+
+  if (error instanceof multer.MulterError) {
+    res.status(400).json({
+      success: false,
+      message: error.message,
     });
     return;
   }

@@ -60,7 +60,7 @@
       @for (product of filteredProducts; track product.id) {
         <article class="product-card">
           <img
-            [src]="product.image || 'https://placehold.co/320x180?text=Product'"
+            [src]="getImageUrl(product.image) || 'https://placehold.co/320x180?text=Product'"
             [alt]="product.name"
             (error)="onImageError($event)" />
 

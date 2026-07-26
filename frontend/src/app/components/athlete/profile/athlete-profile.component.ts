@@ -9,6 +9,7 @@ import type { Sport } from '../../../core/models/sport.model';
 import { AuthService } from '../../../core/services/auth.service';
 import { AthleteService } from '../../../core/services/athlete.service';
 import { PublicService } from '../../../core/services/public.service';
+import { buildUploadImageUrl } from '../../../core/utils/image.util';
 
 @Component({
   selector: 'app-athlete-profile',
@@ -38,10 +39,14 @@ export class AthleteProfileComponent {
 
   isLoading = true;
   isSaving = false;
+  isUploadingImage = false;
   isCancellingIds = new Set<string>();
   errorMessage = '';
   successMessage = '';
   reservationsErrorMessage = '';
+  imageErrorMessage = '';
+  profileImagePreview = '';
+  selectedProfileImageFile: File | null = null;
 
   constructor() {
     this.loadPageData();
@@ -77,6 +82,10 @@ export class AthleteProfileComponent {
 
   canSelectMoreSports(sportId: string) {
     return this.isSportSelected(sportId) || this.favoriteSports.value.length < 5;
+  }
+
+  get profileImageUrl() {
+    return this.profileImagePreview || buildUploadImageUrl(this.profile?.profileImage);
   }
 
   onSportChange(sportId: string, checked: boolean) {
@@ -134,6 +143,62 @@ export class AthleteProfileComponent {
           this.errorMessage = error.error?.message ?? 'Unable to update profile.';
         },
       });
+  }
+
+  onProfileImageChange(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0] ?? null;
+    this.imageErrorMessage = '';
+
+    if (!file) {
+      this.selectedProfileImageFile = null;
+      this.profileImagePreview = '';
+      return;
+    }
+
+    const validationError = this.validateImageFile(file);
+
+    if (validationError) {
+      input.value = '';
+      this.selectedProfileImageFile = null;
+      this.profileImagePreview = '';
+      this.imageErrorMessage = validationError;
+      return;
+    }
+
+    this.selectedProfileImageFile = file;
+    this.profileImagePreview = URL.createObjectURL(file);
+  }
+
+  uploadProfileImage() {
+    if (!this.selectedProfileImageFile || this.isUploadingImage) {
+      return;
+    }
+
+    this.isUploadingImage = true;
+    this.imageErrorMessage = '';
+    this.successMessage = '';
+
+    this.athleteService.uploadProfileImage(this.selectedProfileImageFile).subscribe({
+      next: (response) => {
+        if (this.profile) {
+          this.profile = {
+            ...this.profile,
+            profileImage: response.data.imagePath,
+          };
+        }
+
+        this.isUploadingImage = false;
+        this.successMessage = 'Profile image updated successfully.';
+        this.selectedProfileImageFile = null;
+        this.profileImagePreview = '';
+        this.authService.loadCurrentUser().subscribe();
+      },
+      error: (error) => {
+        this.isUploadingImage = false;
+        this.imageErrorMessage = error.error?.message ?? 'Unable to upload profile image.';
+      },
+    });
   }
 
   isCancelling(reservationId: string) {
@@ -196,5 +261,19 @@ export class AthleteProfileComponent {
       email: profile.email,
       favoriteSports: profile.favoriteSports.map((sport) => sport.id),
     });
+  }
+
+  private validateImageFile(file: File) {
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+
+    if (!allowedTypes.includes(file.type)) {
+      return 'Only JPG, PNG and WEBP images are allowed.';
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      return 'Image size must not exceed 5 MB.';
+    }
+
+    return '';
   }
 }

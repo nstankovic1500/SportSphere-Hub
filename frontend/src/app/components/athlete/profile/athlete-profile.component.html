@@ -18,6 +18,28 @@
     <section class="panel">
       <h2>Personal Data</h2>
 
+      <div class="profile-image-section">
+        <div class="profile-image-card">
+          @if (profileImageUrl) {
+            <img class="profile-image" [src]="profileImageUrl" [alt]="profile?.username || 'Profile image'" />
+          } @else {
+            <div class="profile-image placeholder">No image</div>
+          }
+        </div>
+
+        <div class="profile-image-actions">
+          <label for="profileImage">Profile Image</label>
+          <input id="profileImage" type="file" accept="image/jpeg,image/png,image/webp" (change)="onProfileImageChange($event)" />
+          <small class="helper-text">Allowed formats: JPG, PNG, WEBP. Maximum size: 5 MB.</small>
+          @if (imageErrorMessage) {
+            <p class="message error">{{ imageErrorMessage }}</p>
+          }
+          <button type="button" [disabled]="!selectedProfileImageFile || isUploadingImage" (click)="uploadProfileImage()">
+            {{ isUploadingImage ? 'Uploading...' : 'Upload Image' }}
+          </button>
+        </div>
+      </div>
+
       @if (successMessage) {
         <p class="message success">{{ successMessage }}</p>
       }

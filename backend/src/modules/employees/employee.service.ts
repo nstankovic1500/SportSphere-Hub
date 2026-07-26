@@ -11,6 +11,7 @@ import { Sport, type ISport } from '../../models/Sport';
 import { Trainer, type ITrainer } from '../../models/Trainer';
 import { User, UserRole, type IUser } from '../../models/User';
 import { AppError } from '../../utils/AppError';
+import { isManagedUploadPath, safeDeleteFile } from '../../utils/file-storage';
 import type {
   AttendanceItem,
   AttendanceQuery,
@@ -1731,6 +1732,98 @@ const createProduct = async (
   };
 };
 
+const uploadFacilityImages = async (
+  employeeId: string,
+  facilityId: string,
+  files: Express.Multer.File[] | undefined,
+) => {
+  if (!files || files.length === 0) {
+    throw new AppError('At least one image file is required', 400);
+  }
+
+  if (files.length > 5) {
+    await Promise.all(files.map((file) => safeDeleteFile(`facilities/${file.filename}`)));
+    throw new AppError('A maximum of 5 images can be uploaded per request', 400);
+  }
+
+  const facility = await getFacilityByEmployee(employeeId, facilityId);
+  const currentImages = facility.images ?? [];
+
+  if (currentImages.length + files.length > 10) {
+    await Promise.all(files.map((file) => safeDeleteFile(`facilities/${file.filename}`)));
+    throw new AppError('A facility can have a maximum of 10 images', 400);
+  }
+
+  const newImagePaths = files.map((file) => `facilities/${file.filename}`);
+
+  try {
+    facility.images = [...currentImages, ...newImagePaths];
+    await facility.save();
+  } catch (error) {
+    await Promise.all(newImagePaths.map((imagePath) => safeDeleteFile(imagePath)));
+    throw error;
+  }
+
+  return {
+    imagePaths: newImagePaths,
+  };
+};
+
+const deleteFacilityImage = async (
+  employeeId: string,
+  facilityId: string,
+  imagePath: string,
+) => {
+  const facility = await getFacilityByEmployee(employeeId, facilityId);
+  const trimmedImagePath = imagePath.trim();
+
+  if (!trimmedImagePath) {
+    throw new AppError('imagePath is required', 400);
+  }
+
+  if (!(facility.images ?? []).includes(trimmedImagePath)) {
+    throw new AppError('imagePath does not belong to this facility', 400);
+  }
+
+  facility.images = (facility.images ?? []).filter((currentImagePath) => currentImagePath !== trimmedImagePath);
+  await facility.save();
+  await safeDeleteFile(trimmedImagePath);
+
+  return {
+    imagePath: trimmedImagePath,
+  };
+};
+
+const updateProductImage = async (
+  employeeId: string,
+  productId: string,
+  file: Express.Multer.File | undefined,
+) => {
+  if (!file) {
+    throw new AppError('image file is required', 400);
+  }
+
+  const product = await getProductByEmployee(employeeId, productId);
+  const previousImage = product.image;
+  const nextImage = `products/${file.filename}`;
+
+  try {
+    product.image = nextImage;
+    await product.save();
+  } catch (error) {
+    await safeDeleteFile(nextImage);
+    throw error;
+  }
+
+  if (previousImage && isManagedUploadPath(previousImage)) {
+    await safeDeleteFile(previousImage);
+  }
+
+  return {
+    imagePath: nextImage,
+  };
+};
+
 const updateProduct = async (
   employeeId: string,
   productId: string,
@@ -2373,6 +2466,8 @@ const markTrainingAttendance = async (
 export {
   createProduct,
   createPromotion,
+  uploadFacilityImages,
+  deleteFacilityImage,
   getAttendance,
   getFacilityCalendar,
   getFacilityOrders,
@@ -2392,6 +2487,7 @@ export {
   getFacilities,
   getFacility,
   updateProduct,
+  updateProductImage,
   updateOrderStatus,
   updatePromotion,
   getFacilityResources,

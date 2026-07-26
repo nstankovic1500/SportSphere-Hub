@@ -12,6 +12,7 @@ import type { User } from '../../../core/models/user.model';
 import { AthleteService } from '../../../core/services/athlete.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { PublicService } from '../../../core/services/public.service';
+import { buildUploadImageUrl } from '../../../core/utils/image.util';
 
 const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -87,6 +88,10 @@ export class FacilityDetailsComponent {
 
   getDayName(day: number) {
     return dayNames[day] ?? `Day ${day}`;
+  }
+
+  getImageUrl(imagePath: string | null) {
+    return buildUploadImageUrl(imagePath);
   }
 
   reserveFacility() {

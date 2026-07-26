@@ -6,6 +6,7 @@ import { RouterLink } from '@angular/router';
 import type { PublicProduct, PublicProductFacilityGroup } from '../../../core/models/public.model';
 import { AthleteService } from '../../../core/services/athlete.service';
 import { PublicService } from '../../../core/services/public.service';
+import { buildUploadImageUrl } from '../../../core/utils/image.util';
 
 type ShopProduct = PublicProduct & {
   facilityName: string;
@@ -124,6 +125,10 @@ export class AthleteShopComponent {
 
   onImageError(event: Event) {
     (event.target as HTMLImageElement).src = 'https://placehold.co/320x180?text=Product';
+  }
+
+  getImageUrl(imagePath: string | null) {
+    return buildUploadImageUrl(imagePath);
   }
 
   private loadProducts() {

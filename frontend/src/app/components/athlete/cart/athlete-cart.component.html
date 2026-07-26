@@ -45,7 +45,7 @@
               <tr>
                 <td class="product-cell">
                   <img
-                    [src]="item.image || 'https://placehold.co/120x120?text=Product'"
+                    [src]="getImageUrl(item.image) || 'https://placehold.co/120x120?text=Product'"
                     [alt]="item.name"
                     (error)="onImageError($event)" />
                   <div>

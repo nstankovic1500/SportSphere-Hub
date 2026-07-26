@@ -21,9 +21,13 @@
 
   @if (isLoading) {
     <p class="state-message">Loading facility details...</p>
-  } @else if (errorMessage || !facility) {
+  } @else if (!facility) {
     <p class="state-message error">{{ errorMessage || 'Facility not found.' }}</p>
   } @else {
+    @if (successMessage) {
+      <p class="state-message success">{{ successMessage }}</p>
+    }
+
     <section class="panel">
       <div class="details-grid">
         <div class="detail-item"><span class="detail-label">Name</span><span>{{ facility.name }}</span></div>
@@ -39,6 +43,59 @@
         <div class="detail-item detail-item-wide"><span class="detail-label">Opening Hours</span><span>{{ getOpeningHoursLabel() }}</span></div>
         <div class="detail-item detail-item-wide"><span class="detail-label">Location</span><span>{{ facility.location?.coordinates?.[1] }}, {{ facility.location?.coordinates?.[0] }}</span></div>
       </div>
+    </section>
+
+    <section class="panel">
+      <div class="section-header">
+        <div>
+          <h2>Facility Gallery</h2>
+          <p>Upload up to 5 images per request, maximum 10 total.</p>
+        </div>
+      </div>
+
+      @if (imageErrorMessage) {
+        <p class="state-message error">{{ imageErrorMessage }}</p>
+      }
+
+      <div class="upload-panel">
+        <input
+          id="facilityImages"
+          type="file"
+          multiple
+          accept="image/jpeg,image/png,image/webp"
+          (change)="onImagesSelected($event)"
+        />
+        <button type="button" [disabled]="selectedImageFiles.length === 0 || isUploadingImages" (click)="uploadImages()">
+          {{ isUploadingImages ? 'Uploading...' : 'Upload Images' }}
+        </button>
+      </div>
+
+      @if (imageErrorMessage) {
+        <p class="state-message error">{{ imageErrorMessage }}</p>
+      }
+
+      @if (imagePreviews.length > 0) {
+        <div class="gallery-grid preview-grid">
+          @for (preview of imagePreviews; track preview) {
+            <img [src]="preview" alt="Facility preview" />
+          }
+        </div>
+      }
+
+      @if (facility.images.length === 0) {
+        <p class="state-message">No images uploaded yet.</p>
+      } @else {
+        <div class="gallery-grid">
+          @for (imagePath of facility.images; track imagePath) {
+            <div class="gallery-card">
+              <img [src]="getImageUrl(imagePath)" [alt]="facility.name" />
+              <button type="button" class="secondary-button" [disabled]="isDeletingImage" (click)="deleteImage(imagePath)">
+                {{ isDeletingImage ? 'Deleting...' : 'Delete Image' }}
+              </button>
+            </div>
+          }
+        </div>
+      }
     </section>
   }
 </section>
