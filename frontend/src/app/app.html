@@ -1,5 +1,5 @@
 <div class="app-shell">
-  @if (!isLoginScreen) {
+  @if (isLoggedIn && !isLoginScreen) {
     <header class="global-auth-bar">
       <button type="button" class="logout-link" (click)="logout()">Izloguj se</button>
     </header>

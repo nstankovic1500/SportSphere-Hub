@@ -145,7 +145,9 @@ const getAds = async (athleteId: string, query: AdsQuery) => {
   }
 
   if (query.date) {
-    filters.date = parseDateOnly(query.date);
+    const dateText = query.date.trim();
+    parseDateOnly(dateText);
+    filters.date = dateText;
   }
 
   const ads = (await Ad.find(filters)
@@ -219,7 +221,7 @@ const createAd = async (athleteId: string, body: AdBody) => {
     authorId: new Types.ObjectId(athleteId),
     sportId: new Types.ObjectId(sportId),
     city,
-    date,
+    date: dateText,
     startTime,
     endTime,
     missingPlayers,

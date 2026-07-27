@@ -183,8 +183,8 @@ export class TrainerBookingComponent {
       trainerId: this.trainer.id,
       sportId: this.trainer.sports.length > 1 ? this.sportId.value : this.trainer.sports[0]?.id,
       resourceId: this.resourceId.value,
-      startTime: this.makeLocalDateTimeIso(this.availability.date, this.selectedStartTime),
-      endTime: this.makeLocalDateTimeIso(this.availability.date, this.selectedEndTime),
+      startTime: this.makeIsoDateTime(this.availability.date, this.selectedStartTime),
+      endTime: this.makeIsoDateTime(this.availability.date, this.selectedEndTime),
     }).subscribe({
       next: () => {
         this.isSubmitting = false;
@@ -283,8 +283,8 @@ export class TrainerBookingComponent {
     for (let hour = openingHour; hour < closingHour; hour += 1) {
       const startTime = `${String(hour).padStart(2, '0')}:00`;
       const endTime = `${String(hour + 1).padStart(2, '0')}:00`;
-      const slotStart = new Date(this.makeLocalDateTimeIso(availability.date, startTime));
-      const slotEnd = new Date(this.makeLocalDateTimeIso(availability.date, endTime));
+      const slotStart = new Date(this.makeIsoDateTime(availability.date, startTime));
+      const slotEnd = new Date(this.makeIsoDateTime(availability.date, endTime));
       const overlapsOccupiedInterval = availability.occupiedIntervals.some((interval) => {
         const occupiedStart = new Date(interval.startTime);
         const occupiedEnd = new Date(interval.endTime);
@@ -312,12 +312,5 @@ export class TrainerBookingComponent {
 
   private makeIsoDateTime(date: string, time: string) {
     return `${date}T${time}:00.000Z`;
-  }
-
-  private makeLocalDateTimeIso(date: string, time: string) {
-    const [year, month, day] = date.split('-').map(Number);
-    const [hours, minutes] = time.split(':').map(Number);
-
-    return new Date(year, month - 1, day, hours, minutes, 0, 0).toISOString();
   }
 }

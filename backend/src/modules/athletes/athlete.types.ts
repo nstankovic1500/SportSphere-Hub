@@ -58,6 +58,7 @@ interface ResourceAvailability {
   date: string;
   openingTime: string;
   closingTime: string;
+  closed: boolean;
   occupiedIntervals: Array<{
     startTime: Date;
     endTime: Date;

@@ -18,6 +18,10 @@ export class App {
     return this.router.url === '/login';
   }
 
+  get isLoggedIn() {
+    return !!this.authService.getToken();
+  }
+
   logout() {
     this.authService.logout();
   }

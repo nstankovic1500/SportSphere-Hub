@@ -172,7 +172,10 @@ const getNextFullHour = (date: Date) => {
   return result;
 };
 
-const hasAvailableSlotToday = async (facilities: PopulatedFacility[]) => {
+const hasAvailableSlotToday = async (
+  facilities: PopulatedFacility[],
+  query: Pick<PublicFacilitiesQuery, 'resourceType' | 'sportId'>,
+) => {
   if (facilities.length === 0) {
     return new Set<string>();
   }
@@ -185,10 +188,20 @@ const hasAvailableSlotToday = async (facilities: PopulatedFacility[]) => {
   endOfDay.setDate(endOfDay.getDate() + 1);
 
   const facilityIds = facilities.map((facility) => facility._id);
-  const resources = await Resource.find({
+  const resourceFilter: Record<string, unknown> = {
     facilityId: { $in: facilityIds },
     active: true,
-  })
+  };
+
+  if (query.resourceType) {
+    resourceFilter.type = query.resourceType;
+  }
+
+  if (query.sportId?.trim()) {
+    resourceFilter.sportId = new Types.ObjectId(query.sportId.trim());
+  }
+
+  const resources = await Resource.find(resourceFilter)
     .select('facilityId')
     .lean();
 
@@ -501,7 +514,7 @@ const getFacilities = async (
 
   const availableFacilityIds =
     query.availableToday === 'true'
-      ? await hasAvailableSlotToday(facilities)
+      ? await hasAvailableSlotToday(facilities, query)
       : null;
 
   const finalFacilities =

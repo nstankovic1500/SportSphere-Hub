@@ -11,7 +11,7 @@ interface IAd {
   authorId: Types.ObjectId;
   sportId: Types.ObjectId;
   city: string;
-  date: Date;
+  date: string;
   startTime: string;
   endTime: string;
   missingPlayers: number;
@@ -27,7 +27,10 @@ const AdSchema = new Schema<IAd>(
     authorId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     sportId: { type: Schema.Types.ObjectId, ref: 'Sport', required: true },
     city: { type: String, required: true, trim: true },
-    date: { type: Date, required: true },
+    date: {
+      type: String,
+      required: true,
+    },
     startTime: {
       type: String,
       required: true,

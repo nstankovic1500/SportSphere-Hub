@@ -53,7 +53,7 @@
 
     @if (showAvailableTodayFilter) {
       <label class="availability-toggle">
-        <input type="checkbox" formControlName="availableToday" />
+        <input type="checkbox" formControlName="availableToday" (change)="applyFilters()" />
         <span>Samo slobodni termini danas</span>
       </label>
     }

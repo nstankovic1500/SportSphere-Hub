@@ -59,6 +59,7 @@ export interface ResourceAvailability {
   date: string;
   openingTime: string;
   closingTime: string;
+  closed: boolean;
   occupiedIntervals: ResourceAvailabilityPeriod[];
 }
 

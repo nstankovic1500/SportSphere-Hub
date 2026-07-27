@@ -824,10 +824,31 @@ const getResourceAvailability = async (
 ): Promise<{ availability: ResourceAvailability }> => {
   const parsedDate = parseDateOnly(date);
   const resource = await getActiveResourceWithFacility(resourceId);
-  const openingHours = getOpeningHoursForDate(
-    resource.facilityId.openingHours,
-    parsedDate,
+  const openingHours = (resource.facilityId.openingHours ?? []).find(
+    (item) => item.day === parsedDate.getUTCDay(),
   );
+
+  const resourceSummary = {
+    id: resource._id.toString(),
+    name: resource.name,
+    facilityId: resource.facilityId._id.toString(),
+    facilityName: resource.facilityId.name,
+    sportId: resource.sportId._id.toString(),
+    sportName: resource.sportId.name,
+  };
+
+  if (!openingHours) {
+    return {
+      availability: {
+        resource: resourceSummary,
+        date,
+        openingTime: '',
+        closingTime: '',
+        closed: true,
+        occupiedIntervals: [],
+      },
+    };
+  }
 
   const dayStart = new Date(`${date}T00:00:00.000Z`);
   const dayEnd = new Date(`${date}T23:59:59.999Z`);
@@ -854,17 +875,11 @@ const getResourceAvailability = async (
 
   return {
     availability: {
-      resource: {
-        id: resource._id.toString(),
-        name: resource.name,
-        facilityId: resource.facilityId._id.toString(),
-        facilityName: resource.facilityId.name,
-        sportId: resource.sportId._id.toString(),
-        sportName: resource.sportId.name,
-      },
+      resource: resourceSummary,
       date,
       openingTime: openingHours.open,
       closingTime: openingHours.close,
+      closed: false,
       occupiedIntervals: [...reservations, ...appointments]
         .sort((first, second) => first.startTime.getTime() - second.startTime.getTime())
         .map((interval) => ({

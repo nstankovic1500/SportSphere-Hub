@@ -22,7 +22,7 @@ interface AdListItem {
     name: string;
   };
   city: string;
-  date: Date;
+  date: string;
   startTime: string;
   endTime: string;
   missingPlayers: number;
@@ -46,7 +46,7 @@ interface AdRequestsData {
     id: string;
     sportName: string;
     city: string;
-    date: Date;
+    date: string;
     startTime: string;
     endTime: string;
     missingPlayers: number;

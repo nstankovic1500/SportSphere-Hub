@@ -172,8 +172,8 @@
                   <td>{{ reservation.city }}</td>
                   <td>{{ reservation.resourceName }}</td>
                   <td>{{ reservation.sportName }}</td>
-                  <td>{{ reservation.startTime | date: 'medium' }}</td>
-                  <td>{{ reservation.endTime | date: 'medium' }}</td>
+                  <td>{{ reservation.startTime | date: 'medium' : 'UTC' }}</td>
+                  <td>{{ reservation.endTime | date: 'medium' : 'UTC' }}</td>
                   <td>{{ reservation.status }}</td>
                   <td>
                     @if (reservation.canCancel) {

@@ -42,8 +42,8 @@
               <td>{{ appointment.facilityName }}</td>
               <td>{{ appointment.city }}</td>
               <td>{{ appointment.sportName }}</td>
-              <td>{{ appointment.startTime | date: 'medium' }}</td>
-              <td>{{ appointment.endTime | date: 'medium' }}</td>
+              <td>{{ appointment.startTime | date: 'medium' : 'UTC' }}</td>
+              <td>{{ appointment.endTime | date: 'medium' : 'UTC' }}</td>
               <td>
                 <span class="status-badge" [class.cancelled]="appointment.status === 'cancelled'">
                   {{ getStatusLabel(appointment.status) }}

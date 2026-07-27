@@ -6,6 +6,7 @@ import { forkJoin } from 'rxjs';
 
 import type { FacilityListItem } from '../../../core/models/public.model';
 import type { Sport } from '../../../core/models/sport.model';
+import type { User } from '../../../core/models/user.model';
 import { AuthService } from '../../../core/services/auth.service';
 import { PublicService } from '../../../core/services/public.service';
 import { buildUploadImageUrl } from '../../../core/utils/image.util';
@@ -35,11 +36,20 @@ export class FacilitiesComponent {
   cities: string[] = [];
   sports: Sport[] = [];
   facilities: FacilityListItem[] = [];
+  currentUser: User | null = this.authService.getCurrentUser();
   isLoading = true;
   isSearching = false;
   errorMessage = '';
 
   constructor() {
+    this.authService.currentUser$.subscribe((user) => {
+      this.currentUser = user;
+    });
+
+    if (this.authService.getToken() && !this.currentUser) {
+      this.authService.loadCurrentUser().subscribe();
+    }
+
     this.loadPageData();
   }
 
@@ -84,11 +94,11 @@ export class FacilitiesComponent {
   }
 
   get showAvailableTodayFilter() {
-    return this.authService.getCurrentUser()?.role === 'athlete';
+    return this.currentUser?.role === 'athlete';
   }
 
   get homeRoute() {
-    const role = this.authService.getCurrentUser()?.role;
+    const role = this.currentUser?.role;
 
     if (role === 'athlete') {
       return '/athlete';

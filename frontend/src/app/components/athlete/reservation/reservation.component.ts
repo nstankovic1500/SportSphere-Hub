@@ -383,6 +383,10 @@ export class ReservationComponent {
           const availability = response.data.availability;
           newAvailabilityMap[availability.date] = availability;
 
+          if (availability.closed) {
+            continue;
+          }
+
           for (const interval of availability.occupiedIntervals) {
             newEvents.push({
               title: 'Rezervisano',
@@ -529,7 +533,9 @@ export class ReservationComponent {
   }
 
   private getCalendarTimes() {
-    const availabilityList = Object.values(this.availabilityMap);
+    const availabilityList = Object.values(this.availabilityMap).filter(
+      (availability) => !availability.closed,
+    );
     let minTime = '06:00:00';
     let maxTime = '23:00:00';
 
@@ -581,6 +587,11 @@ export class ReservationComponent {
 
     for (const date of Object.keys(this.availabilityMap)) {
       const availability = this.availabilityMap[date];
+
+      if (availability.closed) {
+        continue;
+      }
+
       const dayNumber = new Date(`${date}T00:00:00.000Z`).getUTCDay();
 
       businessHours.push({
