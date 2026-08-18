@@ -200,4 +200,4 @@ The application uses three main roles:
 
 ## Author
 
-SportSphere Hub project.
+Nikola Stankovic
